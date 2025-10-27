@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDiscovery - Interactive Demo</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .demo-header {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        .demo-header h1 {
+            color: #212F45;
+            margin-bottom: 0.5rem;
+        }
+        .demo-header p {
+            color: #5DADE2;
+            font-size: 1.1rem;
+        }
+        .demo-form-section {
+            background: #F0F4F8;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .form-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .demo-option {
+            flex: 1;
+            padding: 1.5rem;
+            background: white;
+            border: 2px solid #5DADE2;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .demo-option:hover {
+            border-color: #3A86FF;
+            transform: translateY(-2px);
+        }
+        .demo-option.selected {
+            border-color: #3A86FF;
+            background: #F0F4F8;
+        }
+        .demo-option h3 {
+            color: #212F45;
+            margin-bottom: 0.5rem;
+        }
+        .demo-option p {
+            color: #5DADE2;
+            font-size: 0.9rem;
+        }
+        .custom-goal-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 2px solid #5DADE2;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .submit-demo-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #FFC300;
+            color: #212F45;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-demo-btn:hover {
+            background: #ffd633;
+        }
+        .submit-demo-btn:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .results-section {
+            display: none;
+            margin-top: 2rem;
+        }
+        .results-header {
+            background: #212F45;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px 8px 0 0;
+        }
+        .results-content {
+            background: #212F45;
+            color: #F0F4F8;
+            padding: 2rem;
+            border: 2px solid #212F45;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+        .candidate-item {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: rgba(240, 244, 248, 0.1);
+            border-left: 4px solid #3A86FF;
+            border-radius: 8px;
+        }
+        .candidate-item h4 {
+            color: #F0F4F8;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .candidate-item .rank {
+            color: #3A86FF;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        .candidate-item .candidate-name {
+            color: #F0F4F8;
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        .candidate-item .score {
+            display: inline-block;
+            background: #FFC300;
+            color: #212F45;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        .candidate-item .section {
+            margin-bottom: 1rem;
+        }
+        .candidate-item .section-label {
+            color: #5DADE2;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        .candidate-item .section-content {
+            color: #F0F4F8;
+            line-height: 1.6;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+        .loading-spinner {
+            border: 4px solid #F0F4F8;
+            border-top: 4px solid #3A86FF;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: #ffe0e0;
+            color: #d32f2f;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="/" style="text-decoration: none; color: inherit;">
+                    <h2>UDiscovery</h2>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="/#problem" class="nav-link">The Problem</a>
+                <a href="/#solution" class="nav-link">Our Solution</a>
+                <a href="/#vision" class="nav-link">The Vision</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="/signin" class="btn btn-secondary">Sign In</a>
+                <a href="/demo" class="btn btn-primary">Request a Demo</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Interactive UDiscovery Demo</h1>
+            <p>Experience how our AI agents find your ideal candidates</p>
+        </div>
+
+        <div class="demo-form-section">
+            <h2 style="color: #212F45; margin-bottom: 1rem;">Choose Your University Goal</h2>
+            
+            <div class="form-options">
+                <div class="demo-option" id="hgse-option">
+                    <h3>🎓 Harvard Graduate School of Education</h3>
+                    <p>Use our pre-configured goal for finding diverse, mission-driven education leaders and changemakers.</p>
+                </div>
+                <div class="demo-option" id="custom-option">
+                    <h3>✏️ Custom Goal</h3>
+                    <p>Enter your own university's specific goals and requirements.</p>
+                </div>
+            </div>
+
+            <div id="custom-goal-section" style="display: none;">
+                <textarea 
+                    id="custom-goal-input" 
+                    class="custom-goal-input"
+                    placeholder="Enter your university's program goals, ideal candidate profiles, and any specific requirements..."></textarea>
+            </div>
+
+            <button id="submit-demo-btn" class="submit-demo-btn" disabled>
+                Generate Demo
+            </button>
+
+            <div id="error-container"></div>
+        </div>
+
+        <div id="results-section" class="results-section">
+            <div class="results-header">
+                <h2>🎉 Demo Results - Top Candidates</h2>
+            </div>
+            <div class="results-content" id="results-content">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+
+        <div id="loading-section" class="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p style="color: #212F45; font-size: 1.1rem;">
+                Our AI agents are working hard to find your ideal candidates...
+                <br><br>
+                This may take a few minutes as we search Kaggle, analyze datasets, and score candidates.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let selectedOption = null;
+        const hgseGoal = `Our primary objective is to build a diverse and mission-driven cohort across all Harvard Graduate School of Education (HGSE) master's programs. We are not just looking for academics; we are looking for future **leaders, innovators, and changemakers** who want to have a systemic impact on the field of education.
+
+Ideal candidates often have **3-10 years of professional experience** and come from a wide range of backgrounds, including **K-12 teaching, school administration, non-profit management, education policy, and ed-tech**.
+
+We want to find individuals who demonstrate a deep commitment to **equity, social justice, and innovation**. Your task is to find datasets containing profiles we can analyze for these signals. Look for keywords indicating leadership, initiative, and a desire to solve complex educational problems, such as 'program manager,' 'department head,' 'founder,' 'principal,' or active involvement in 'community engagement,' 'policy writing,' or 'curriculum development'.`;
+
+        // Handle option selection
+        document.getElementById('hgse-option').addEventListener('click', () => {
+            selectedOption = 'hgse';
+            document.getElementById('hgse-option').classList.add('selected');
+            document.getElementById('custom-option').classList.remove('selected');
+            document.getElementById('custom-goal-section').style.display = 'none';
+            document.getElementById('submit-demo-btn').disabled = false;
+        });
+
+        document.getElementById('custom-option').addEventListener('click', () => {
+            selectedOption = 'custom';
+            document.getElementById('custom-option').classList.add('selected');
+            document.getElementById('hgse-option').classList.remove('selected');
+            document.getElementById('custom-goal-section').style.display = 'block';
+            updateSubmitButton();
+        });
+
+        document.getElementById('custom-goal-input').addEventListener('input', updateSubmitButton);
+
+        function updateSubmitButton() {
+            const hasText = document.getElementById('custom-goal-input').value.trim().length > 0;
+            document.getElementById('submit-demo-btn').disabled = !hasText;
+        }
+
+        // Handle form submission
+        document.getElementById('submit-demo-btn').addEventListener('click', async () => {
+            const universityGoal = selectedOption === 'hgse' 
+                ? hgseGoal 
+                : document.getElementById('custom-goal-input').value;
+
+            // Show loading, hide form
+            document.querySelector('.demo-form-section').style.display = 'none';
+            document.getElementById('loading-section').style.display = 'block';
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('error-container').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/run-demo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ university_goal: universityGoal })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.result);
+                } else {
+                    showError(data.error || 'An error occurred while running the demo');
+                }
+            } catch (error) {
+                showError('Failed to run demo: ' + error.message);
+            } finally {
+                document.getElementById('loading-section').style.display = 'none';
+            }
+        });
+
+        function displayResults(result) {
+            const resultsContent = document.getElementById('results-content');
+            
+            // Get the result text
+            let text = '';
+            if (typeof result === 'string') {
+                text = result;
+            } else if (result && result.raw) {
+                text = result.raw;
+            } else if (result && typeof result === 'object') {
+                text = JSON.stringify(result, null, 2);
+            } else {
+                text = 'No results generated';
+            }
+
+            // Try to parse structured candidates from the text
+            const candidates = parseCandidates(text);
+            
+            // Debug: log parsed candidates
+            console.log('Parsed candidates:', candidates);
+            
+            if (candidates.length > 0) {
+                resultsContent.innerHTML = candidates.map((candidate, index) => `
+                    <div class="candidate-item">
+                        <div>
+                            <span class="rank">#${candidate.rank}</span>
+                            <span class="candidate-name">${escapeHtml(candidate.name)}</span>
+                        </div>
+                        ${candidate.score ? `<div class="score">Score: ${escapeHtml(candidate.score)}</div>` : ''}
+                        ${candidate.background ? `
+                            <div class="section">
+                                <div class="section-label">Background</div>
+                                <div class="section-content">${escapeHtml(candidate.background)}</div>
+                            </div>
+                        ` : ''}
+                        ${candidate.whyMatch ? `
+                            <div class="section">
+                                <div class="section-label">Why They Match</div>
+                                <div class="section-content">${escapeHtml(candidate.whyMatch)}</div>
+                            </div>
+                        ` : ''}
+                        ${candidate.strengths ? `
+                            <div class="section">
+                                <div class="section-label">Areas of Strength</div>
+                                <div class="section-content">${escapeHtml(candidate.strengths)}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } else {
+                // Fallback to raw text display
+                resultsContent.innerHTML = `<pre style="white-space: pre-wrap; color: #F0F4F8; font-family: 'Inter', sans-serif; line-height: 1.6; margin: 0;">${escapeHtml(text)}</pre>`;
+            }
+
+            document.getElementById('results-section').style.display = 'block';
+        }
+
+        function parseCandidates(text) {
+            const candidates = [];
+            
+            // Try to extract structured candidates from the text
+            // Look for patterns like "1. Name" followed by score, background, etc.
+            const lines = text.split('\n');
+            let currentCandidate = null;
+            let currentSection = null;
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                
+                // Check if this is a candidate number (e.g., "1.", "2.", etc.)
+                const candidateMatch = line.match(/^(\d+)\.\s*(.+)$/);
+                if (candidateMatch) {
+                    if (currentCandidate) {
+                        candidates.push(currentCandidate);
+                    }
+                    // Clean markdown formatting from name
+                    let name = candidateMatch[2].replace(/\*\*/g, '').trim();
+                    currentCandidate = {
+                        rank: candidateMatch[1],
+                        name: name,
+                        score: null,
+                        background: '',
+                        whyMatch: '',
+                        strengths: ''
+                    };
+                    currentSection = null;
+                    continue;
+                }
+                
+                // Check for Score in various formats
+                if (line.toLowerCase().includes('score')) {
+                    // Try different patterns: "Score: 95/100", "Score: 95", "Score: 85/100 -", etc.
+                    const scoreMatch = line.match(/score:\s*(\d+)(?:\/(\d+))?/i);
+                    if (scoreMatch && currentCandidate) {
+                        const score = scoreMatch[1];
+                        const max = scoreMatch[2] || '100';
+                        currentCandidate.score = `${score}/${max}`;
+                    }
+                    continue;
+                }
+                
+                // Check for section labels
+                const sectionLabels = {
+                    'background:': 'background',
+                    'why they match:': 'whyMatch',
+                    'why they match': 'whyMatch',
+                    'areas of strength:': 'strengths',
+                    'areas of strength': 'strengths',
+                    'areas of concern:': 'concerns'
+                };
+                
+                let foundSection = false;
+                for (const [label, key] of Object.entries(sectionLabels)) {
+                    if (line.toLowerCase().startsWith(label)) {
+                        currentSection = key;
+                        let content = line.substring(label.length).trim();
+                        // Clean markdown formatting
+                        content = content.replace(/\*\*/g, '').trim();
+                        if (content && currentCandidate) {
+                            currentCandidate[currentSection] = content;
+                        }
+                        foundSection = true;
+                        break;
+                    }
+                }
+                
+                // If not a section label, append to current section
+                if (!foundSection && currentCandidate && currentSection) {
+                    // Clean markdown and append
+                    const cleanedLine = line.replace(/\*\*/g, '').trim();
+                    currentCandidate[currentSection] += ' ' + cleanedLine;
+                }
+            }
+            
+            // Add the last candidate
+            if (currentCandidate) {
+                candidates.push(currentCandidate);
+            }
+            
+            return candidates;
+        }
+
+        function showError(message) {
+            document.getElementById('error-container').innerHTML = 
+                `<div class="error-message">${escapeHtml(message)}</div>`;
+            document.querySelector('.demo-form-section').style.display = 'block';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

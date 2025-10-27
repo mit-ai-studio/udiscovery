@@ -59,10 +59,25 @@ class SearchKaggleTool(BaseTool):
 # Create tool instance
 search_tool = SearchKaggleTool()
 
-def test_real_agentic_pipeline():
-    """Test with REAL CrewAI agents"""
+def run_pipeline_with_goal(university_goal: str):
+    """
+    Run the UDiscovery pipeline with a custom university goal.
+    This function is called by the frontend via demo_runner.py
     
-    university_goal = """
+    Args:
+        university_goal: The university's program goal/prompt
+        
+    Returns:
+        The final result from the pipeline execution
+    """
+    return test_real_agentic_pipeline_internal(university_goal)
+
+def test_real_agentic_pipeline_internal(university_goal=None):
+    """Internal function that runs with a specific goal"""
+    
+    if university_goal is None:
+        # Default HGSE goal if not provided
+        university_goal = """
     Our primary objective is to build a diverse and mission-driven cohort across all Harvard Graduate School of Education (HGSE) master's programs. We are not just looking for academics; we are looking for future **leaders, innovators, and changemakers** who want to have a systemic impact on the field of education.
 
     Ideal candidates often have **3-10 years of professional experience** and come from a wide range of backgrounds, including **K-12 teaching, school administration, non-profit management, education policy, and ed-tech**.
@@ -254,16 +269,31 @@ def test_real_agentic_pipeline():
         description="""Score and rank candidates based on the ideal profile.
         
         Consider the ideal profile from Agent 1 and rank candidates from the datasets.
-        Return a numbered list of top 5 candidates with scores (0-100).
+        Return a numbered list of top 10 candidates with scores (0-100).
         
-        Format:
-        "Top 5 Candidates:
-        1. Candidate name/ID - Score: 95/100 - [Brief reason]
-        2. Candidate name/ID - Score: 90/100 - [Brief reason]
-        etc..." """,
+        For EACH candidate, provide:
+        - Full Name (or candidate ID)
+        - Score: XX/100
+        - Background: [Detailed professional background with experience, sector, achievements]
+        - Why they match: [Specific reasons why this candidate is a good fit]
+        
+        Format as:
+        "Top 10 Candidates for Harvard Graduate School of Education:
+        
+        1. [Full Name]
+           Score: XX/100
+           Background: [Detailed background]
+           Why they match: [Detailed explanation]
+        
+        2. [Full Name]
+           Score: XX/100
+           Background: [Detailed background]
+           Why they match: [Detailed explanation]
+        
+        Continue for all 10 candidates." """,
         agent=modeler_agent,
         context=[blueprint_task, ingest_task],
-        expected_output="A ranked list of top 5 candidates with scores and reasons"
+        expected_output="A ranked list of top 10 candidates with scores, full names, detailed backgrounds, and detailed matching explanations"
     )
     logger.info("✅ Rank Task created")
     
@@ -297,6 +327,10 @@ def test_real_agentic_pipeline():
         import traceback
         logger.error(traceback.format_exc())
         return None
+
+def test_real_agentic_pipeline():
+    """Test with REAL CrewAI agents - uses default HGSE goal"""
+    return test_real_agentic_pipeline_internal()
 
 if __name__ == "__main__":
     if not os.getenv("GOOGLE_API_KEY"):

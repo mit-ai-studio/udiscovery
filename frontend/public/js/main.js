@@ -20,8 +20,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modal functionality
     const modals = document.querySelectorAll('.modal');
-    const modalTriggers = document.querySelectorAll('[href="#demo"], [href="#waitlist"]');
+    const modalTriggers = document.querySelectorAll('[href="#waitlist"]');
     const closeButtons = document.querySelectorAll('.close');
+    
+    // Redirect demo buttons to demo page
+    const demoButtons = document.querySelectorAll('a[href*="#demo"], a[href="/demo"]');
+    demoButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.href.includes('#demo')) {
+                e.preventDefault();
+                window.location.href = '/demo';
+            }
+        }.bind(button));
+    });
 
     // Open modals
     modalTriggers.forEach(trigger => {

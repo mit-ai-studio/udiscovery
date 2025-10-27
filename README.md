@@ -6,30 +6,32 @@ A complete platform for universities to autonomously discover and evaluate prosp
 
 - **Modern, Responsive Design**: Clean, professional interface that works on all devices
 - **Interactive Elements**: Smooth scrolling, animated visualizations, and modal forms
+- **AI-Powered Demo**: Interactive demo page where users can test the UDiscovery pipeline
+- **5-Agent CrewAI Pipeline**: Automated candidate discovery using specialized AI agents
+- **Kaggle Integration**: Automatic dataset discovery and candidate scoring
 - **Form Handling**: Demo requests, waitlist signups, and sign-in functionality
 - **Professional Copy**: Targeted messaging for university enrollment professionals
-- **Node.js Backend**: Easy integration with future backend services
 
 ## Project Structure
 
 ```
 udiscovery/
-├── frontend/             # Landing page and web interface
-│   ├── package.json      # Node.js dependencies
-│   ├── server.js         # Express server
-│   └── public/           # Static files
-│       ├── index.html    # Main landing page
-│       ├── signin.html   # Sign-in page
+├── frontend/                    # Landing page and web interface
+│   ├── package.json             # Node.js dependencies
+│   ├── server.js                # Express server
+│   └── public/                  # Static files
+│       ├── index.html           # Main landing page
+│       ├── demo.html            # Interactive demo page
+│       ├── signin.html          # Sign-in page
 │       ├── css/styles.css
 │       └── js/main.js
-├── backend/              # AI agentic pipeline
-│   ├── tools.py          # Kaggle integration tools
-│   ├── agents.py         # 5 specialized AI agents
-│   ├── tasks.py          # Sequential workflow tasks
-│   ├── main.py           # Pipeline orchestration
-│   ├── requirements.txt  # Python dependencies
-│   └── README.md         # Backend documentation
-└── README.md             # This file
+├── backend/backend/              # AI agentic pipeline
+│   ├── test_real_agents.py      # Working 5-agent pipeline
+│   ├── demo_runner.py          # Demo runner for web interface
+│   ├── run_demo_cli.py          # CLI interface
+│   ├── .env                      # Environment variables (API keys)
+│   └── requirements.txt         # Python dependencies
+└── README.md                     # This file
 ```
 
 ## Sections
@@ -44,8 +46,11 @@ udiscovery/
 
 ## Getting Started
 
+### Frontend Setup
+
 1. **Install Dependencies**:
    ```bash
+   cd frontend
    npm install
    ```
 
@@ -57,18 +62,60 @@ udiscovery/
 3. **View the Site**:
    Open your browser to `http://localhost:3000`
 
+### Backend Setup
+
+1. **Create Virtual Environment**:
+   ```bash
+   cd backend/backend
+   python3.12 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Install Python Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Set Up Environment Variables**:
+   Create a `.env` file in `backend/backend/`:
+   ```env
+   GOOGLE_API_KEY=your_google_api_key_here
+   KAGGLE_USERNAME=your_kaggle_username
+   KAGGLE_KEY=your_kaggle_api_key
+   ```
+
+### Running the Interactive Demo
+
+1. Start the frontend server
+2. Navigate to `http://localhost:3000/demo`
+3. Choose either the HGSE pre-configured goal or enter your own custom goal
+4. Click "Generate Demo" to run the 5-agent pipeline
+5. View the top candidates and their scores
+
 ## API Endpoints
 
+- `GET /` - Landing page
+- `GET /demo` - Interactive demo page
+- `GET /signin` - Sign-in page
 - `POST /api/demo-request` - Handle demo requests
+- `POST /api/run-demo` - Execute the UDiscovery pipeline with a custom goal
 - `POST /api/waitlist` - Handle waitlist signups
 - `POST /api/signin` - Handle user authentication
 
 ## Technologies Used
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Backend**: Node.js, Express.js
-- **Styling**: Custom CSS with modern design patterns
-- **Fonts**: Inter font family for professional typography
+### Frontend
+- **HTML5, CSS3, Vanilla JavaScript**
+- **Node.js, Express.js**
+- Custom CSS with modern design patterns
+- Inter font family for professional typography
+
+### Backend
+- **Python 3.12** with virtual environment
+- **CrewAI** for multi-agent orchestration
+- **Google Gemini (gemini-2.0-flash)** LLM
+- **Kaggle API** for dataset discovery
+- **Pandas** for data manipulation
 
 ## Design Features
 
