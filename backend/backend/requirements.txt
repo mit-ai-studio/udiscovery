@@ -1,0 +1,20 @@
+# UDiscovery Backend Dependencies - using Google Gemini
+# Core AI/ML Libraries
+crewai
+langchain==0.3.0
+langchain-google-genai
+google-generativeai
+
+# Data Processing
+pandas
+numpy
+
+# Kaggle Integration
+kaggle
+
+# Environment Management
+python-dotenv
+
+# Additional Utilities
+requests
+pydantic

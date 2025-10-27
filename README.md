@@ -1,6 +1,6 @@
-# UDiscovery Landing Page
+# UDiscovery - AI-Powered Student Pipeline Optimization
 
-A professional landing page for UDiscovery, an AI-powered student pipeline optimization platform for universities.
+A complete platform for universities to autonomously discover and evaluate prospective graduate students using AI agents and Kaggle datasets.
 
 ## Features
 
@@ -14,15 +14,22 @@ A professional landing page for UDiscovery, an AI-powered student pipeline optim
 
 ```
 udiscovery/
-├── package.json          # Dependencies and scripts
-├── server.js             # Express server with API endpoints
-├── public/               # Static files
-│   ├── index.html        # Main landing page
-│   ├── signin.html       # Sign-in page
-│   ├── css/
-│   │   └── styles.css    # Main stylesheet
-│   └── js/
-│       └── main.js       # Client-side JavaScript
+├── frontend/             # Landing page and web interface
+│   ├── package.json      # Node.js dependencies
+│   ├── server.js         # Express server
+│   └── public/           # Static files
+│       ├── index.html    # Main landing page
+│       ├── signin.html   # Sign-in page
+│       ├── css/styles.css
+│       └── js/main.js
+├── backend/              # AI agentic pipeline
+│   ├── tools.py          # Kaggle integration tools
+│   ├── agents.py         # 5 specialized AI agents
+│   ├── tasks.py          # Sequential workflow tasks
+│   ├── main.py           # Pipeline orchestration
+│   ├── requirements.txt  # Python dependencies
+│   └── README.md         # Backend documentation
+└── README.md             # This file
 ```
 
 ## Sections
