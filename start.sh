@@ -11,15 +11,35 @@ export PORT="${PORT:-3000}"
 echo "[start.sh] Setting up Python backend..."
 cd "$APP_DIR/backend/backend"
 
-# Create venv if missing
-if [ ! -d "venv" ]; then
-  python3 -m venv venv || python -m venv venv
-fi
+# Prefer the bundled backend Python if present (committed venv)
+BACKEND_VENV_PY="$APP_DIR/backend/backend/venv/bin/python3"
+if [ -x "$BACKEND_VENV_PY" ]; then
+  echo "[start.sh] Using bundled backend Python: $BACKEND_VENV_PY"
+  # No install needed; dependencies are included in the bundled venv
+else
+  # Detect system python to create venv if needed
+  PY_CMD=""
+  if command -v python3 >/dev/null 2>&1; then
+    PY_CMD="python3"
+  elif command -v python >/dev/null 2>&1; then
+    PY_CMD="python"
+  fi
 
-.# shellcheck disable=SC1091
-. venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+  if [ -n "$PY_CMD" ]; then
+    if [ ! -d "venv" ]; then
+      $PY_CMD -m venv venv || true
+    fi
+    if [ -f "venv/bin/activate" ]; then
+      . venv/bin/activate
+      $PY_CMD -m pip install --upgrade pip
+      pip install -r requirements.txt || true
+    else
+      echo "[start.sh] Warning: venv not created; continuing without backend setup." >&2
+    fi
+  else
+    echo "[start.sh] Warning: No Python found and no bundled venv. Backend demo API may not work." >&2
+  fi
+fi
 
 echo "[start.sh] Starting Node frontend server..."
 cd "$APP_DIR/frontend"
