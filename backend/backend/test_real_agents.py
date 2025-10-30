@@ -23,11 +23,11 @@ load_dotenv()
 # Set up logging
 log_filename = f"udiscovery_real_agents_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(log_filename),
-        logging.StreamHandler(sys.stdout)
+        logging.StreamHandler(sys.stderr)
     ]
 )
 
@@ -90,10 +90,9 @@ def test_real_agentic_pipeline_internal(university_goal=None):
     logger.info("=" * 80)
     
     # Initialize LLM - CrewAI expects a string or specific format
-    google_key = os.getenv("GOOGLE_API_KEY")
-    # For CrewAI, we use the model string directly
-    llm_model = "gemini-2.0-flash"
-    os.environ["GEMINI_API_KEY"] = google_key
+    # Expect GOOGLE_API_KEY in environment. Do not set GEMINI_API_KEY to avoid provider warnings.
+    # CrewAI uses provider/model string: "google_genai/gemini-1.5-flash"
+    llm_model = "google_genai/gemini-1.5-flash"
     
     # Create Agent 1: Trait Inferrer
     logger.info("Creating Agent 1: Trait Inferrer...")
@@ -107,9 +106,9 @@ def test_real_agentic_pipeline_internal(university_goal=None):
         Your expertise lies in identifying the key traits, experiences, and characteristics 
         that predict student success in specific graduate programs.""",
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash",  # CrewAI expects this format
+        llm=llm_model,
         tools=[],
-        verbose=True
+        verbose=False
     )
     logger.info("✅ Trait Inferrer Agent created")
     
@@ -125,10 +124,10 @@ def test_real_agentic_pipeline_internal(university_goal=None):
         contain the specific information needed for candidate analysis. You work efficiently 
         and stop after finding sufficient results.""",
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash",
+        llm=llm_model,
         tools=[search_tool],
         max_iter=3,  # Limit iterations - just one search and return
-        verbose=True
+        verbose=False
     )
     logger.info("✅ Kaggle Scout Agent created")
     
@@ -191,9 +190,9 @@ def test_real_agentic_pipeline_internal(university_goal=None):
         identifying datasets that contain the right mix of candidate attributes and sufficient 
         data quality for meaningful analysis.""",
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash",
+        llm=llm_model,
         tools=[],  # No tools for this agent
-        verbose=True
+        verbose=False
     )
     logger.info("✅ Dataset Evaluator Agent created")
     
@@ -208,9 +207,9 @@ def test_real_agentic_pipeline_internal(university_goal=None):
         and preparing clean, structured data for downstream analysis. Your attention to 
         detail ensures data quality and proper formatting.""",
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash",
+        llm=llm_model,
         tools=[],  # We'll use direct calls for now
-        verbose=True
+        verbose=False
     )
     logger.info("✅ Data Ingestion Agent created")
     
@@ -226,9 +225,9 @@ def test_real_agentic_pipeline_internal(university_goal=None):
         and excel at creating fair, comprehensive scoring models that identify the most 
         promising candidates while providing clear justifications for your assessments.""",
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash",
+        llm=llm_model,
         tools=[],
-        verbose=True
+        verbose=False
     )
     logger.info("✅ Propensity Modeler Agent created")
     
@@ -303,7 +302,7 @@ def test_real_agentic_pipeline_internal(university_goal=None):
         agents=[trait_agent, scout_agent, evaluator_agent, ingestion_agent, modeler_agent],
         tasks=[blueprint_task, search_task, evaluate_task, ingest_task, rank_task],
         process=Process.sequential,
-        verbose=True
+        verbose=False
     )
     logger.info("✅ Crew created")
     
