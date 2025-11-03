@@ -25,7 +25,7 @@ udiscovery/
 │       ├── signin.html          # Sign-in page
 │       ├── css/styles.css
 │       └── js/main.js
-├── backend/backend/              # AI agentic pipeline
+├── backend/                      # AI agentic pipeline
 │   ├── test_real_agents.py      # Working 5-agent pipeline
 │   ├── demo_runner.py          # Demo runner for web interface
 │   ├── run_demo_cli.py          # CLI interface
@@ -66,7 +66,7 @@ udiscovery/
 
 1. **Create Virtual Environment**:
    ```bash
-   cd backend/backend
+   cd backend
    python3.12 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
@@ -77,7 +77,7 @@ udiscovery/
    ```
 
 3. **Set Up Environment Variables**:
-   Create a `.env` file in `backend/backend/`:
+   Create a `.env` file in `backend/`:
    ```env
    GOOGLE_API_KEY=your_google_api_key_here
    KAGGLE_USERNAME=your_kaggle_username

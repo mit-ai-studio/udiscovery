@@ -85,7 +85,7 @@ app.post('/api/run-demo', async (req, res) => {
         const { spawn } = require('child_process');
         const path = require('path');
         
-        const backendPath = path.join(__dirname, '..', 'backend', 'backend');
+        const backendPath = path.join(__dirname, '..', 'backend');
         const scriptPath = path.join(backendPath, 'run_demo_cli.py');
         const venvPython = path.join(backendPath, 'venv', 'bin', 'python3');
         
