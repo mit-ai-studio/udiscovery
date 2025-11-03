@@ -107,7 +107,7 @@ app.post('/api/run-demo', async (req, res) => {
                 NO_COLOR: '1',
                 TERM: 'dumb'  // Disable color output
             },
-            stdio: ['pipe', 'pipe', 'pipe']  // Explicit stdio
+            stdio: ['ignore', 'pipe', 'pipe']  // stdin:ignore to prevent lock issues with daemon threads
         });
         
         let resultData = '';
