@@ -41,8 +41,8 @@ def run_udiscovery_demo(university_goal: str) -> dict:
     """
     
     try:
-        # Import the test function from test_real_agents
-        from test_real_agents import run_pipeline_with_goal
+        # Import the pipeline function from agents_pipeline
+        from agents_pipeline import run_pipeline_with_goal
         
         logger.info(f"Running UDiscovery demo with goal: {university_goal[:100]}...")
         

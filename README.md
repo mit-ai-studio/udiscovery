@@ -26,7 +26,7 @@ udiscovery/
 │       ├── css/styles.css
 │       └── js/main.js
 ├── backend/                      # AI agentic pipeline
-│   ├── test_real_agents.py      # Working 5-agent pipeline
+│   ├── agents_pipeline.py        # Working 5-agent pipeline
 │   ├── demo_runner.py          # Demo runner for web interface
 │   ├── run_demo_cli.py          # CLI interface
 │   ├── .env                      # Environment variables (API keys)
