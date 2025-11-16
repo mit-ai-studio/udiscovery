@@ -2,15 +2,36 @@
 
 A complete platform for universities to autonomously discover and evaluate prospective graduate students using AI agents and Kaggle datasets.
 
-## Features
+## AI Agents Pipeline
 
-- **Modern, Responsive Design**: Clean, professional interface that works on all devices
-- **Interactive Elements**: Smooth scrolling, animated visualizations, and modal forms
-- **AI-Powered Demo**: Interactive demo page where users can test the UDiscovery pipeline
-- **5-Agent CrewAI Pipeline**: Automated candidate discovery using specialized AI agents
-- **Kaggle Integration**: Automatic dataset discovery and candidate scoring
-- **Form Handling**: Demo requests, waitlist signups, and sign-in functionality
-- **Professional Copy**: Targeted messaging for university enrollment professionals
+The UDiscovery platform uses a 5-agent CrewAI pipeline that works sequentially to discover and evaluate candidates:
+
+1. **University Strategy Analyst** (Trait Inferrer)
+   - Analyzes university program goals and requirements
+   - Creates a detailed candidate blueprint with ideal traits
+   - Generates Kaggle search keywords for data sourcing
+
+2. **Data Sourcing Specialist** (Kaggle Scout)
+   - Searches Kaggle datasets using the generated keywords
+   - Identifies relevant datasets containing candidate profiles
+   - Returns a list of potential data sources
+
+3. **Dataset Quality Analyst** (Dataset Evaluator)
+   - Evaluates the discovered datasets
+   - Selects the single best dataset for candidate analysis
+   - Ensures data quality and relevance
+
+4. **Data Engineer** (Data Ingestion)
+   - Prepares the selected dataset for analysis
+   - Handles data formatting and structure
+   - Ensures data is ready for candidate evaluation
+
+5. **Admissions Propensity Modeler** (Ranking Agent)
+   - Scores candidates against the ideal profile blueprint
+   - Ranks the top 10 most promising candidates
+   - Provides detailed justifications for each candidate's score and match
+
+The pipeline executes sequentially, with each agent building on the previous agent's output to produce a final ranked list of candidates with scores, backgrounds, and matching explanations.
 
 ## Project Structure
 
@@ -33,16 +54,6 @@ udiscovery/
 │   └── requirements.txt         # Python dependencies
 └── README.md                     # This file
 ```
-
-## Sections
-
-1. **Navigation Bar**: Logo, navigation links, Sign In and Request Demo buttons
-2. **Hero Section**: Main value proposition with animated data visualization
-3. **The Problem**: Pain points for university enrollment offices
-4. **The Solution**: How UDiscovery's AI Discovery Agent works
-5. **The Vision**: Future features and waitlist signup
-6. **Final CTA**: Demo request and sign-in links
-7. **Sign-In Page**: Dedicated authentication page
 
 ## Getting Started
 
