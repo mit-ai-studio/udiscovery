@@ -4,6 +4,7 @@ crewai[google-genai]
 langchain==0.3.0
 langchain-google-genai
 google-generativeai
+litellm
 
 # Data Processing
 pandas
