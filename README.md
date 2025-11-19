@@ -47,11 +47,14 @@ udiscovery/
 │       ├── css/styles.css
 │       └── js/main.js
 ├── backend/                      # AI agentic pipeline
-│   ├── agents_pipeline.py        # Working 5-agent pipeline
-│   ├── demo_runner.py          # Demo runner for web interface
-│   ├── run_demo_cli.py          # CLI interface
+│   ├── agents_pipeline.py        # Main pipeline orchestrator
+│   ├── trait_inferrer.py         # Trait inferrer agent module
+│   ├── kaggle_pipeline.py        # Kaggle-related agents and tasks
+│   ├── propensity_modeler.py     # Propensity modeler agent module
+│   ├── demo_runner.py            # Demo runner for web interface
+│   ├── run_demo_cli.py           # CLI interface
 │   ├── .env                      # Environment variables (API keys)
-│   └── requirements.txt         # Python dependencies
+│   └── requirements.txt          # Python dependencies
 └── README.md                     # This file
 ```
 
