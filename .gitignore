@@ -89,6 +89,9 @@ __pycache__/
 *.so
 .Python
 
+# Large dataset files
+dataset/10k_random_us_linkedin_profiles.txt
+
 # Environment variables
 .env
 *.log
