@@ -241,6 +241,135 @@
             border-radius: 8px;
             margin-bottom: 1rem;
         }
+        .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #212F45;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .candidates-table thead {
+            background: #3A86FF;
+            color: white;
+        }
+        .candidates-table th {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .candidates-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(240, 244, 248, 0.1);
+            color: #F0F4F8;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .candidates-table tbody tr:hover {
+            background: rgba(58, 134, 255, 0.1);
+        }
+        .candidates-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .position-cell {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #3A86FF;
+        }
+        .candidate-name-cell {
+            font-weight: 600;
+            color: #F0F4F8;
+            text-align: left;
+        }
+        .probability-cell {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .contact-cell {
+            color: #5DADE2;
+            font-size: 0.9rem;
+        }
+        .learn-more-btn {
+            background: #FFC300;
+            color: #212F45;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .learn-more-btn:hover {
+            background: #ffd633;
+            transform: translateY(-1px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+        }
+        .modal-content {
+            background: #212F45;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header {
+            background: #3A86FF;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .close-modal {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .modal-body {
+            padding: 2rem;
+            color: #F0F4F8;
+        }
+        .no-candidates {
+            text-align: center;
+            padding: 3rem;
+            color: #F0F4F8;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -418,62 +547,68 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             console.log('Parsed candidates:', candidates);
             console.log('Number of candidates:', candidates.length);
             
-            if (candidates.length > 0) {
-                resultsContent.innerHTML = candidates.map((candidate, index) => `
-                    <div class="candidate-item">
-                        <div>
-                            <span class="rank">#${candidate.rank}</span>
-                            <span class="candidate-name">${escapeHtml(candidate.name || 'Unknown')}</span>
-                        </div>
-                        <div style="margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-                            ${candidate.probability !== null && candidate.probability !== undefined ? 
-                                `<div class="score">Application Probability: ${(parseFloat(candidate.probability) * 100).toFixed(1)}%</div>` : 
-                                candidate.score ? `<div class="score">Score: ${escapeHtml(candidate.score)}</div>` : ''}
-                            ${candidate.propensitySegment ? 
-                                `<div class="propensity-segment ${candidate.propensitySegment.toLowerCase()}">${escapeHtml(candidate.propensitySegment.toUpperCase())} PROPENSITY</div>` : ''}
-                        </div>
-                        ${candidate.background ? `
-                            <div class="section">
-                                <div class="section-label">Background</div>
-                                <div class="section-content">${escapeHtml(candidate.background)}</div>
-                            </div>
-                        ` : ''}
-                        ${candidate.positiveDrivers && candidate.positiveDrivers.length > 0 ? `
-                            <div class="section">
-                                <div class="section-label">Key Positive Drivers</div>
-                                <ul class="drivers-list positive">
-                                    ${candidate.positiveDrivers.map(driver => `<li>${escapeHtml(driver)}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${candidate.negativeDrivers && candidate.negativeDrivers.length > 0 ? `
-                            <div class="section">
-                                <div class="section-label">Key Negative Drivers</div>
-                                <ul class="drivers-list negative">
-                                    ${candidate.negativeDrivers.map(driver => `<li>${escapeHtml(driver)}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        ${candidate.whyMatch ? `
-                            <div class="section">
-                                <div class="section-label">Why They Match</div>
-                                <div class="section-content">${escapeHtml(candidate.whyMatch)}</div>
-                            </div>
-                        ` : ''}
-                        ${candidate.assumptions ? `
-                            <div class="assumptions">
-                                <div class="section-label">Assumptions/Warnings</div>
-                                <div class="section-content">${escapeHtml(candidate.assumptions)}</div>
-                            </div>
-                        ` : ''}
-                        ${candidate.strengths ? `
-                            <div class="section">
-                                <div class="section-label">Areas of Strength</div>
-                                <div class="section-content">${escapeHtml(candidate.strengths)}</div>
-                            </div>
-                        ` : ''}
+            // Filter candidates with probability >= 40%
+            const filteredCandidates = candidates.filter(c => {
+                if (c.probability !== null && c.probability !== undefined) {
+                    return parseFloat(c.probability) >= 0.4;
+                }
+                return false;
+            });
+            
+            if (filteredCandidates.length > 0) {
+                // Create table
+                resultsContent.innerHTML = `
+                    <table class="candidates-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th style="text-align: left;">Full Name</th>
+                                <th>Application Probability</th>
+                                <th>Contact Information</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredCandidates.map((candidate, index) => {
+                                const probability = candidate.probability !== null && candidate.probability !== undefined 
+                                    ? (parseFloat(candidate.probability) * 100).toFixed(1) + '%'
+                                    : 'N/A';
+                                const contactInfo = extractContactInfo(candidate);
+                                
+                                return `
+                                    <tr>
+                                        <td class="position-cell">#${candidate.rank || (index + 1)}</td>
+                                        <td class="candidate-name-cell">${escapeHtml(candidate.name || 'Unknown')}</td>
+                                        <td class="probability-cell">
+                                            <div class="score" style="display: inline-block;">${probability}</div>
+                                            ${candidate.propensitySegment ? 
+                                                `<div class="propensity-segment ${candidate.propensitySegment.toLowerCase()}" style="display: inline-block; margin-left: 0.5rem;">${escapeHtml(candidate.propensitySegment.toUpperCase())}</div>` : ''}
+                                        </td>
+                                        <td class="contact-cell">${contactInfo || 'Not available'}</td>
+                                        <td>
+                                            <button class="learn-more-btn" onclick="showCandidateDetails(${index})" data-candidate-index="${index}">
+                                                Learn More
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    ${filteredCandidates.map((candidate, index) => createCandidateModal(candidate, index)).join('')}
+                `;
+                
+                // Store candidates globally for modal access
+                window.candidatesData = filteredCandidates;
+            } else if (candidates.length > 0) {
+                // Have candidates but none meet the 40% threshold
+                resultsContent.innerHTML = `
+                    <div class="no-candidates">
+                        <p>Found ${candidates.length} candidates, but none have an application probability of 40% or higher.</p>
+                        <p>Try adjusting your search criteria or check the raw results below.</p>
                     </div>
-                `).join('');
+                    <pre style="white-space: pre-wrap; color: #F0F4F8; font-family: 'Inter', sans-serif; line-height: 1.6; margin-top: 2rem;">${escapeHtml(text)}</pre>
+                `;
             } else {
                 // Fallback to raw text display (but formatted nicely)
                 // Show the actual text so we can debug
@@ -483,6 +618,128 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
 
             document.getElementById('results-section').style.display = 'block';
         }
+
+        function extractContactInfo(candidate) {
+            // First check if email is directly stored
+            if (candidate.email) {
+                return candidate.email;
+            }
+            if (candidate.contactInfo) {
+                return candidate.contactInfo;
+            }
+            // Try to extract email from background text
+            if (candidate.background) {
+                const emailMatch = candidate.background.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+                if (emailMatch) {
+                    return emailMatch[0];
+                }
+            }
+            return null;
+        }
+
+        function createCandidateModal(candidate, index) {
+            const probability = candidate.probability !== null && candidate.probability !== undefined 
+                ? (parseFloat(candidate.probability) * 100).toFixed(1) + '%'
+                : 'N/A';
+            const contactInfo = extractContactInfo(candidate);
+            
+            return `
+                <div id="candidate-modal-${index}" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>👤 ${escapeHtml(candidate.name || 'Unknown Candidate')}</h3>
+                            <button class="close-modal" onclick="closeModal(${index})">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: 1.5rem; background: rgba(58, 134, 255, 0.1); border-radius: 8px; border-left: 4px solid #3A86FF;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="font-size: 0.85rem; color: #5DADE2; margin-bottom: 0.5rem; font-weight: 600;">📊 APPLICATION PROBABILITY</div>
+                                    ${candidate.probability !== null && candidate.probability !== undefined ? 
+                                        `<div class="score" style="font-size: 1.5rem; display: inline-block;">${probability}</div>` : 
+                                        candidate.score ? `<div class="score" style="font-size: 1.5rem;">Score: ${escapeHtml(candidate.score)}</div>` : ''}
+                                </div>
+                                ${candidate.propensitySegment ? `
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <div style="font-size: 0.85rem; color: #5DADE2; margin-bottom: 0.5rem; font-weight: 600;">🎯 PROPENSITY SEGMENT</div>
+                                        <div class="propensity-segment ${candidate.propensitySegment.toLowerCase()}" style="font-size: 1.1rem; padding: 0.5rem 1rem;">${escapeHtml(candidate.propensitySegment.toUpperCase())}</div>
+                                    </div>
+                                ` : ''}
+                                ${contactInfo ? `
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <div style="font-size: 0.85rem; color: #5DADE2; margin-bottom: 0.5rem; font-weight: 600;">📧 CONTACT</div>
+                                        <div style="color: #5DADE2; font-size: 1rem;">${escapeHtml(contactInfo)}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${candidate.background ? `
+                                <div class="section" style="margin-bottom: 1.5rem;">
+                                    <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #5DADE2;">📝 <strong>Background</strong></div>
+                                    <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.background)}</div>
+                                </div>
+                            ` : ''}
+                            ${candidate.positiveDrivers && candidate.positiveDrivers.length > 0 ? `
+                                <div class="section" style="margin-bottom: 1.5rem;">
+                                    <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #4CAF50;">✅ <strong>Key Positive Drivers</strong></div>
+                                    <ul class="drivers-list positive" style="margin: 0; padding-left: 1.5rem;">
+                                        ${candidate.positiveDrivers.map(driver => `<li style="margin-bottom: 0.5rem; color: #4CAF50; font-size: 0.95rem;">${escapeHtml(driver)}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${candidate.negativeDrivers && candidate.negativeDrivers.length > 0 ? `
+                                <div class="section" style="margin-bottom: 1.5rem;">
+                                    <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #f44336;">⚠️ <strong>Key Negative Drivers</strong></div>
+                                    <ul class="drivers-list negative" style="margin: 0; padding-left: 1.5rem;">
+                                        ${candidate.negativeDrivers.map(driver => `<li style="margin-bottom: 0.5rem; color: #f44336; font-size: 0.95rem;">${escapeHtml(driver)}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${candidate.whyMatch ? `
+                                <div class="section" style="margin-bottom: 1.5rem;">
+                                    <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #FFC300;">🎯 <strong>Why They Match</strong></div>
+                                    <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.whyMatch)}</div>
+                                </div>
+                            ` : ''}
+                            ${candidate.assumptions ? `
+                                <div class="assumptions" style="margin-bottom: 1.5rem;">
+                                    <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #FFC300;">⚠️ <strong>Assumptions/Warnings</strong></div>
+                                    <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.assumptions)}</div>
+                                </div>
+                            ` : ''}
+                            ${candidate.strengths ? `
+                                <div class="section" style="margin-bottom: 1.5rem;">
+                                    <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #5DADE2;">💪 <strong>Areas of Strength</strong></div>
+                                    <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.strengths)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showCandidateDetails(index) {
+            const modal = document.getElementById(`candidate-modal-${index}`);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(index) {
+            const modal = document.getElementById(`candidate-modal-${index}`);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
 
         function parseCandidates(text) {
             const candidates = [];
@@ -521,7 +778,9 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                         strengths: '',
                         positiveDrivers: [],
                         negativeDrivers: [],
-                        assumptions: ''
+                        assumptions: '',
+                        email: null,
+                        contactInfo: null
                     };
                     currentSection = null;
                     continue;
@@ -664,12 +923,32 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                         }
                     }
                 }
+                
+                // Try to extract email from any line for contact info
+                if (currentCandidate && !currentCandidate.email) {
+                    const emailMatch = line.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+                    if (emailMatch) {
+                        currentCandidate.email = emailMatch[0];
+                        currentCandidate.contactInfo = emailMatch[0];
+                    }
+                }
             }
             
             // Add the last candidate
             if (currentCandidate) {
                 candidates.push(currentCandidate);
             }
+            
+            // Post-process: extract emails from background if not already found
+            candidates.forEach(candidate => {
+                if (!candidate.email && candidate.background) {
+                    const emailMatch = candidate.background.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+                    if (emailMatch) {
+                        candidate.email = emailMatch[0];
+                        candidate.contactInfo = emailMatch[0];
+                    }
+                }
+            });
             
             return candidates;
         }
