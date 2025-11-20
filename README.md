@@ -4,7 +4,9 @@ A complete platform for universities to autonomously discover and evaluate prosp
 
 ## AI Agents Pipeline
 
-The UDiscovery platform uses a 5-agent CrewAI pipeline that works sequentially to discover and evaluate candidates:
+The UDiscovery platform uses a multi-agent CrewAI pipeline that works sequentially to discover and evaluate candidates. The platform supports two pipeline configurations:
+
+### Kaggle Pipeline (5 Agents)
 
 1. **University Strategy Analyst** (Trait Inferrer)
    - Analyzes university program goals and requirements
@@ -22,16 +24,37 @@ The UDiscovery platform uses a 5-agent CrewAI pipeline that works sequentially t
    - Ensures data quality and relevance
 
 4. **Data Engineer** (Data Ingestion)
-   - Prepares the selected dataset for analysis
+   - Downloads and prepares the selected dataset for analysis
    - Handles data formatting and structure
    - Ensures data is ready for candidate evaluation
 
-5. **Admissions Propensity Modeler** (Ranking Agent)
-   - Scores candidates against the ideal profile blueprint
-   - Ranks the top 10 most promising candidates
-   - Provides detailed justifications for each candidate's score and match
+5. **Graduate Program Application Probability Modeler** (Prospection Agent)
+   - Estimates the probability that each candidate will apply to the graduate program
+   - Uses logistic regression and probabilistic modeling
+   - Provides structured output including:
+     - Predicted application probability (0.0-1.0)
+     - Propensity segment (high/medium/low)
+     - Key positive drivers (factors increasing application likelihood)
+     - Key negative drivers (factors decreasing application likelihood)
+     - Assumptions and warnings about predictions
+   - Ranks the top 10 most promising candidates with detailed justifications
 
-The pipeline executes sequentially, with each agent building on the previous agent's output to produce a final ranked list of candidates with scores, backgrounds, and matching explanations.
+### Synthetic Dataset Pipeline (3 Agents)
+
+For faster testing and development, UDiscovery also supports a streamlined pipeline using a local synthetic dataset:
+
+1. **University Strategy Analyst** (Trait Inferrer)
+   - Same as Kaggle pipeline - analyzes goals and creates candidate blueprint
+
+2. **Data Loader Agent**
+   - Loads and prepares the synthetic candidate dataset (`dataset/synt_prospec.csv`)
+   - Provides candidate profiles with fields including: experience, education, GPA, demographics, and more
+
+3. **Graduate Program Application Probability Modeler** (Prospection Agent)
+   - Same probability modeling as Kaggle pipeline
+   - Works with synthetic data structure to predict application probabilities
+
+The pipeline executes sequentially, with each agent building on the previous agent's output to produce a final ranked list of candidates with application probabilities, backgrounds, and detailed matching explanations.
 
 ## Project Structure
 
@@ -47,14 +70,18 @@ udiscovery/
 │       ├── css/styles.css
 │       └── js/main.js
 ├── backend/                      # AI agentic pipeline
-│   ├── agents_pipeline.py        # Main pipeline orchestrator
+│   ├── agents_pipeline.py        # Kaggle pipeline orchestrator
+│   ├── synthetic_agents_pipeline.py  # Synthetic dataset pipeline orchestrator
 │   ├── trait_inferrer.py         # Trait inferrer agent module
 │   ├── kaggle_pipeline.py        # Kaggle-related agents and tasks
-│   ├── propensity_modeler.py     # Propensity modeler agent module
+│   ├── synthetic_pipeline.py      # Synthetic dataset loading module
+│   ├── propensity_modeler.py     # Prospection agent (probability modeler) module
 │   ├── demo_runner.py            # Demo runner for web interface
 │   ├── run_demo_cli.py           # CLI interface
 │   ├── .env                      # Environment variables (API keys)
 │   └── requirements.txt          # Python dependencies
+├── dataset/                      # Data files
+│   └── synt_prospec.csv          # Synthetic candidate dataset (1000 candidates)
 └── README.md                     # This file
 ```
 
@@ -103,8 +130,15 @@ udiscovery/
 1. Start the frontend server
 2. Navigate to `http://localhost:3000/demo`
 3. Choose either the HGSE pre-configured goal or enter your own custom goal
-4. Click "Generate Demo" to run the 5-agent pipeline
-5. View the top candidates and their scores
+4. Click "Generate Demo" to run the pipeline (currently uses synthetic dataset pipeline)
+5. View the top candidates with:
+   - Application probability scores (0-100%)
+   - Propensity segments (high/medium/low)
+   - Detailed backgrounds
+   - Key positive and negative drivers
+   - Assumptions and warnings
+
+**Note**: The demo currently uses the synthetic dataset pipeline for faster execution. To use the Kaggle pipeline, modify `demo_runner.py` to import from `agents_pipeline` instead of `synthetic_agents_pipeline`.
 
 ## API Endpoints
 
@@ -128,8 +162,10 @@ udiscovery/
 - **Python 3.12** with virtual environment
 - **CrewAI** for multi-agent orchestration
 - **Google Gemini (gemini-2.0-flash)** LLM
-- **Kaggle API** for dataset discovery
+- **Kaggle API** for dataset discovery (Kaggle pipeline)
 - **Pandas** for data manipulation
+- **Logistic Regression/Probabilistic Modeling** for application probability prediction
+- **Synthetic Dataset Support** for faster testing and development
 
 ## Design Features
 
