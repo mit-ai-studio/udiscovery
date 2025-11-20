@@ -568,6 +568,12 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             });
             
             if (filteredCandidates.length > 0) {
+                // Update results header with count
+                const resultsHeader = document.querySelector('.results-header h2');
+                if (resultsHeader) {
+                    resultsHeader.innerHTML = `🎉 Demo Results - ${filteredCandidates.length} Probable Candidate${filteredCandidates.length !== 1 ? 's' : ''} Found`;
+                }
+                
                 // Create table
                 resultsContent.innerHTML = `
                     <table class="candidates-table">
