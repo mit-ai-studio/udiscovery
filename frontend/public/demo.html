@@ -228,11 +228,50 @@
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            margin: 0 auto 1.5rem;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        .loading-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 24px;
+            background: rgba(240, 244, 248, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(58, 134, 255, 0.2);
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3A86FF 0%, #5DADE2 100%);
+            border-radius: 12px;
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 2px 8px rgba(58, 134, 255, 0.3);
+        }
+        .progress-percentage {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3A86FF;
+            margin-top: 0.5rem;
+        }
+        .loading-status {
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+            color: #FFFFFF !important;
+            font-weight: 500;
         }
         .error-message {
             background: #ffe0e0;
@@ -437,11 +476,17 @@
 
         <div id="loading-section" class="loading" style="display: none;">
             <div class="loading-spinner"></div>
-            <p style="color: #212F45; font-size: 1.1rem;">
-                Our AI agents are working hard to find your ideal candidates...
-                <br><br>
-                This may take a few minutes as we search Kaggle, analyze datasets, and score candidates.
-            </p>
+            <div class="loading-content">
+                <div class="progress-container">
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <div id="progress-percentage" class="progress-percentage">0%</div>
+                </div>
+                <p id="loading-status" class="loading-status" style="font-size: 1.1rem; margin-top: 1.5rem;">
+                    Initializing AI agents...
+                </p>
+            </div>
         </div>
     </div>
 
@@ -477,6 +522,97 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             document.getElementById('submit-demo-btn').disabled = !hasText;
         }
 
+        // Loading progress and status messages
+        let loadingInterval = null;
+        let progressInterval = null;
+        let currentProgress = 0;
+        
+        const loadingMessages = [
+            { progress: 0, message: "🤖 Initializing AI agents..." },
+            { progress: 10, message: "📊 Analyzing program requirements and candidate traits..." },
+            { progress: 20, message: "📂 Loading candidate dataset..." },
+            { progress: 30, message: "🔍 Processing candidate profiles..." },
+            { progress: 40, message: "🧠 Inferring candidate traits and characteristics..." },
+            { progress: 50, message: "📈 Calculating application probabilities..." },
+            { progress: 60, message: "🎯 Identifying key positive and negative drivers..." },
+            { progress: 70, message: "⚖️ Ranking candidates by application likelihood..." },
+            { progress: 80, message: "✨ Finalizing results and generating insights..." },
+            { progress: 90, message: "🎉 Almost done! Preparing your candidate list..." },
+            { progress: 95, message: "✅ Completing final analysis..." }
+        ];
+        
+        function startLoadingProgress() {
+            currentProgress = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const loadingStatus = document.getElementById('loading-status');
+            
+            // Reset progress
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressPercentage) progressPercentage.textContent = '0%';
+            if (loadingStatus) {
+                loadingStatus.textContent = loadingMessages[0].message;
+                loadingStatus.style.opacity = '1';
+            }
+            
+            let lastMessageIndex = 0;
+            
+            // Update progress bar - smooth, even progression
+            const startTime = Date.now();
+            const targetProgress = 95; // Progress to 95% smoothly, then complete to 100% when API finishes
+            const estimatedDuration = 90000; // 90 seconds to reach 95%
+            
+            progressInterval = setInterval(() => {
+                // Calculate smooth progress based on time
+                const elapsed = Date.now() - startTime;
+                const timeBasedProgress = Math.min((elapsed / estimatedDuration) * targetProgress, targetProgress);
+                
+                // Ensure we always move forward, but smoothly
+                if (timeBasedProgress > currentProgress) {
+                    currentProgress = timeBasedProgress;
+                } else {
+                    // If time-based is behind, add a tiny increment to ensure forward movement
+                    currentProgress = Math.min(currentProgress + 0.1, targetProgress);
+                }
+                
+                if (progressBar) progressBar.style.width = currentProgress + '%';
+                if (progressPercentage) progressPercentage.textContent = Math.round(currentProgress) + '%';
+                
+                // Update message based on progress - find the appropriate message for current progress
+                for (let i = loadingMessages.length - 1; i >= 0; i--) {
+                    if (currentProgress >= loadingMessages[i].progress && i > lastMessageIndex) {
+                        lastMessageIndex = i;
+                        if (loadingStatus) {
+                            loadingStatus.style.opacity = '0';
+                            setTimeout(() => {
+                                loadingStatus.textContent = loadingMessages[i].message;
+                                loadingStatus.style.opacity = '1';
+                            }, 150);
+                        }
+                        break;
+                    }
+                }
+            }, 100);
+        }
+        
+        function stopLoadingProgress() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+            
+            // Complete the progress bar
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const loadingStatus = document.getElementById('loading-status');
+            
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressPercentage) progressPercentage.textContent = '100%';
+            if (loadingStatus) {
+                loadingStatus.textContent = '✅ Analysis complete!';
+            }
+        }
+
         // Handle form submission
         document.getElementById('submit-demo-btn').addEventListener('click', async () => {
             const universityGoal = selectedOption === 'hgse' 
@@ -488,6 +624,9 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             document.getElementById('loading-section').style.display = 'block';
             document.getElementById('results-section').style.display = 'none';
             document.getElementById('error-container').innerHTML = '';
+            
+            // Start loading progress
+            startLoadingProgress();
 
             try {
                 const response = await fetch('/api/run-demo', {
@@ -500,15 +639,24 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
 
                 const data = await response.json();
 
-                if (data.success) {
-                    displayResults(data.result);
-                } else {
-                    showError(data.error || 'An error occurred while running the demo');
-                }
+                // Complete progress before showing results
+                stopLoadingProgress();
+                
+                // Small delay to show 100% before hiding
+                setTimeout(() => {
+                    if (data.success) {
+                        displayResults(data.result);
+                    } else {
+                        showError(data.error || 'An error occurred while running the demo');
+                    }
+                    document.getElementById('loading-section').style.display = 'none';
+                }, 500);
             } catch (error) {
-                showError('Failed to run demo: ' + error.message);
-            } finally {
-                document.getElementById('loading-section').style.display = 'none';
+                stopLoadingProgress();
+                setTimeout(() => {
+                    showError('Failed to run demo: ' + error.message);
+                    document.getElementById('loading-section').style.display = 'none';
+                }, 500);
             }
         });
 
