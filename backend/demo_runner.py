@@ -66,6 +66,11 @@ def run_udiscovery_demo(university_goal: str) -> dict:
             # Clean ANSI codes
             result_text = remove_ansi_codes(result_text)
             
+            # Remove markdown code blocks (```...```) but keep the content inside
+            result_text = re.sub(r'```[a-z]*\n?', '', result_text)
+            result_text = re.sub(r'```', '', result_text)
+            result_text = result_text.strip()
+            
             # Log first 500 chars for debugging
             # logger.info(f"Result preview: {result_text[:500]}")
             

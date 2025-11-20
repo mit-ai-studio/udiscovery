@@ -18,7 +18,7 @@ from synthetic_pipeline import (
     create_data_loader_agent,
     create_load_data_task
 )
-from propensity_modeler import create_modeler_agent, create_rank_task
+from propensity_modeler import create_prospection_agent, create_predict_probability_task
 
 # Load environment variables
 load_dotenv()
@@ -74,7 +74,7 @@ def execute_pipeline(university_goal=None):
     
     # Load synthetic data first
     logger.info("Loading synthetic candidate dataset...")
-    data_info = load_synthetic_data("dataset/synt_prospec.csv", num_rows=100)  # Load first 100 for faster processing
+    data_info = load_synthetic_data("dataset/synt_prospec.csv", num_rows=50)  # Load first 50 to reduce token usage
     if not data_info["success"]:
         logger.error(f"Failed to load dataset: {data_info.get('error', 'Unknown error')}")
         return None
@@ -92,10 +92,10 @@ def execute_pipeline(university_goal=None):
     data_loader_agent = create_data_loader_agent()
     logger.info("✅ Data Loader Agent created")
     
-    # Create Agent 3: Propensity Modeler
-    logger.info("Creating Agent 3: Propensity Modeler...")
-    modeler_agent = create_modeler_agent()
-    logger.info("✅ Propensity Modeler Agent created")
+    # Create Agent 3: Prospection Agent
+    logger.info("Creating Agent 3: Prospection Agent...")
+    prospection_agent = create_prospection_agent()
+    logger.info("✅ Prospection Agent created")
     
     # Create Task 1: Create Blueprint
     logger.info("Creating Task 1: Create Blueprint...")
@@ -107,16 +107,16 @@ def execute_pipeline(university_goal=None):
     load_task = create_load_data_task(data_loader_agent, data_info)
     logger.info("✅ Load Data Task created")
     
-    # Create Task 3: Rank Candidates
-    logger.info("Creating Task 3: Rank Candidates...")
-    rank_task = create_rank_task(modeler_agent, blueprint_task, load_task, use_synthetic_data=True)
-    logger.info("✅ Rank Task created")
+    # Create Task 3: Predict Application Probability
+    logger.info("Creating Task 3: Predict Application Probability...")
+    predict_task = create_predict_probability_task(prospection_agent, blueprint_task, load_task, use_synthetic_data=True)
+    logger.info("✅ Predict Probability Task created")
     
     # Create Crew
     logger.info("Creating Crew...")
     crew = Crew(
-        agents=[trait_agent, data_loader_agent, modeler_agent],
-        tasks=[blueprint_task, load_task, rank_task],
+        agents=[trait_agent, data_loader_agent, prospection_agent],
+        tasks=[blueprint_task, load_task, predict_task],
         process=Process.sequential,
         verbose=False  # Reduced verbosity to save tokens
     )

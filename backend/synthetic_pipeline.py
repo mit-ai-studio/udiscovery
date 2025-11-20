@@ -67,34 +67,29 @@ def create_data_loader_agent():
 
 def create_load_data_task(data_loader_agent: Agent, data_info: dict):
     """Create the data loading task with actual data embedded"""
+    # Load a smaller sample for the task description to avoid token limits
+    import json
+    all_data = json.loads(data_info['data'])
+    sample_data = all_data[:20]  # Only use first 20 candidates in task description
+    sample_json = json.dumps(sample_data, indent=2)
+    
     return Task(
         description=f"""Load and prepare the synthetic candidate dataset.
 
-The dataset has been loaded and contains {data_info['total_rows']} candidates with the following fields:
+The dataset contains {data_info['total_rows']} candidates with the following fields:
 {', '.join(data_info['columns'])}
 
-Here is the candidate data (first {data_info['sample_size']} candidates):
+Here is a sample of candidate data (first 20 candidates for reference):
 
 CANDIDATE_DATA_START
-{data_info['data']}
+{sample_json}
 CANDIDATE_DATA_END
 
-Return a summary:
-- Total number of candidates: {data_info['total_rows']}
-- Key fields available: {', '.join(data_info['columns'][:10])}...
-- Sample of 5 candidates with their key information (name, position, experience, education)
+Note: The full dataset has {data_info['total_rows']} candidates. Use the data structure shown above to understand the available fields.
 
-Format:
-"Dataset loaded successfully. Found {data_info['total_rows']} candidates.
-
-Available fields: {', '.join(data_info['columns'])}
-
-Sample candidates:
-1. [Full Name: first_name + last_name] - [Current Position], [Years Work Experience] years work exp, [Years Education Experience] years education exp, [Prior Degree Level] in [Prior Degree Field]. Interest: [Interest]. GPA: [GPA]. Located in [State].
-2. [Full Name] - [Current Position], [Years Work Experience] years work exp, [Years Education Experience] years education exp, [Prior Degree Level] in [Prior Degree Field]. Interest: [Interest]. GPA: [GPA]. Located in [State].
-[Continue for 5 candidates]"
+Return a brief summary confirming the dataset is loaded and ready for analysis. List the key fields available and confirm you can access candidate data.
 """,
         agent=data_loader_agent,
-        expected_output="Summary of loaded candidate data with sample records"
+        expected_output="Brief confirmation that dataset is loaded with key fields listed"
     )
 

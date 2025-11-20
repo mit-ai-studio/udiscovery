@@ -147,6 +147,62 @@
             font-size: 1.1rem;
             margin-bottom: 1rem;
         }
+        .candidate-item .probability {
+            display: inline-block;
+            background: #3A86FF;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .candidate-item .propensity-segment {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .candidate-item .propensity-segment.high {
+            background: #4CAF50;
+            color: white;
+        }
+        .candidate-item .propensity-segment.medium {
+            background: #FFC300;
+            color: #212F45;
+        }
+        .candidate-item .propensity-segment.low {
+            background: #f44336;
+            color: white;
+        }
+        .candidate-item .drivers-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .candidate-item .drivers-list li {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            line-height: 1.4;
+        }
+        .candidate-item .drivers-list.positive li {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 3px solid #4CAF50;
+        }
+        .candidate-item .drivers-list.negative li {
+            background: rgba(244, 67, 54, 0.2);
+            border-left: 3px solid #f44336;
+        }
+        .candidate-item .assumptions {
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 3px solid #FFC300;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
         .candidate-item .section {
             margin-bottom: 1rem;
         }
@@ -330,42 +386,84 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         function displayResults(result) {
             const resultsContent = document.getElementById('results-content');
             
-            // Get the result text
+            // Get the result text - CrewAI returns result.raw as a string
             let text = '';
             if (typeof result === 'string') {
                 text = result;
-            } else if (result && result.raw) {
-                text = result.raw;
             } else if (result && typeof result === 'object') {
-                text = JSON.stringify(result, null, 2);
+                // Try different possible attributes
+                if (result.raw !== undefined) {
+                    text = String(result.raw);
+                } else if (result.content !== undefined) {
+                    text = String(result.content);
+                } else {
+                    text = JSON.stringify(result, null, 2);
+                }
             } else {
-                text = 'No results generated';
+                text = String(result || 'No results generated');
             }
+
+            // Remove markdown code blocks (```...```) but keep the content inside
+            text = text.replace(/```[a-z]*\n?/g, '').replace(/```/g, '').trim();
+            
+            // Debug: log what we received
+            console.log('Result type:', typeof result);
+            console.log('Text length:', text.length);
+            console.log('First 1000 chars:', text.substring(0, 1000));
 
             // Try to parse structured candidates from the text
             const candidates = parseCandidates(text);
             
             // Debug: log parsed candidates
             console.log('Parsed candidates:', candidates);
+            console.log('Number of candidates:', candidates.length);
             
             if (candidates.length > 0) {
                 resultsContent.innerHTML = candidates.map((candidate, index) => `
                     <div class="candidate-item">
                         <div>
                             <span class="rank">#${candidate.rank}</span>
-                            <span class="candidate-name">${escapeHtml(candidate.name)}</span>
+                            <span class="candidate-name">${escapeHtml(candidate.name || 'Unknown')}</span>
                         </div>
-                        ${candidate.score ? `<div class="score">Score: ${escapeHtml(candidate.score)}</div>` : ''}
+                        <div style="margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+                            ${candidate.probability !== null && candidate.probability !== undefined ? 
+                                `<div class="score">Application Probability: ${(parseFloat(candidate.probability) * 100).toFixed(1)}%</div>` : 
+                                candidate.score ? `<div class="score">Score: ${escapeHtml(candidate.score)}</div>` : ''}
+                            ${candidate.propensitySegment ? 
+                                `<div class="propensity-segment ${candidate.propensitySegment.toLowerCase()}">${escapeHtml(candidate.propensitySegment.toUpperCase())} PROPENSITY</div>` : ''}
+                        </div>
                         ${candidate.background ? `
                             <div class="section">
                                 <div class="section-label">Background</div>
                                 <div class="section-content">${escapeHtml(candidate.background)}</div>
                             </div>
                         ` : ''}
+                        ${candidate.positiveDrivers && candidate.positiveDrivers.length > 0 ? `
+                            <div class="section">
+                                <div class="section-label">Key Positive Drivers</div>
+                                <ul class="drivers-list positive">
+                                    ${candidate.positiveDrivers.map(driver => `<li>${escapeHtml(driver)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        ${candidate.negativeDrivers && candidate.negativeDrivers.length > 0 ? `
+                            <div class="section">
+                                <div class="section-label">Key Negative Drivers</div>
+                                <ul class="drivers-list negative">
+                                    ${candidate.negativeDrivers.map(driver => `<li>${escapeHtml(driver)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
                         ${candidate.whyMatch ? `
                             <div class="section">
                                 <div class="section-label">Why They Match</div>
                                 <div class="section-content">${escapeHtml(candidate.whyMatch)}</div>
+                            </div>
+                        ` : ''}
+                        ${candidate.assumptions ? `
+                            <div class="assumptions">
+                                <div class="section-label">Assumptions/Warnings</div>
+                                <div class="section-content">${escapeHtml(candidate.assumptions)}</div>
                             </div>
                         ` : ''}
                         ${candidate.strengths ? `
@@ -377,8 +475,10 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     </div>
                 `).join('');
             } else {
-                // Fallback to raw text display
-                resultsContent.innerHTML = `<pre style="white-space: pre-wrap; color: #F0F4F8; font-family: 'Inter', sans-serif; line-height: 1.6; margin: 0;">${escapeHtml(text)}</pre>`;
+                // Fallback to raw text display (but formatted nicely)
+                // Show the actual text so we can debug
+                const formattedText = text.length > 0 ? text : 'No candidates found in the results.';
+                resultsContent.innerHTML = `<pre style="white-space: pre-wrap; color: #F0F4F8; font-family: 'Inter', sans-serif; line-height: 1.6; margin: 0;">${escapeHtml(formattedText)}</pre>`;
             }
 
             document.getElementById('results-section').style.display = 'block';
@@ -388,14 +488,17 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             const candidates = [];
             
             // Try to extract structured candidates from the text
-            // Look for patterns like "1. Name" followed by score, background, etc.
+            // Look for patterns like "1. Name" followed by probability, background, etc.
             const lines = text.split('\n');
             let currentCandidate = null;
             let currentSection = null;
             
-            for (let line of lines) {
-                line = line.trim();
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
                 if (!line) continue;
+                
+                // Skip markdown code blocks
+                if (line.startsWith('```')) continue;
                 
                 // Check if this is a candidate number (e.g., "1.", "2.", etc.)
                 const candidateMatch = line.match(/^(\d+)\.\s*(.+)$/);
@@ -404,24 +507,61 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                         candidates.push(currentCandidate);
                     }
                     // Clean markdown formatting from name
-                    let name = candidateMatch[2].replace(/\*\*/g, '').trim();
+                    let name = candidateMatch[2].replace(/\*\*/g, '').replace(/\[|\]/g, '').trim();
+                    // Remove "Full Name:" prefix if present
+                    name = name.replace(/^full name:\s*/i, '').trim();
                     currentCandidate = {
                         rank: candidateMatch[1],
                         name: name,
                         score: null,
+                        probability: null,
+                        propensitySegment: null,
                         background: '',
                         whyMatch: '',
-                        strengths: ''
+                        strengths: '',
+                        positiveDrivers: [],
+                        negativeDrivers: [],
+                        assumptions: ''
                     };
                     currentSection = null;
                     continue;
                 }
                 
-                // Check for Score in various formats
-                if (line.toLowerCase().includes('score')) {
+                if (!currentCandidate) continue;
+                
+                // Check for Predicted Application Probability or Application Probability
+                // Look for lines like "Predicted Application Probability: 0.75" or "Application Probability: 0.82"
+                if (line.toLowerCase().includes('predicted application probability') || 
+                    line.toLowerCase().includes('application probability')) {
+                    // Try patterns: "Predicted Application Probability: 0.85", "Application Probability: 0.75", etc.
+                    const probMatch = line.match(/probability[:\s]+([0-9.]+)/i);
+                    if (probMatch) {
+                        const probValue = parseFloat(probMatch[1]);
+                        // If value is > 1, assume it's a percentage and convert
+                        // Otherwise use as decimal (0.0-1.0)
+                        currentCandidate.probability = probValue > 1 ? probValue / 100 : probValue;
+                    } else if (line.toLowerCase().includes('null')) {
+                        // Only set to null if explicitly stated
+                        currentCandidate.probability = null;
+                    }
+                    continue;
+                }
+                
+                // Also check for just "Probability:" on a line
+                if (line.toLowerCase().startsWith('probability:') || line.toLowerCase().startsWith('probability ')) {
+                    const probMatch = line.match(/probability[:\s]+([0-9.]+)/i);
+                    if (probMatch) {
+                        const probValue = parseFloat(probMatch[1]);
+                        currentCandidate.probability = probValue > 1 ? probValue / 100 : probValue;
+                    }
+                    continue;
+                }
+                
+                // Check for Score in various formats (fallback)
+                if (line.toLowerCase().includes('score:')) {
                     // Try different patterns: "Score: 95/100", "Score: 95", "Score: 85/100 -", etc.
                     const scoreMatch = line.match(/score:\s*(\d+)(?:\/(\d+))?/i);
-                    if (scoreMatch && currentCandidate) {
+                    if (scoreMatch) {
                         const score = scoreMatch[1];
                         const max = scoreMatch[2] || '100';
                         currentCandidate.score = `${score}/${max}`;
@@ -429,25 +569,62 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     continue;
                 }
                 
+                // Check for Propensity Segment
+                if (line.toLowerCase().includes('propensity segment') || 
+                    (line.toLowerCase().includes('propensity') && line.match(/propensity[:\s]+(high|medium|low)/i))) {
+                    const segmentMatch = line.match(/propensity[:\s]+(high|medium|low)/i);
+                    if (segmentMatch) {
+                        currentCandidate.propensitySegment = segmentMatch[1].toLowerCase();
+                    }
+                    continue;
+                }
+                
                 // Check for section labels
                 const sectionLabels = {
                     'background:': 'background',
+                    'background': 'background',
                     'why they match:': 'whyMatch',
                     'why they match': 'whyMatch',
+                    'key positive drivers:': 'positiveDrivers',
+                    'key positive drivers': 'positiveDrivers',
+                    'positive drivers:': 'positiveDrivers',
+                    'positive drivers': 'positiveDrivers',
+                    'key negative drivers:': 'negativeDrivers',
+                    'key negative drivers': 'negativeDrivers',
+                    'negative drivers:': 'negativeDrivers',
+                    'negative drivers': 'negativeDrivers',
+                    'assumptions/warnings:': 'assumptions',
+                    'assumptions/warnings': 'assumptions',
+                    'assumptions or warnings:': 'assumptions',
+                    'assumptions or warnings': 'assumptions',
+                    'assumptions:': 'assumptions',
+                    'warnings:': 'assumptions',
                     'areas of strength:': 'strengths',
                     'areas of strength': 'strengths',
                     'areas of concern:': 'concerns'
                 };
                 
                 let foundSection = false;
+                const lowerLine = line.toLowerCase();
                 for (const [label, key] of Object.entries(sectionLabels)) {
-                    if (line.toLowerCase().startsWith(label)) {
+                    if (lowerLine.startsWith(label.toLowerCase())) {
                         currentSection = key;
                         let content = line.substring(label.length).trim();
                         // Clean markdown formatting
-                        content = content.replace(/\*\*/g, '').trim();
-                        if (content && currentCandidate) {
-                            currentCandidate[currentSection] = content;
+                        content = content.replace(/\*\*/g, '').replace(/\[|\]/g, '').trim();
+                        if (content) {
+                            if (key === 'positiveDrivers' || key === 'negativeDrivers') {
+                                // Initialize array if needed
+                                if (!currentCandidate[key]) {
+                                    currentCandidate[key] = [];
+                                }
+                                // If there's content on the same line, add it
+                                if (content) {
+                                    currentCandidate[key].push(content);
+                                }
+                            } else {
+                                currentCandidate[key] = content;
+                            }
                         }
                         foundSection = true;
                         break;
@@ -455,10 +632,37 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 }
                 
                 // If not a section label, append to current section
-                if (!foundSection && currentCandidate && currentSection) {
+                if (!foundSection && currentSection) {
                     // Clean markdown and append
-                    const cleanedLine = line.replace(/\*\*/g, '').trim();
-                    currentCandidate[currentSection] += ' ' + cleanedLine;
+                    const cleanedLine = line.replace(/\*\*/g, '').replace(/\[|\]/g, '').trim();
+                    
+                    // Handle list items for drivers
+                    if (currentSection === 'positiveDrivers' || currentSection === 'negativeDrivers') {
+                        // Initialize array if needed
+                        if (!currentCandidate[currentSection]) {
+                            currentCandidate[currentSection] = [];
+                        }
+                        // Check if line starts with bullet, dash, number, or is indented
+                        if (cleanedLine && (cleanedLine.match(/^[-•\d.)]\s+/) || line.startsWith('   ') || line.startsWith('\t'))) {
+                            const listItemMatch = cleanedLine.match(/^[-•\d.)]\s*(.+)$/);
+                            if (listItemMatch) {
+                                currentCandidate[currentSection].push(listItemMatch[1]);
+                            } else {
+                                currentCandidate[currentSection].push(cleanedLine);
+                            }
+                        } else if (cleanedLine && currentCandidate[currentSection].length > 0) {
+                            // Continue previous item
+                            const lastIndex = currentCandidate[currentSection].length - 1;
+                            currentCandidate[currentSection][lastIndex] += ' ' + cleanedLine;
+                        } else if (cleanedLine) {
+                            currentCandidate[currentSection].push(cleanedLine);
+                        }
+                    } else {
+                        // For other sections, append as before
+                        if (typeof currentCandidate[currentSection] === 'string') {
+                            currentCandidate[currentSection] += (currentCandidate[currentSection] ? ' ' : '') + cleanedLine;
+                        }
+                    }
                 }
             }
             
