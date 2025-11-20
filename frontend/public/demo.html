@@ -555,6 +555,18 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 return false;
             });
             
+            // Sort by probability (highest to lowest)
+            filteredCandidates.sort((a, b) => {
+                const probA = a.probability !== null && a.probability !== undefined ? parseFloat(a.probability) : 0;
+                const probB = b.probability !== null && b.probability !== undefined ? parseFloat(b.probability) : 0;
+                return probB - probA; // Descending order (highest first)
+            });
+            
+            // Update ranks based on sorted order
+            filteredCandidates.forEach((candidate, index) => {
+                candidate.rank = (index + 1).toString();
+            });
+            
             if (filteredCandidates.length > 0) {
                 // Create table
                 resultsContent.innerHTML = `
