@@ -50,7 +50,7 @@ def run_udiscovery_demo(university_goal: str) -> dict:
         # Run the pipeline
         result = run_pipeline_with_goal(university_goal)
         
-        if result:
+        if result is not None:
             # Extract the text from the result
             # CrewAI returns result objects, check what attributes are available
             if hasattr(result, 'raw'):

@@ -87,10 +87,12 @@ def create_predict_probability_task(prospection_agent: Agent, blueprint_task: Ta
     """Create the prediction task for computing application probability"""
     
     if use_synthetic_data:
-        description = """Using the candidate profiles from the dataset (provided in the previous task) and program attributes from the blueprint,
+        description = """Using the candidate profiles from the dataset (provided in the previous task between CANDIDATE_DATA_START and CANDIDATE_DATA_END markers) and program attributes from the blueprint,
 compute or simulate P(Apply = 1) using logistic modeling logic.
 
-For each candidate in the dataset:
+You MUST process ALL candidates from the previous task's output. Do not limit yourself to a subset.
+
+For EACH candidate in the dataset:
 
 1. Extract candidate attributes:
    - Academic/Professional: years_work_experience, years_education_experience, current_position (prior_role), 
@@ -112,9 +114,9 @@ For each candidate in the dataset:
    - Instead output a theoretical high/medium/low propensity
    - Clearly mark it as non-empirical
 
-For the top 10 candidates (ranked by predicted probability), format EXACTLY as:
+For ALL candidates in the dataset, format EXACTLY as:
 
-Top 10 Candidates for Harvard Graduate School of Education:
+Candidates for Harvard Graduate School of Education:
 
 1. [Full Name: first_name + last_name]
    Predicted Application Probability: [MUST include a number between 0.0 and 1.0, e.g., 0.75, 0.82, 0.65. If theoretical, use an estimated value like 0.7 for high, 0.5 for medium, 0.3 for low]
@@ -132,7 +134,7 @@ Top 10 Candidates for Harvard Graduate School of Education:
    Key Negative Drivers: [...]
    Assumptions/Warnings: [...]
 
-[Continue for all 10 candidates]
+[Continue for ALL candidates in the dataset, ranked by predicted probability from highest to lowest]
 
 CRITICAL: You MUST provide a numerical probability value (0.0-1.0) for each candidate. Calculate this based on:
 - Candidate attributes (experience, education, GPA, interest alignment)
@@ -163,7 +165,7 @@ For each candidate, return JSON containing:
   - assumptions_or_warnings
 
 Format EXACTLY as:
-"Top 10 Candidates for Harvard Graduate School of Education:
+"Candidates for Harvard Graduate School of Education:
 
 1. [Full Name]
    Predicted Application Probability: [0.0-1.0 or null]
@@ -173,13 +175,13 @@ Format EXACTLY as:
    Key Negative Drivers: [List factors]
    Assumptions/Warnings: [Any assumptions]
 
-[Continue for all 10 candidates]"""
+[Continue for ALL candidates, ranked by predicted probability from highest to lowest]"""
     
     return Task(
         description=description,
         agent=prospection_agent,
         context=[blueprint_task, load_task],
-        expected_output="Ranked list of 10 candidates with predicted application probabilities, propensity segments, key drivers, and assumptions"
+        expected_output="Ranked list of ALL candidates (sorted by predicted probability, highest to lowest) with predicted application probabilities, propensity segments, key drivers, and assumptions"
     )
 
 # Alias for backward compatibility

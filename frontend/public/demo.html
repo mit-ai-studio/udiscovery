@@ -629,13 +629,20 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             startLoadingProgress();
 
             try {
+                // Create an AbortController for timeout handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000); // 30 minute timeout
+                
                 const response = await fetch('/api/run-demo', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ university_goal: universityGoal })
+                    body: JSON.stringify({ university_goal: universityGoal }),
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
 
                 const data = await response.json();
 
@@ -654,7 +661,15 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             } catch (error) {
                 stopLoadingProgress();
                 setTimeout(() => {
-                    showError('Failed to run demo: ' + error.message);
+                    let errorMessage = 'Failed to run demo: ';
+                    if (error.name === 'AbortError') {
+                        errorMessage += 'Request timed out. The analysis is taking longer than expected. Please try again or contact support.';
+                    } else if (error.message === 'Failed to fetch') {
+                        errorMessage += 'Unable to connect to the server. Please check if the server is running and try again.';
+                    } else {
+                        errorMessage += error.message;
+                    }
+                    showError(errorMessage);
                     document.getElementById('loading-section').style.display = 'none';
                 }, 500);
             }

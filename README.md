@@ -47,7 +47,7 @@ For faster testing and development, UDiscovery also supports a streamlined pipel
    - Same as Kaggle pipeline - analyzes goals and creates candidate blueprint
 
 2. **Data Loader Agent**
-   - Loads and prepares the synthetic candidate dataset (`dataset/synt_prospec.csv`)
+   - Loads and prepares the synthetic candidate dataset (`dataset/synt_prospect_5k.csv`)
    - Provides candidate profiles with fields including: experience, education, GPA, demographics, and more
 
 3. **Graduate Program Application Probability Modeler** (Prospection Agent)
@@ -81,7 +81,7 @@ udiscovery/
 │   ├── .env                      # Environment variables (API keys)
 │   └── requirements.txt          # Python dependencies
 ├── dataset/                      # Data files
-│   └── synt_prospec.csv          # Synthetic candidate dataset (1000 candidates)
+│   └── synt_prospect_5k.csv      # Synthetic candidate dataset (5000 candidates)
 └── README.md                     # This file
 ```
 

@@ -9,7 +9,7 @@ import json
 import pandas as pd
 from crewai import Agent, Task
 
-def load_synthetic_data(dataset_path: str = "dataset/synt_prospec.csv", num_rows: int = None):
+def load_synthetic_data(dataset_path: str = "dataset/synt_prospect_5k.csv", num_rows: int = None):
     """
     Load synthetic candidate data from CSV file.
     
@@ -67,29 +67,38 @@ def create_data_loader_agent():
 
 def create_load_data_task(data_loader_agent: Agent, data_info: dict):
     """Create the data loading task with actual data embedded"""
-    # Load a smaller sample for the task description to avoid token limits
     import json
     all_data = json.loads(data_info['data'])
-    sample_data = all_data[:20]  # Only use first 20 candidates in task description
+    
+    # For large datasets, we'll include all candidates but in compact JSON format (no indentation)
+    # This allows processing many candidates while staying within token limits
+    full_data_json = data_info['data']  # Already compact JSON from to_json()
+    
+    # Show a small sample with indentation for structure reference
+    sample_data = all_data[:10]  # Small sample for structure reference
     sample_json = json.dumps(sample_data, indent=2)
     
     return Task(
         description=f"""Load and prepare the synthetic candidate dataset.
 
-The dataset contains {data_info['total_rows']} candidates with the following fields:
+The dataset contains {data_info['total_rows']} total candidates in the full dataset, and we are processing {data_info['sample_size']} candidates with the following fields:
 {', '.join(data_info['columns'])}
 
-Here is a sample of candidate data (first 20 candidates for reference):
+Here is a sample of candidate data (first 10 candidates to show the structure):
+
+CANDIDATE_DATA_SAMPLE_START
+{sample_json}
+CANDIDATE_DATA_SAMPLE_END
+
+The dataset with {data_info['sample_size']} candidates to process is provided below in compact JSON format. You MUST output ALL {data_info['sample_size']} candidates in your response:
 
 CANDIDATE_DATA_START
-{sample_json}
+{full_data_json}
 CANDIDATE_DATA_END
 
-Note: The full dataset has {data_info['total_rows']} candidates. Use the data structure shown above to understand the available fields.
-
-Return a brief summary confirming the dataset is loaded and ready for analysis. List the key fields available and confirm you can access candidate data.
+Return ALL {data_info['sample_size']} candidates in JSON format, wrapped between CANDIDATE_DATA_START and CANDIDATE_DATA_END markers. Do not summarize - include the complete dataset.
 """,
         agent=data_loader_agent,
-        expected_output="Brief confirmation that dataset is loaded with key fields listed"
+        expected_output=f"Complete dataset with all {data_info['sample_size']} candidates in JSON format, wrapped between CANDIDATE_DATA_START and CANDIDATE_DATA_END markers"
     )
 
