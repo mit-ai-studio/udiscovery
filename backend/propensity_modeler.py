@@ -95,6 +95,7 @@ You MUST process ALL candidates from the previous task's output. Do not limit yo
 For EACH candidate in the dataset:
 
 1. Extract candidate attributes:
+   - Contact: email (from the dataset)
    - Academic/Professional: years_work_experience, years_education_experience, current_position (prior_role), 
      prior_degree_level, prior_degree_field, gpa_percentile, sat_percentile
    - Demographic/Socioeconomic: age, gender, individual_income_level, parental_education_level,
@@ -121,6 +122,7 @@ Candidates for Harvard Graduate School of Education:
 1. [Full Name: first_name + last_name]
    Predicted Application Probability: [MUST include a number between 0.0 and 1.0, e.g., 0.75, 0.82, 0.65. If theoretical, use an estimated value like 0.7 for high, 0.5 for medium, 0.3 for low]
    Propensity Segment: [high/medium/low]
+   Contact: [email field from the dataset - use the exact email value provided]
    Background: [Current Position] with [years_work_experience] years work exp, [years_education_experience] years education exp, [Prior Degree Level] in [Prior Degree Field]. Interest: [Interest]. GPA: [GPA]. Located in [State].
    Key Positive Drivers: [List factors that increase application likelihood]
    Key Negative Drivers: [List factors that decrease application likelihood]
@@ -129,6 +131,7 @@ Candidates for Harvard Graduate School of Education:
 2. [Full Name]
    Predicted Application Probability: [MUST include a number between 0.0 and 1.0, e.g., 0.75, 0.82, 0.65]
    Propensity Segment: [high/medium/low]
+   Contact: [email field from the dataset - use the exact email value provided]
    Background: [Current Position] with [years_work_experience] years work exp, [years_education_experience] years education exp, [Prior Degree Level] in [Prior Degree Field]. Interest: [Interest]. GPA: [GPA]. Located in [State].
    Key Positive Drivers: [...]
    Key Negative Drivers: [...]

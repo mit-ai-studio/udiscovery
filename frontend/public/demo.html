@@ -1019,6 +1019,23 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     continue;
                 }
                 
+                // Check for Contact/Email
+                if (line.toLowerCase().includes('contact:') || line.toLowerCase().includes('email:')) {
+                    const contactMatch = line.match(/(?:contact|email):\s*(.+)/i);
+                    if (contactMatch) {
+                        const contactValue = contactMatch[1].trim();
+                        // Check if it's an email
+                        const emailMatch = contactValue.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+                        if (emailMatch) {
+                            currentCandidate.email = emailMatch[0];
+                            currentCandidate.contactInfo = emailMatch[0];
+                        } else {
+                            currentCandidate.contactInfo = contactValue;
+                        }
+                    }
+                    continue;
+                }
+                
                 // Check for section labels
                 const sectionLabels = {
                     'background:': 'background',
