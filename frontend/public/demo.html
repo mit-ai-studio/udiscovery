@@ -345,6 +345,25 @@
             background: #ffd633;
             transform: translateY(-1px);
         }
+        .download-csv-btn {
+            background: #3A86FF;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .download-csv-btn:hover {
+            background: #2a6fe0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+        }
         .modal {
             display: none;
             position: fixed;
@@ -467,7 +486,12 @@
 
         <div id="results-section" class="results-section">
             <div class="results-header">
-                <h2>🎉 Demo Results - Top Candidates</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <h2>🎉 Demo Results - Top Candidates</h2>
+                    <button id="download-csv-btn" class="download-csv-btn" style="display: none;" onclick="downloadCSV()">
+                        📥 Download CSV
+                    </button>
+                </div>
             </div>
             <div class="results-content" id="results-content">
                 <!-- Results will be populated here -->
@@ -737,6 +761,12 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     resultsHeader.innerHTML = `🎉 Demo Results - ${filteredCandidates.length} Probable Candidate${filteredCandidates.length !== 1 ? 's' : ''} Found`;
                 }
                 
+                // Show download CSV button
+                const downloadBtn = document.getElementById('download-csv-btn');
+                if (downloadBtn) {
+                    downloadBtn.style.display = 'flex';
+                }
+                
                 // Create table
                 resultsContent.innerHTML = `
                     <table class="candidates-table">
@@ -790,11 +820,21 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     </div>
                     <pre style="white-space: pre-wrap; color: #F0F4F8; font-family: 'Inter', sans-serif; line-height: 1.6; margin-top: 2rem;">${escapeHtml(text)}</pre>
                 `;
+                // Hide download button
+                const downloadBtn = document.getElementById('download-csv-btn');
+                if (downloadBtn) {
+                    downloadBtn.style.display = 'none';
+                }
             } else {
                 // Fallback to raw text display (but formatted nicely)
                 // Show the actual text so we can debug
                 const formattedText = text.length > 0 ? text : 'No candidates found in the results.';
                 resultsContent.innerHTML = `<pre style="white-space: pre-wrap; color: #F0F4F8; font-family: 'Inter', sans-serif; line-height: 1.6; margin: 0;">${escapeHtml(formattedText)}</pre>`;
+                // Hide download button
+                const downloadBtn = document.getElementById('download-csv-btn');
+                if (downloadBtn) {
+                    downloadBtn.style.display = 'none';
+                }
             }
 
             document.getElementById('results-section').style.display = 'block';
@@ -1161,6 +1201,83 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        function downloadCSV() {
+            if (!window.candidatesData || window.candidatesData.length === 0) {
+                alert('No candidates data available to download.');
+                return;
+            }
+
+            const candidates = window.candidatesData;
+            
+            // Define CSV headers
+            const headers = [
+                'Position',
+                'Full Name',
+                'Application Probability (%)',
+                'Propensity Segment',
+                'Contact Information',
+                'Background',
+                'Positive Drivers',
+                'Negative Drivers',
+                'Assumptions/Warnings'
+            ];
+
+            // Convert candidates to CSV rows
+            const rows = candidates.map(candidate => {
+                const probability = candidate.probability !== null && candidate.probability !== undefined 
+                    ? (parseFloat(candidate.probability) * 100).toFixed(1)
+                    : 'N/A';
+                
+                const contactInfo = extractContactInfo(candidate) || 'Not available';
+                
+                const positiveDrivers = Array.isArray(candidate.positiveDrivers) 
+                    ? candidate.positiveDrivers.join('; ')
+                    : (candidate.positiveDrivers || '');
+                
+                const negativeDrivers = Array.isArray(candidate.negativeDrivers) 
+                    ? candidate.negativeDrivers.join('; ')
+                    : (candidate.negativeDrivers || '');
+                
+                // Escape CSV values (handle commas, quotes, newlines)
+                const escapeCSV = (value) => {
+                    if (value === null || value === undefined) return '';
+                    const str = String(value);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return '"' + str.replace(/"/g, '""') + '"';
+                    }
+                    return str;
+                };
+
+                return [
+                    escapeCSV(candidate.rank || ''),
+                    escapeCSV(candidate.name || 'Unknown'),
+                    escapeCSV(probability),
+                    escapeCSV(candidate.propensitySegment || ''),
+                    escapeCSV(contactInfo),
+                    escapeCSV(candidate.background || ''),
+                    escapeCSV(positiveDrivers),
+                    escapeCSV(negativeDrivers),
+                    escapeCSV(candidate.assumptions || '')
+                ].join(',');
+            });
+
+            // Combine headers and rows
+            const csvContent = [headers.join(','), ...rows].join('\n');
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `udiscovery_candidates_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
