@@ -234,25 +234,506 @@
             display: none;
             margin-top: 2rem;
         }
-        .results-header {
+        
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .dashboard-layout {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+        
+        /* Left Sidebar */
+        .dashboard-sidebar {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .dashboard-sidebar {
+                width: 224px;
+                flex-shrink: 0;
+            }
+        }
+        
+        .sidebar-section {
             background: #01344F;
-            color: white;
-            padding: 1.5rem;
-            border-radius: 8px 8px 0 0;
             border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .sidebar-section h3 {
+            color: #6EE7D7;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(110, 231, 215, 0.2);
+        }
+        
+        .sidebar-item:last-child {
             border-bottom: none;
         }
-        .results-content {
-            background: #01344F;
+        
+        .sidebar-item span:first-child {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+        
+        .status-badge.active {
+            background: rgba(110, 231, 215, 0.2);
             color: #6EE7D7;
-            padding: 2rem;
+        }
+        
+        .sidebar-upload-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #012A42;
             border: 1px solid rgba(110, 231, 215, 0.3);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 600px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-upload-btn:hover {
+            background: #01425F;
+        }
+        
+        /* Main Content Area */
+        .dashboard-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        /* KPI Section */
+        .kpi-section {
+            background: #01344F;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .kpi-header h3 {
+            color: #6EE7D7;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .kpi-card {
+            background: rgba(110, 231, 215, 0.1);
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .kpi-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .kpi-value {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        /* Filters Section */
+        .filters-section {
+            background: #01344F;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .filters-section h3 {
+            color: #6EE7D7;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .filters-grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .filter-row:first-child {
+                grid-column: span 12;
+            }
+            .filter-row:not(:first-child) {
+                grid-column: span 6;
+            }
+        }
+        
+        .filter-row label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+        }
+        
+        .threshold-value {
+            color: #6EE7D7;
+            font-weight: 600;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .slider-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+        }
+        
+        .threshold-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #01425F;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .threshold-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6EE7D7;
+            cursor: pointer;
+        }
+        
+        .threshold-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6EE7D7;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 0.5rem;
+            background: #012A42;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: #6EE7D7;
+            box-shadow: 0 0 0 2px rgba(110, 231, 215, 0.2);
+        }
+        
+        /* Prospects Section */
+        .prospects-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .prospects-section {
+                flex-direction: row;
+            }
+        }
+        
+        .prospects-main {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .prospects-main h3 {
+            color: #6EE7D7;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .prospects-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: calc(100vh - 20rem);
             overflow-y: auto;
-            font-family: 'Inter', sans-serif;
+            padding-right: 0.5rem;
+        }
+        
+        /* Candidate Card */
+        .candidate-card {
+            background: #01344F;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .candidate-card:hover {
+            border-color: rgba(110, 231, 215, 0.5);
+        }
+        
+        .candidate-card-header {
+            padding: 1rem;
+        }
+        
+        .candidate-card-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .candidate-info {
+            flex: 1;
+        }
+        
+        .candidate-name-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .candidate-name {
+            color: #6EE7D7;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .propensity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            background: rgba(110, 231, 215, 0.2);
+            color: #6EE7D7;
+            font-size: 0.875rem;
+        }
+        
+        .candidate-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .candidate-interests {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .interest-tag {
+            padding: 0.25rem 0.5rem;
+            background: #012A42;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.75rem;
+        }
+        
+        .candidate-expand-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s;
+            font-size: 1.2rem;
+        }
+        
+        .candidate-expand-btn:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .candidate-rationale {
+            border-top: 1px solid rgba(110, 231, 215, 0.2);
+            padding: 1rem;
+            background: rgba(1, 42, 66, 0.5);
+        }
+        
+        .candidate-rationale h5 {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .candidate-rationale p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
             line-height: 1.6;
+            margin: 0;
+        }
+        
+        /* Campaign Sidebar */
+        .campaign-sidebar {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .campaign-sidebar {
+                width: 288px;
+                flex-shrink: 0;
+                max-height: calc(100vh - 14rem);
+            }
+        }
+        
+        .campaign-buttons {
+            background: #01344F;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .campaign-buttons h3 {
+            color: #6EE7D7;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .campaign-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            background: #012A42;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+        }
+        
+        .campaign-btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .campaign-btn:hover {
+            background: #01425F;
+        }
+        
+        .campaign-btn.active {
+            background: #6EE7D7;
+            color: #012A42;
+            border-color: #6EE7D7;
+        }
+        
+        .campaign-btn.active:hover {
+            background: #5DD6C6;
+        }
+        
+        .campaign-viewport {
+            background: #01344F;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .campaign-placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .campaign-contact-item {
+            background: #012A42;
+            border: 1px solid rgba(110, 231, 215, 0.2);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .campaign-contact-name {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .campaign-contact-value {
+            color: #6EE7D7;
+            font-size: 0.75rem;
         }
         .candidate-item {
             padding: 1.5rem;
@@ -917,16 +1398,108 @@
                 </div>
             </div>
             
-            <div class="results-header">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <h2>🎉 Demo Results - Top Candidates</h2>
-                    <button id="download-csv-btn" class="download-csv-btn" style="display: none;" onclick="downloadCSV()">
-                        📥 Download CSV
-                    </button>
+            <!-- Dashboard Layout: Sidebar + Main Content -->
+            <div class="dashboard-layout">
+                <!-- Left Sidebar -->
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-section">
+                        <h3>Input Data</h3>
+                        <p class="sidebar-text">Database is active and updated</p>
+                        <div class="sidebar-item">
+                            <span>Synthetic Prospect Database</span>
+                            <span class="status-badge active">Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>Training Data</h3>
+                        <p class="sidebar-text">Upload datasets to improve predictions</p>
+                        <button class="sidebar-upload-btn">
+                            📤 Upload Dataset
+                        </button>
+                        <div class="sidebar-item">
+                            <span>Demo Training Data</span>
+                            <span class="status-badge active">Active</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="results-content" id="results-content">
-                <!-- Results will be populated here -->
+
+                <!-- Main Content Area -->
+                <div class="dashboard-main">
+                    <!-- KPI Results Box -->
+                    <div class="kpi-section">
+                        <div class="kpi-header">
+                            <h3>🎉 Prospecting Results & KPIs</h3>
+                            <button id="download-csv-btn" class="download-csv-btn" style="display: none;" onclick="downloadCSV()">
+                                📥 Export
+                            </button>
+                        </div>
+                        <div class="kpi-grid" id="kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-label">Possible Candidates Prospected</div>
+                                <div class="kpi-value" id="kpi-total">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">General Fit Candidates</div>
+                                <div class="kpi-value" id="kpi-fit">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">High Probability (&gt;50%)</div>
+                                <div class="kpi-value" id="kpi-high">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters & Controls -->
+                    <div class="filters-section">
+                        <h3>Filters & Controls</h3>
+                        <div class="filters-grid">
+                            <div class="filter-row">
+                                <label>
+                                    Propensity Threshold: <span class="threshold-value" id="threshold-display">40</span>%
+                                </label>
+                                <div class="slider-container">
+                                    <span class="slider-label">0%</span>
+                                    <input type="range" id="threshold-slider" min="0" max="100" value="40" class="threshold-slider">
+                                    <span class="slider-label">100%</span>
+                                </div>
+                            </div>
+                            <div class="filter-row">
+                                <label>Search</label>
+                                <input type="text" id="search-query" class="filter-input" placeholder="Search by name or interests...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Prospects Section -->
+                    <div class="prospects-section">
+                        <div class="prospects-main">
+                            <h3 id="prospects-title">Ranked Prospects (0)</h3>
+                            <div class="prospects-list" id="prospects-list">
+                                <!-- Candidates will be rendered here as cards -->
+                            </div>
+                        </div>
+
+                        <!-- Campaign Views Sidebar -->
+                        <div class="campaign-sidebar">
+                            <div class="campaign-buttons">
+                                <h3>Campaign Views</h3>
+                                <button class="campaign-btn active" data-view="list">
+                                    📋 Ranked List
+                                </button>
+                                <button class="campaign-btn" data-view="email">
+                                    ✉️ Generate Email Campaign
+                                </button>
+                                <button class="campaign-btn" data-view="sms">
+                                    💬 Generate SMS Campaign
+                                </button>
+                            </div>
+                            <div class="campaign-viewport" id="campaign-viewport">
+                                <p class="campaign-placeholder">View detailed prospect information in the main list. Click on a prospect to expand their AI rationale.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1328,60 +1901,40 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 candidate.rank = (index + 1).toString();
             });
             
+            // Store all candidates globally for filtering
+            window.allCandidatesData = candidates;
+            window.filteredCandidatesData = filteredCandidates;
+            
+            // Update KPIs
+            const total = candidates.length;
+            const fit = candidates.filter(c => {
+                const prob = c.probability ? parseFloat(c.probability) * 100 : 0;
+                return prob >= 40;
+            }).length;
+            const high = candidates.filter(c => {
+                const prob = c.probability ? parseFloat(c.probability) * 100 : 0;
+                return prob >= 50;
+            }).length;
+            
+            const totalEl = document.getElementById('kpi-total');
+            const fitEl = document.getElementById('kpi-fit');
+            const highEl = document.getElementById('kpi-high');
+            if (totalEl) totalEl.textContent = total.toLocaleString();
+            if (fitEl) fitEl.textContent = fit.toLocaleString();
+            if (highEl) highEl.textContent = high.toLocaleString();
+            
+            // Initialize filters
+            initializeFilters();
+            
             if (filteredCandidates.length > 0) {
-                // Update results header with count
-                const resultsHeader = document.querySelector('.results-header h2');
-                if (resultsHeader) {
-                    resultsHeader.innerHTML = `🎉 Demo Results - ${filteredCandidates.length} Probable Candidate${filteredCandidates.length !== 1 ? 's' : ''} Found`;
-                }
-                
                 // Show download CSV button
                 const downloadBtn = document.getElementById('download-csv-btn');
                 if (downloadBtn) {
                     downloadBtn.style.display = 'flex';
                 }
                 
-                // Create table
-                resultsContent.innerHTML = `
-                    <table class="candidates-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 60px;">#</th>
-                                <th style="text-align: left;">Full Name</th>
-                                <th>Application Probability</th>
-                                <th>Contact Information</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filteredCandidates.map((candidate, index) => {
-                                const probability = candidate.probability !== null && candidate.probability !== undefined 
-                                    ? (parseFloat(candidate.probability) * 100).toFixed(1) + '%'
-                                    : 'N/A';
-                                const contactInfo = extractContactInfo(candidate);
-                                
-                                return `
-                                    <tr>
-                                        <td class="position-cell">#${candidate.rank || (index + 1)}</td>
-                                        <td class="candidate-name-cell">${escapeHtml(candidate.name || 'Unknown')}</td>
-                                        <td class="probability-cell">
-                                            <div class="score" style="display: inline-block;">${probability}</div>
-                                            ${candidate.propensitySegment ? 
-                                                `<div class="propensity-segment ${candidate.propensitySegment.toLowerCase()}" style="display: inline-block; margin-left: 0.5rem;">${escapeHtml(candidate.propensitySegment.toUpperCase())}</div>` : ''}
-                                        </td>
-                                        <td class="contact-cell">${contactInfo || 'Not available'}</td>
-                                        <td>
-                                            <button class="learn-more-btn" onclick="showCandidateDetails(${index})" data-candidate-index="${index}">
-                                                Learn More
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                    ${filteredCandidates.map((candidate, index) => createCandidateModal(candidate, index)).join('')}
-                `;
+                // Render candidates as cards
+                renderCandidateCards(filteredCandidates);
                 
                 // Store candidates globally for modal access
                 window.candidatesData = filteredCandidates;
@@ -1413,6 +1966,258 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
 
             document.getElementById('results-section').style.display = 'block';
         }
+        
+        // Global state for filtering
+        let expandedCandidateIndex = null;
+        let currentThreshold = 40;
+        let currentView = 'list';
+        
+        function renderCandidateCards(candidates) {
+            const prospectsList = document.getElementById('prospects-list');
+            const prospectsTitle = document.getElementById('prospects-title');
+            
+            if (!prospectsList) return;
+            
+            if (candidates.length === 0) {
+                prospectsList.innerHTML = `
+                    <div class="candidate-card" style="text-align: center; padding: 3rem;">
+                        <p style="color: rgba(255, 255, 255, 0.7);">
+                            No prospects match your current filters. Adjust the threshold or filter criteria.
+                        </p>
+                    </div>
+                `;
+                if (prospectsTitle) {
+                    prospectsTitle.textContent = 'Ranked Prospects (0)';
+                }
+                return;
+            }
+            
+            if (prospectsTitle) {
+                prospectsTitle.textContent = `Ranked Prospects (${candidates.length})`;
+            }
+            
+            prospectsList.innerHTML = candidates.map((candidate, index) => {
+                const probability = candidate.probability !== null && candidate.probability !== undefined 
+                    ? (parseFloat(candidate.probability) * 100).toFixed(1)
+                    : '0';
+                const contactInfo = extractContactInfo(candidate);
+                const isExpanded = expandedCandidateIndex === index;
+                
+                // Extract location, experience from background
+                const background = candidate.background || '';
+                const location = extractLocation(background) || 'Not specified';
+                const experience = extractExperience(background) || 'Not specified';
+                const interests = candidate.interests || [];
+                
+                return `
+                    <div class="candidate-card">
+                        <div class="candidate-card-header">
+                            <div class="candidate-card-main">
+                                <div class="candidate-info">
+                                    <div class="candidate-name-row">
+                                        <h4 class="candidate-name">${escapeHtml(candidate.name || 'Unknown')}</h4>
+                                        <span class="propensity-badge">${probability}% propensity</span>
+                                    </div>
+                                    <div class="candidate-meta">
+                                        <span>${escapeHtml(location)}</span>
+                                        <span>${escapeHtml(experience)}</span>
+                                        ${candidate.propensitySegment ? `<span>${escapeHtml(candidate.propensitySegment)}</span>` : ''}
+                                    </div>
+                                    ${interests.length > 0 ? `
+                                        <div class="candidate-interests">
+                                            ${interests.map(interest => `
+                                                <span class="interest-tag">${escapeHtml(interest)}</span>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <button class="candidate-expand-btn" onclick="toggleCandidateExpand(${index})">
+                                    ${isExpanded ? '▲' : '▼'}
+                                </button>
+                            </div>
+                        </div>
+                        ${isExpanded ? `
+                            <div class="candidate-rationale">
+                                <h5>AI Rationale</h5>
+                                <p>${escapeHtml(candidate.background || candidate.rationale || 'No rationale available.')}</p>
+                                ${candidate.positiveDrivers ? `
+                                    <h5 style="margin-top: 1rem;">Positive Drivers</h5>
+                                    <p>${escapeHtml(Array.isArray(candidate.positiveDrivers) ? candidate.positiveDrivers.join(', ') : candidate.positiveDrivers)}</p>
+                                ` : ''}
+                                ${candidate.negativeDrivers ? `
+                                    <h5 style="margin-top: 1rem;">Negative Drivers</h5>
+                                    <p>${escapeHtml(Array.isArray(candidate.negativeDrivers) ? candidate.negativeDrivers.join(', ') : candidate.negativeDrivers)}</p>
+                                ` : ''}
+                                ${contactInfo ? `
+                                    <h5 style="margin-top: 1rem;">Contact</h5>
+                                    <p style="color: #6EE7D7;">${escapeHtml(contactInfo)}</p>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function toggleCandidateExpand(index) {
+            expandedCandidateIndex = expandedCandidateIndex === index ? null : index;
+            if (window.filteredCandidatesData) {
+                renderCandidateCards(window.filteredCandidatesData);
+            }
+        }
+        
+        function initializeFilters() {
+            const thresholdSlider = document.getElementById('threshold-slider');
+            const thresholdDisplay = document.getElementById('threshold-display');
+            const searchInput = document.getElementById('search-query');
+            
+            if (thresholdSlider) {
+                thresholdSlider.addEventListener('input', (e) => {
+                    currentThreshold = parseInt(e.target.value);
+                    if (thresholdDisplay) thresholdDisplay.textContent = currentThreshold;
+                    applyFilters();
+                });
+            }
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    applyFilters();
+                });
+            }
+            
+            // Initialize campaign views
+            const campaignBtns = document.querySelectorAll('.campaign-btn');
+            campaignBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    campaignBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentView = btn.dataset.view;
+                    updateCampaignView();
+                });
+            });
+        }
+        
+        function applyFilters() {
+            if (!window.allCandidatesData) return;
+            
+            const threshold = currentThreshold;
+            const searchQuery = document.getElementById('search-query')?.value.toLowerCase() || '';
+            
+            let filtered = window.allCandidatesData.filter(c => {
+                // Threshold filter
+                if (c.probability !== null && c.probability !== undefined) {
+                    const prob = parseFloat(c.probability) * 100;
+                    if (prob < threshold) return false;
+                } else {
+                    return false;
+                }
+                
+                // Search filter
+                if (searchQuery) {
+                    const name = (c.name || '').toLowerCase();
+                    const interests = Array.isArray(c.interests) ? c.interests.join(' ').toLowerCase() : '';
+                    if (!name.includes(searchQuery) && !interests.includes(searchQuery)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // Sort by probability
+            filtered.sort((a, b) => {
+                const probA = a.probability ? parseFloat(a.probability) : 0;
+                const probB = b.probability ? parseFloat(b.probability) : 0;
+                return probB - probA;
+            });
+            
+            // Update ranks
+            filtered.forEach((candidate, index) => {
+                candidate.rank = (index + 1).toString();
+            });
+            
+            window.filteredCandidatesData = filtered;
+            renderCandidateCards(filtered);
+            updateCampaignView();
+        }
+        
+        function updateCampaignView() {
+            const viewport = document.getElementById('campaign-viewport');
+            if (!viewport || !window.filteredCandidatesData) return;
+            
+            if (currentView === 'list') {
+                viewport.innerHTML = `
+                    <p class="campaign-placeholder">
+                        View detailed prospect information in the main list. Click on a prospect to expand their AI rationale.
+                    </p>
+                `;
+            } else if (currentView === 'email') {
+                const emails = window.filteredCandidatesData.map(c => {
+                    const contact = extractContactInfo(c);
+                    const email = contact ? contact.split(',')[0].trim() : '';
+                    return { name: c.name || 'Unknown', email };
+                }).filter(c => c.email);
+                
+                viewport.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="color: #6EE7D7; margin: 0;">Email Addresses</h4>
+                        <button onclick="exportCampaignData('email')" style="background: transparent; border: none; color: #6EE7D7; cursor: pointer;">
+                            📥
+                        </button>
+                    </div>
+                    <div>
+                        ${emails.length > 0 ? emails.map(c => `
+                            <div class="campaign-contact-item">
+                                <div class="campaign-contact-name">${escapeHtml(c.name)}</div>
+                                <div class="campaign-contact-value">${escapeHtml(c.email)}</div>
+                            </div>
+                        `).join('') : '<p class="campaign-placeholder">No email addresses available</p>'}
+                    </div>
+                `;
+            } else if (currentView === 'sms') {
+                viewport.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="color: #6EE7D7; margin: 0;">Phone Numbers</h4>
+                        <button onclick="exportCampaignData('sms')" style="background: transparent; border: none; color: #6EE7D7; cursor: pointer;">
+                            📥
+                        </button>
+                    </div>
+                    <p class="campaign-placeholder">Phone number extraction not yet implemented</p>
+                `;
+            }
+        }
+        
+        function extractLocation(text) {
+            const locationPatterns = /(?:from|located in|based in|resides in|in)\s+([A-Z][a-zA-Z\s,]+)/i;
+            const match = text.match(locationPatterns);
+            return match ? match[1].trim() : null;
+        }
+        
+        function extractExperience(text) {
+            const expPatterns = /(\d+)\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)/i;
+            const match = text.match(expPatterns);
+            return match ? `${match[1]} years exp` : null;
+        }
+        
+        function exportCampaignData(type) {
+            if (type === 'email' && window.filteredCandidatesData) {
+                const emails = window.filteredCandidatesData.map(c => {
+                    const contact = extractContactInfo(c);
+                    return contact ? contact.split(',')[0].trim() : '';
+                }).filter(e => e).join('\n');
+                
+                const blob = new Blob([emails], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'email_addresses.txt';
+                a.click();
+            }
+        }
+        
+        // Make functions globally available
+        window.toggleCandidateExpand = toggleCandidateExpand;
+        window.exportCampaignData = exportCampaignData;
 
         function extractContactInfo(candidate) {
             // First check if email is directly stored
