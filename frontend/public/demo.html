@@ -13,6 +13,7 @@
             padding: 2rem;
             padding-top: 7rem;
             min-height: 100vh;
+            background: #012A42;
         }
         .demo-header {
             text-align: center;
@@ -20,20 +21,20 @@
             margin-bottom: 2rem;
         }
         .demo-header h1 {
-            color: #E8EDF3;
+            color: #6EE7D7;
             margin-bottom: 0.5rem;
         }
         .demo-header p {
-            color: #9BB5C8;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1.1rem;
         }
         .demo-form-section {
-            background: rgba(58, 74, 95, 0.6);
+            background: #01344F;
             padding: 2.5rem;
             border-radius: 12px;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            border: 2px solid rgba(255, 195, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(110, 231, 215, 0.3);
         }
         .form-options {
             display: flex;
@@ -69,11 +70,13 @@
             width: 100%;
             min-height: 150px;
             padding: 1rem;
-            border: 2px solid #5DADE2;
+            border: 1.5px solid rgba(110, 231, 215, 0.3);
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
             resize: vertical;
+            color: #666666;
+            background: #ffffff;
         }
         .university-form {
             display: flex;
@@ -96,7 +99,7 @@
             gap: 0.5rem;
         }
         .form-group label {
-            color: #C8D4E0;
+            color: #6EE7D7;
             font-weight: 600;
             font-size: 1.1rem;
             margin-bottom: 0.75rem;
@@ -105,27 +108,101 @@
         .form-textarea {
             width: 100%;
             padding: 0.875rem;
-            border: 1.5px solid rgba(255, 195, 0, 0.4);
+            border: 1.5px solid rgba(110, 231, 215, 0.3);
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
-            color: #2C3E50;
-            background: rgba(255, 255, 255, 0.9);
+            color: #666666;
+            background: #ffffff;
             transition: all 0.3s ease;
         }
+        select.form-input,
+        select#program-level {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1.5px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #666666 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        select.form-input *,
+        select#program-level * {
+            color: #1a1a1a !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
         .form-input:hover,
-        .form-textarea:hover {
-            border-color: rgba(255, 195, 0, 0.6);
+        .form-textarea:hover,
+        select.form-input:hover {
+            border-color: rgba(110, 231, 215, 0.5);
         }
         .form-input:focus,
         .form-textarea:focus {
             outline: none;
-            border-color: #FFC300;
-            box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.3);
+            border-color: #6EE7D7;
+            box-shadow: 0 0 0 3px rgba(110, 231, 215, 0.2);
+            color: #666666;
+            background: #ffffff;
+        }
+        select.form-input:focus,
+        select#program-level:focus {
+            outline: none;
+            border-color: #6EE7D7;
+            box-shadow: 0 0 0 3px rgba(110, 231, 215, 0.2);
+            color: #666666 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
         }
         .form-input::placeholder,
         .form-textarea::placeholder {
-            color: #7A8A9A;
+            color: rgba(1, 42, 66, 0.5);
+        }
+        select.form-input {
+            color: #666666 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+        select.form-input option,
+        select#program-level option {
+            color: #666666 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+        select.form-input option:checked,
+        select#program-level option:checked {
+            color: #666666 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+        select.form-input option:hover,
+        select#program-level option:hover {
+            color: #666666 !important;
+            background: #f0f0f0 !important;
+            background-color: #f0f0f0 !important;
+        }
+        input.form-input,
+        textarea.form-textarea {
+            color: #666666;
+            background: #ffffff;
+            background-color: #ffffff;
+        }
+        input.form-input:focus,
+        textarea.form-textarea:focus {
+            color: #666666;
+            background: #ffffff;
+            background-color: #ffffff;
+        }
+        select.form-input:focus {
+            color: #1a1a1a !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
         }
         .form-textarea {
             resize: vertical;
@@ -134,8 +211,8 @@
         .submit-demo-btn {
             width: 100%;
             padding: 0.75rem;
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
@@ -144,11 +221,13 @@
             transition: all 0.3s;
         }
         .submit-demo-btn:hover {
-            background: #ffd633;
+            background: #5DD6C6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(110, 231, 215, 0.3);
         }
         .submit-demo-btn:disabled {
-            background: #ccc;
-            color: #666;
+            background: rgba(110, 231, 215, 0.3);
+            color: rgba(1, 42, 66, 0.5);
             cursor: not-allowed;
         }
         .results-section {
@@ -156,16 +235,18 @@
             margin-top: 2rem;
         }
         .results-header {
-            background: #212F45;
+            background: #01344F;
             color: white;
             padding: 1.5rem;
             border-radius: 8px 8px 0 0;
+            border: 1px solid rgba(110, 231, 215, 0.3);
+            border-bottom: none;
         }
         .results-content {
-            background: #212F45;
-            color: #F0F4F8;
+            background: #01344F;
+            color: #6EE7D7;
             padding: 2rem;
-            border: 2px solid #212F45;
+            border: 1px solid rgba(110, 231, 215, 0.3);
             border-top: none;
             border-radius: 0 0 8px 8px;
             max-height: 600px;
@@ -199,8 +280,8 @@
         }
         .candidate-item .score {
             display: inline-block;
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
             padding: 0.25rem 0.75rem;
             border-radius: 4px;
             font-weight: 700;
@@ -227,12 +308,12 @@
             margin-bottom: 1rem;
         }
         .candidate-item .propensity-segment.high {
-            background: #4CAF50;
+            background: #298E34;
             color: white;
         }
         .candidate-item .propensity-segment.medium {
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
         }
         .candidate-item .propensity-segment.low {
             background: #f44336;
@@ -375,24 +456,25 @@
         .position-cell {
             font-weight: 700;
             font-size: 1.2rem;
-            color: #3A86FF;
+            color: #6EE7D7;
         }
         .candidate-name-cell {
             font-weight: 600;
-            color: #F0F4F8;
+            color: #6EE7D7;
             text-align: left;
         }
         .probability-cell {
             font-weight: 700;
             font-size: 1.1rem;
+            color: #6EE7D7;
         }
         .contact-cell {
-            color: #5DADE2;
+            color: rgba(110, 231, 215, 0.8);
             font-size: 0.9rem;
         }
         .learn-more-btn {
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 4px;
@@ -402,12 +484,13 @@
             font-size: 0.9rem;
         }
         .learn-more-btn:hover {
-            background: #ffd633;
+            background: #5DD6C6;
             transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(110, 231, 215, 0.3);
         }
         .download-csv-btn {
-            background: #3A86FF;
-            color: white;
+            background: #6EE7D7;
+            color: #012A42;
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
@@ -420,9 +503,9 @@
             gap: 0.5rem;
         }
         .download-csv-btn:hover {
-            background: #2a6fe0;
+            background: #5DD6C6;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(110, 231, 215, 0.3);
         }
         .modal {
             display: none;
@@ -436,7 +519,7 @@
             overflow: auto;
         }
         .modal-content {
-            background: #212F45;
+            background: #01344F;
             margin: 5% auto;
             padding: 0;
             border-radius: 8px;
@@ -445,15 +528,17 @@
             max-height: 85vh;
             overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(110, 231, 215, 0.3);
         }
         .modal-header {
-            background: #3A86FF;
-            color: white;
+            background: #012A42;
+            color: #6EE7D7;
             padding: 1.5rem;
             border-radius: 8px 8px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(110, 231, 215, 0.3);
         }
         .modal-header h3 {
             margin: 0;
@@ -480,7 +565,7 @@
         }
         .modal-body {
             padding: 2rem;
-            color: #F0F4F8;
+            color: #6EE7D7;
         }
         .no-candidates {
             text-align: center;
@@ -489,11 +574,11 @@
             font-size: 1.1rem;
         }
         .continue-journey-section {
-            background: rgba(58, 74, 95, 0.6);
+            background: #01344F;
             padding: 2rem;
             border-radius: 12px;
             margin-bottom: 2rem;
-            border: 2px solid rgba(255, 195, 0, 0.3);
+            border: 1px solid rgba(110, 231, 215, 0.3);
         }
         .journey-timeline {
             display: flex;
@@ -518,40 +603,40 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
             margin: 0 auto 1rem;
             font-weight: bold;
-            box-shadow: 0 4px 12px rgba(255, 195, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(110, 231, 215, 0.3);
         }
         .journey-step.completed .step-icon {
-            background: #4CAF50;
+            background: #298E34;
             color: white;
         }
         .step-title {
-            color: #E8EDF3;
+            color: #6EE7D7;
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
         .step-description {
-            color: #9BB5C8;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.9rem;
             line-height: 1.5;
         }
         .timeline-arrow {
             flex: 0 0 auto;
             font-size: 2rem;
-            color: #FFC300;
+            color: #6EE7D7;
             margin: 0 0.5rem;
         }
         .continue-btn {
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
             border: none;
             padding: 1rem 2rem;
             border-radius: 8px;
@@ -563,17 +648,17 @@
             width: 100%;
         }
         .continue-btn:hover {
-            background: #ffd633;
+            background: #5DD6C6;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 195, 0, 0.4);
+            box-shadow: 0 4px 12px rgba(110, 231, 215, 0.4);
         }
         .demo-note {
-            background: rgba(255, 195, 0, 0.15);
-            border-left: 4px solid #FFC300;
+            background: rgba(110, 231, 215, 0.15);
+            border-left: 4px solid #6EE7D7;
             padding: 1rem;
             border-radius: 6px;
             margin-top: 1.5rem;
-            color: #E8EDF3;
+            color: #6EE7D7;
             font-size: 0.9rem;
             line-height: 1.6;
         }
@@ -581,8 +666,9 @@
             display: none;
             margin-top: 3rem;
             padding: 2rem;
-            background: #212F45;
+            background: #01344F;
             border-radius: 8px;
+            border: 1px solid rgba(110, 231, 215, 0.3);
         }
         .admissions-section.active {
             display: block;
@@ -606,21 +692,21 @@
             gap: 2rem;
         }
         .upload-area {
-            border: 3px dashed #5DADE2;
+            border: 3px dashed rgba(110, 231, 215, 0.5);
             border-radius: 8px;
             padding: 3rem;
             text-align: center;
-            background: rgba(93, 173, 226, 0.1);
+            background: rgba(110, 231, 215, 0.1);
             cursor: pointer;
             transition: all 0.3s;
         }
         .upload-area:hover {
-            border-color: #3A86FF;
-            background: rgba(58, 134, 255, 0.15);
+            border-color: #6EE7D7;
+            background: rgba(110, 231, 215, 0.15);
         }
         .upload-area.dragover {
-            border-color: #3A86FF;
-            background: rgba(58, 134, 255, 0.2);
+            border-color: #6EE7D7;
+            background: rgba(110, 231, 215, 0.2);
         }
         .upload-icon {
             font-size: 3rem;
@@ -642,14 +728,15 @@
             margin-top: 1.5rem;
         }
         .file-item {
-            background: rgba(240, 244, 248, 0.1);
+            background: rgba(110, 231, 215, 0.1);
             padding: 1rem;
             border-radius: 6px;
             margin-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #F0F4F8;
+            color: #6EE7D7;
+            border: 1px solid rgba(110, 231, 215, 0.2);
         }
         .file-item-name {
             flex: 1;
@@ -664,8 +751,8 @@
             font-size: 0.85rem;
         }
         .assess-btn {
-            background: #FFC300;
-            color: #212F45;
+            background: #6EE7D7;
+            color: #012A42;
             border: none;
             padding: 1rem 2rem;
             border-radius: 8px;
@@ -676,12 +763,13 @@
             width: 100%;
         }
         .assess-btn:hover {
-            background: #ffd633;
+            background: #5DD6C6;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(110, 231, 215, 0.3);
         }
         .assess-btn:disabled {
-            background: #ccc;
-            color: #666;
+            background: rgba(110, 231, 215, 0.3);
+            color: rgba(1, 42, 66, 0.5);
             cursor: not-allowed;
         }
     </style>
@@ -690,8 +778,8 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="/" style="text-decoration: none; color: inherit;">
-                    <h2>UDiscovery</h2>
+                <a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                    <img src="images/udiscovery-logo.png" alt="UDiscovery Logo" style="height: 60px; width: auto;" />
                 </a>
             </div>
             <div class="nav-menu">
@@ -713,8 +801,8 @@
         </div>
 
         <div class="demo-form-section" id="university-form-section">
-            <h2 style="color: #E8EDF3; margin-bottom: 1.5rem; border-left: 4px solid #FFC300; padding-left: 1rem;">Tell Us About Your Program</h2>
-            <p style="color: #9BB5C8; margin-bottom: 2rem; font-size: 0.95rem;">Fill in the details about your university program to help us find the best candidates</p>
+            <h2 style="color: #6EE7D7; margin-bottom: 1.5rem; border-left: 4px solid #6EE7D7; padding-left: 1rem;">Tell Us About Your Program</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem; font-size: 0.95rem;">Fill in the details about your university program to help us find the best candidates</p>
             
             <form id="university-form" class="university-form">
                 <div class="form-row">
@@ -742,13 +830,13 @@
 
                 <div class="form-group">
                     <label for="program-level">Program Level *</label>
-                    <select id="program-level" name="program-level" class="form-input" required>
-                        <option value="">Select program level</option>
-                        <option value="certificate">Certificate</option>
-                        <option value="bachelors">Bachelor's Degree</option>
-                        <option value="masters">Master's Degree</option>
-                        <option value="doctoral">Doctoral Degree</option>
-                        <option value="professional">Professional Program</option>
+                    <select id="program-level" name="program-level" class="form-input" required style="color: #666666; background: #ffffff; background-color: #ffffff;">
+                        <option value="" style="color: #666666; background: #ffffff;">Select program level</option>
+                        <option value="certificate" style="color: #666666; background: #ffffff;">Certificate</option>
+                        <option value="bachelors" style="color: #666666; background: #ffffff;">Bachelor's Degree</option>
+                        <option value="masters" style="color: #666666; background: #ffffff;">Master's Degree</option>
+                        <option value="doctoral" style="color: #666666; background: #ffffff;">Doctoral Degree</option>
+                        <option value="professional" style="color: #666666; background: #ffffff;">Professional Program</option>
                     </select>
                 </div>
 
@@ -761,7 +849,7 @@
                         rows="6"
                         placeholder="Describe your program's mission, goals, and the type of candidates you're looking for. Include information about desired experience, skills, background, diversity goals, and any specific requirements..."
                         required></textarea>
-                    <small style="color: #9BB5C8; font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                    <small style="color: rgba(110, 231, 215, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
                         Be as detailed as possible - this helps our AI find the best matches
                     </small>
                 </div>
@@ -1826,7 +1914,36 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         window.clearSavedData = clearSavedData;
         
         // Restore on page load
-        document.addEventListener('DOMContentLoaded', restoreSavedData);
+        document.addEventListener('DOMContentLoaded', function() {
+            restoreSavedData();
+            
+            // Force select dropdown to match input text color
+            const programLevelSelect = document.getElementById('program-level');
+            const universityNameInput = document.getElementById('university-name');
+            
+            if (programLevelSelect && universityNameInput) {
+                // Get computed style from input
+                const inputStyle = window.getComputedStyle(universityNameInput);
+                const inputColor = inputStyle.color;
+                
+                // Apply same color to select
+                programLevelSelect.style.color = inputColor;
+                
+                // Also set on change events
+                programLevelSelect.addEventListener('change', function() {
+                    this.style.color = inputColor;
+                });
+                
+                // Force color on focus/blur
+                programLevelSelect.addEventListener('focus', function() {
+                    this.style.color = inputColor;
+                });
+                
+                programLevelSelect.addEventListener('blur', function() {
+                    this.style.color = inputColor;
+                });
+            }
+        });
     </script>
 </body>
 </html>
