@@ -11,25 +11,29 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            padding-top: 7rem;
+            min-height: 100vh;
         }
         .demo-header {
             text-align: center;
-            margin-top: 2rem;
+            margin-top: 1rem;
             margin-bottom: 2rem;
         }
         .demo-header h1 {
-            color: #212F45;
+            color: #E8EDF3;
             margin-bottom: 0.5rem;
         }
         .demo-header p {
-            color: #5DADE2;
+            color: #9BB5C8;
             font-size: 1.1rem;
         }
         .demo-form-section {
-            background: #F0F4F8;
-            padding: 2rem;
-            border-radius: 8px;
+            background: rgba(58, 74, 95, 0.6);
+            padding: 2.5rem;
+            border-radius: 12px;
             margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 195, 0, 0.3);
         }
         .form-options {
             display: flex;
@@ -70,6 +74,62 @@
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
             resize: vertical;
+        }
+        .university-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            color: #C8D4E0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1.5px solid rgba(255, 195, 0, 0.4);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #2C3E50;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        .form-input:hover,
+        .form-textarea:hover {
+            border-color: rgba(255, 195, 0, 0.6);
+        }
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #FFC300;
+            box-shadow: 0 0 0 3px rgba(255, 195, 0, 0.3);
+        }
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #7A8A9A;
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
         }
         .submit-demo-btn {
             width: 100%;
@@ -428,6 +488,202 @@
             color: #F0F4F8;
             font-size: 1.1rem;
         }
+        .continue-journey-section {
+            background: rgba(58, 74, 95, 0.6);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 2px solid rgba(255, 195, 0, 0.3);
+        }
+        .journey-timeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .journey-step {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            position: relative;
+        }
+        .journey-step.completed {
+            opacity: 0.7;
+        }
+        .journey-step.active {
+            opacity: 1;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #FFC300;
+            color: #212F45;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(255, 195, 0, 0.3);
+        }
+        .journey-step.completed .step-icon {
+            background: #4CAF50;
+            color: white;
+        }
+        .step-title {
+            color: #E8EDF3;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .step-description {
+            color: #9BB5C8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .timeline-arrow {
+            flex: 0 0 auto;
+            font-size: 2rem;
+            color: #FFC300;
+            margin: 0 0.5rem;
+        }
+        .continue-btn {
+            background: #FFC300;
+            color: #212F45;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+        .continue-btn:hover {
+            background: #ffd633;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 195, 0, 0.4);
+        }
+        .demo-note {
+            background: rgba(255, 195, 0, 0.15);
+            border-left: 4px solid #FFC300;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+            color: #E8EDF3;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .admissions-section {
+            display: none;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #212F45;
+            border-radius: 8px;
+        }
+        .admissions-section.active {
+            display: block;
+        }
+        .admissions-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .admissions-header h2 {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .admissions-header p {
+            color: #5DADE2;
+            font-size: 1rem;
+        }
+        .admissions-form {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .upload-area {
+            border: 3px dashed #5DADE2;
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            background: rgba(93, 173, 226, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #3A86FF;
+            background: rgba(58, 134, 255, 0.15);
+        }
+        .upload-area.dragover {
+            border-color: #3A86FF;
+            background: rgba(58, 134, 255, 0.2);
+        }
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .upload-text {
+            color: #F0F4F8;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .upload-hint {
+            color: #5DADE2;
+            font-size: 0.9rem;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-list {
+            margin-top: 1.5rem;
+        }
+        .file-item {
+            background: rgba(240, 244, 248, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #F0F4F8;
+        }
+        .file-item-name {
+            flex: 1;
+        }
+        .file-item-remove {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .assess-btn {
+            background: #FFC300;
+            color: #212F45;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .assess-btn:hover {
+            background: #ffd633;
+            transform: translateY(-2px);
+        }
+        .assess-btn:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -456,35 +712,123 @@
             <p>Experience how our AI agents find your ideal candidates</p>
         </div>
 
-        <div class="demo-form-section">
-            <h2 style="color: #212F45; margin-bottom: 1rem;">Choose Your University Goal</h2>
+        <div class="demo-form-section" id="university-form-section">
+            <h2 style="color: #E8EDF3; margin-bottom: 1.5rem; border-left: 4px solid #FFC300; padding-left: 1rem;">Tell Us About Your Program</h2>
+            <p style="color: #9BB5C8; margin-bottom: 2rem; font-size: 0.95rem;">Fill in the details about your university program to help us find the best candidates</p>
             
-            <div class="form-options">
-                <div class="demo-option" id="hgse-option">
-                    <h3>🎓 Harvard Graduate School of Education</h3>
-                    <p>Use our pre-configured goal for finding diverse, mission-driven education leaders and changemakers.</p>
+            <form id="university-form" class="university-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="university-name">University Name *</label>
+                        <input 
+                            type="text" 
+                            id="university-name" 
+                            name="university-name"
+                            class="form-input"
+                            placeholder="e.g., Harvard University"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="program-name">Program Name *</label>
+                        <input 
+                            type="text" 
+                            id="program-name" 
+                            name="program-name"
+                            class="form-input"
+                            placeholder="e.g., Master of Education"
+                            required>
+                    </div>
                 </div>
-                <div class="demo-option" id="custom-option">
-                    <h3>✏️ Custom Goal</h3>
-                    <p>Enter your own university's specific goals and requirements.</p>
+
+                <div class="form-group">
+                    <label for="program-level">Program Level *</label>
+                    <select id="program-level" name="program-level" class="form-input" required>
+                        <option value="">Select program level</option>
+                        <option value="certificate">Certificate</option>
+                        <option value="bachelors">Bachelor's Degree</option>
+                        <option value="masters">Master's Degree</option>
+                        <option value="doctoral">Doctoral Degree</option>
+                        <option value="professional">Professional Program</option>
+                    </select>
                 </div>
-            </div>
 
-            <div id="custom-goal-section" style="display: none;">
-                <textarea 
-                    id="custom-goal-input" 
-                    class="custom-goal-input"
-                    placeholder="Enter your university's program goals, ideal candidate profiles, and any specific requirements..."></textarea>
-            </div>
+                <div class="form-group">
+                    <label for="program-goals">Program Goals & Ideal Candidate Profile *</label>
+                    <textarea 
+                        id="program-goals" 
+                        name="program-goals"
+                        class="form-textarea"
+                        rows="6"
+                        placeholder="Describe your program's mission, goals, and the type of candidates you're looking for. Include information about desired experience, skills, background, diversity goals, and any specific requirements..."
+                        required></textarea>
+                    <small style="color: #9BB5C8; font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                        Be as detailed as possible - this helps our AI find the best matches
+                    </small>
+                </div>
 
-            <button id="submit-demo-btn" class="submit-demo-btn" disabled>
-                Generate Demo
-            </button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="program-focus">Program Focus Area</label>
+                        <input 
+                            type="text" 
+                            id="program-focus" 
+                            name="program-focus"
+                            class="form-input"
+                            placeholder="e.g., Education Leadership, STEM Education">
+                    </div>
+                    <div class="form-group">
+                        <label for="program-location">Program Location</label>
+                        <input 
+                            type="text" 
+                            id="program-location" 
+                            name="program-location"
+                            class="form-input"
+                            placeholder="e.g., Cambridge, MA">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="additional-requirements">Additional Requirements or Preferences</label>
+                    <textarea 
+                        id="additional-requirements" 
+                        name="additional-requirements"
+                        class="form-textarea"
+                        rows="3"
+                        placeholder="Any specific requirements, preferences, or considerations (e.g., work experience minimum, GPA requirements, diversity goals, etc.)"></textarea>
+                </div>
+
+                <button type="submit" id="submit-demo-btn" class="submit-demo-btn">
+                    🚀 Find Candidates
+                </button>
+            </form>
 
             <div id="error-container"></div>
         </div>
 
         <div id="results-section" class="results-section">
+            <!-- Continue Journey Section - Timeline at Top -->
+            <div id="continue-journey-section" class="continue-journey-section" style="display: none;">
+                <div class="journey-timeline">
+                    <div class="journey-step completed">
+                        <div class="step-icon">✓</div>
+                        <div class="step-title">Step 1: Find Candidates</div>
+                        <div class="step-description">AI-powered candidate discovery based on your program requirements</div>
+                    </div>
+                    <div class="timeline-arrow">→</div>
+                    <div class="journey-step active">
+                        <div class="step-icon">📋</div>
+                        <div class="step-title">Step 2: Assess Applications</div>
+                        <div class="step-description">Evaluate admission applications using AI assessment</div>
+                    </div>
+                </div>
+                <button id="continue-to-admissions-btn" class="continue-btn" onclick="showAdmissionsSection()">
+                    Continue to Step 2: Assess Admission Applications
+                </button>
+                <div class="demo-note">
+                    <strong>📌 Demo Note:</strong> For this demonstration, we'll use a synthetic database based on the prospective candidates we found. This protects candidate data while showcasing our AI assessment capabilities. In production, you would upload actual admission applications.
+                </div>
+            </div>
+            
             <div class="results-header">
                 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <h2>🎉 Demo Results - Top Candidates</h2>
@@ -495,6 +839,29 @@
             </div>
             <div class="results-content" id="results-content">
                 <!-- Results will be populated here -->
+            </div>
+        </div>
+
+        <!-- Admissions Section -->
+        <div id="admissions-section" class="admissions-section">
+            <div class="admissions-header">
+                <h2>📋 Assess Admission Applications</h2>
+                <p>Upload admission applications to get AI-powered assessments and recommendations</p>
+            </div>
+            <div class="admissions-form">
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-hint">PDF, DOCX, or TXT files (Max 10MB each)</div>
+                    <input type="file" id="file-input" class="file-input" multiple accept=".pdf,.docx,.txt" onchange="handleFileSelect(event)">
+                </div>
+                <div id="file-list" class="file-list"></div>
+                <button id="assess-applications-btn" class="assess-btn" disabled onclick="assessApplications()">
+                    🔍 Assess Applications
+                </button>
+                <div id="admissions-results" style="display: none; margin-top: 2rem;">
+                    <!-- Admissions assessment results will appear here -->
+                </div>
             </div>
         </div>
 
@@ -522,29 +889,101 @@ Ideal candidates often have **3-10 years of professional experience** and come f
 
 We want to find individuals who demonstrate a deep commitment to **equity, social justice, and innovation**. Your task is to find datasets containing profiles we can analyze for these signals. Look for keywords indicating leadership, initiative, and a desire to solve complex educational problems, such as 'program manager,' 'department head,' 'founder,' 'principal,' or active involvement in 'community engagement,' 'policy writing,' or 'curriculum development'.`;
 
-        // Handle option selection
-        document.getElementById('hgse-option').addEventListener('click', () => {
-            selectedOption = 'hgse';
-            document.getElementById('hgse-option').classList.add('selected');
-            document.getElementById('custom-option').classList.remove('selected');
-            document.getElementById('custom-goal-section').style.display = 'none';
-            document.getElementById('submit-demo-btn').disabled = false;
+        // Handle form submission
+        document.getElementById('university-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Build comprehensive university goal from form data
+            const formData = {
+                universityName: document.getElementById('university-name').value,
+                programName: document.getElementById('program-name').value,
+                programLevel: document.getElementById('program-level').value,
+                programGoals: document.getElementById('program-goals').value,
+                programFocus: document.getElementById('program-focus').value,
+                programLocation: document.getElementById('program-location').value,
+                additionalRequirements: document.getElementById('additional-requirements').value
+            };
+            
+            // Save form data to localStorage
+            localStorage.setItem('udiscovery_formData', JSON.stringify(formData));
+            
+            // Build the university goal text
+            let universityGoal = `University: ${formData.universityName}\n`;
+            universityGoal += `Program: ${formData.programName} (${formData.programLevel})\n`;
+            if (formData.programLocation) {
+                universityGoal += `Location: ${formData.programLocation}\n`;
+            }
+            if (formData.programFocus) {
+                universityGoal += `Focus Area: ${formData.programFocus}\n`;
+            }
+            universityGoal += `\nProgram Goals & Ideal Candidate Profile:\n${formData.programGoals}`;
+            if (formData.additionalRequirements) {
+                universityGoal += `\n\nAdditional Requirements:\n${formData.additionalRequirements}`;
+            }
+            
+            // Show loading, hide form
+            document.querySelector('.demo-form-section').style.display = 'none';
+            document.getElementById('loading-section').style.display = 'block';
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('continue-journey-section').style.display = 'none';
+            document.getElementById('error-container').innerHTML = '';
+            
+            // Start loading progress
+            startLoadingProgress();
+
+            try {
+                // Create an AbortController for timeout handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000); // 30 minute timeout
+                
+                const response = await fetch('/api/run-demo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ university_goal: universityGoal }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Stop loading progress
+                stopLoadingProgress();
+                
+                // Hide loading, show results
+                document.getElementById('loading-section').style.display = 'none';
+                
+                if (data.success) {
+                    // Save results to localStorage
+                    localStorage.setItem('udiscovery_results', data.result);
+                    localStorage.setItem('udiscovery_timestamp', new Date().toISOString());
+                    
+                    // Show continue journey section first (at top)
+                    document.getElementById('continue-journey-section').style.display = 'block';
+                    // Then display results
+                    displayResults(data.result);
+                } else {
+                    showError(data.error || 'Failed to generate demo results');
+                    document.querySelector('.demo-form-section').style.display = 'block';
+                }
+            } catch (error) {
+                stopLoadingProgress();
+                document.getElementById('loading-section').style.display = 'none';
+                
+                if (error.name === 'AbortError') {
+                    showError('Request timed out. The analysis is taking longer than expected. Please try again or contact support.');
+                } else {
+                    showError(`Failed to run demo: ${error.message}`);
+                }
+                document.querySelector('.demo-form-section').style.display = 'block';
+            }
         });
-
-        document.getElementById('custom-option').addEventListener('click', () => {
-            selectedOption = 'custom';
-            document.getElementById('custom-option').classList.add('selected');
-            document.getElementById('hgse-option').classList.remove('selected');
-            document.getElementById('custom-goal-section').style.display = 'block';
-            updateSubmitButton();
-        });
-
-        document.getElementById('custom-goal-input').addEventListener('input', updateSubmitButton);
-
-        function updateSubmitButton() {
-            const hasText = document.getElementById('custom-goal-input').value.trim().length > 0;
-            document.getElementById('submit-demo-btn').disabled = !hasText;
-        }
 
         // Loading progress and status messages
         let loadingInterval = null;
@@ -637,67 +1076,114 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             }
         }
 
-        // Handle form submission
-        document.getElementById('submit-demo-btn').addEventListener('click', async () => {
-            const universityGoal = selectedOption === 'hgse' 
-                ? hgseGoal 
-                : document.getElementById('custom-goal-input').value;
-
-            // Show loading, hide form
-            document.querySelector('.demo-form-section').style.display = 'none';
-            document.getElementById('loading-section').style.display = 'block';
+        // Store selected files for admissions
+        let selectedFiles = [];
+        
+        // Show admissions section
+        function showAdmissionsSection() {
             document.getElementById('results-section').style.display = 'none';
-            document.getElementById('error-container').innerHTML = '';
+            document.getElementById('continue-journey-section').style.display = 'none';
+            document.getElementById('admissions-section').classList.add('active');
+            // Initialize upload area when section is shown
+            initializeUploadArea();
+            // Scroll to admissions section
+            document.getElementById('admissions-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Handle file selection
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    return;
+                }
+                if (!selectedFiles.find(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push(file);
+                }
+            });
+            updateFileList();
+        }
+        
+        // Update file list display
+        function updateFileList() {
+            const fileList = document.getElementById('file-list');
+            const assessBtn = document.getElementById('assess-applications-btn');
             
-            // Start loading progress
-            startLoadingProgress();
-
-            try {
-                // Create an AbortController for timeout handling
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000); // 30 minute timeout
-                
-                const response = await fetch('/api/run-demo', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ university_goal: universityGoal }),
-                    signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId);
-
-                const data = await response.json();
-
-                // Complete progress before showing results
-                stopLoadingProgress();
-                
-                // Small delay to show 100% before hiding
-                setTimeout(() => {
-                    if (data.success) {
-                        displayResults(data.result);
-                    } else {
-                        showError(data.error || 'An error occurred while running the demo');
-                    }
-                    document.getElementById('loading-section').style.display = 'none';
-                }, 500);
-            } catch (error) {
-                stopLoadingProgress();
-                setTimeout(() => {
-                    let errorMessage = 'Failed to run demo: ';
-                    if (error.name === 'AbortError') {
-                        errorMessage += 'Request timed out. The analysis is taking longer than expected. Please try again or contact support.';
-                    } else if (error.message === 'Failed to fetch') {
-                        errorMessage += 'Unable to connect to the server. Please check if the server is running and try again.';
-                    } else {
-                        errorMessage += error.message;
-                    }
-                    showError(errorMessage);
-                    document.getElementById('loading-section').style.display = 'none';
-                }, 500);
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '';
+                assessBtn.disabled = true;
+            } else {
+                fileList.innerHTML = selectedFiles.map((file, index) => `
+                    <div class="file-item">
+                        <span class="file-item-name">📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+                        <button class="file-item-remove" onclick="removeFile(${index})">Remove</button>
+                    </div>
+                `).join('');
+                assessBtn.disabled = false;
             }
-        });
+        }
+        
+        // Remove file
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        }
+        
+        // Handle drag and drop (initialize when admissions section is shown)
+        function initializeUploadArea() {
+            const uploadArea = document.getElementById('upload-area');
+            if (!uploadArea) return;
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                files.forEach(file => {
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                        return;
+                    }
+                    if (!selectedFiles.find(f => f.name === file.name && f.size === file.size)) {
+                        selectedFiles.push(file);
+                    }
+                });
+                updateFileList();
+            });
+        }
+        
+        // Assess applications (placeholder for now)
+        function assessApplications() {
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one file to assess.');
+                return;
+            }
+            
+            // TODO: Implement backend API call for assessment
+            const resultsDiv = document.getElementById('admissions-results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div style="background: rgba(58, 134, 255, 0.1); padding: 2rem; border-radius: 8px; border-left: 4px solid #3A86FF;">
+                    <h3 style="color: #3A86FF; margin-bottom: 1rem;">🚧 Assessment Feature Coming Soon</h3>
+                    <p style="color: #F0F4F8;">
+                        You've selected ${selectedFiles.length} file(s) for assessment. The AI-powered admission application assessment feature is currently under development.
+                    </p>
+                    <p style="color: #5DADE2; margin-top: 1rem; font-size: 0.9rem;">
+                        Files ready: ${selectedFiles.map(f => f.name).join(', ')}
+                    </p>
+                </div>
+            `;
+        }
+        
 
         function displayResults(result) {
             const resultsContent = document.getElementById('results-content');
@@ -1279,6 +1765,68 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             link.click();
             document.body.removeChild(link);
         }
+
+        // Restore saved data on page load
+        function restoreSavedData() {
+            const savedFormData = localStorage.getItem('udiscovery_formData');
+            const savedResults = localStorage.getItem('udiscovery_results');
+            
+            if (savedFormData) {
+                try {
+                    const formData = JSON.parse(savedFormData);
+                    // Restore form fields
+                    document.getElementById('university-name').value = formData.universityName || '';
+                    document.getElementById('program-name').value = formData.programName || '';
+                    document.getElementById('program-level').value = formData.programLevel || '';
+                    document.getElementById('program-goals').value = formData.programGoals || '';
+                    document.getElementById('program-focus').value = formData.programFocus || '';
+                    document.getElementById('program-location').value = formData.programLocation || '';
+                    document.getElementById('additional-requirements').value = formData.additionalRequirements || '';
+                } catch (e) {
+                    console.error('Error restoring form data:', e);
+                }
+            }
+            
+            // If we have saved results, show them
+            if (savedResults) {
+                // Hide form, show results
+                document.querySelector('.demo-form-section').style.display = 'none';
+                document.getElementById('results-section').style.display = 'block';
+                document.getElementById('continue-journey-section').style.display = 'block';
+                
+                // Display the saved results
+                displayResults(savedResults);
+                
+                // Show a message that results were restored
+                const timestamp = localStorage.getItem('udiscovery_timestamp');
+                if (timestamp) {
+                    const date = new Date(timestamp);
+                    const timeStr = date.toLocaleString();
+                    const restoreMsg = document.createElement('div');
+                    restoreMsg.className = 'restore-message';
+                    restoreMsg.style.cssText = 'background: rgba(255, 195, 0, 0.2); border-left: 4px solid #FFC300; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; color: #E8EDF3;';
+                    restoreMsg.innerHTML = `📋 <strong>Restored previous session</strong> - Results from ${timeStr}. <button onclick="clearSavedData()" style="background: #FFC300; color: #212F45; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-left: 0.5rem;">Clear & Start New</button>`;
+                    const resultsHeader = document.querySelector('.results-header');
+                    if (resultsHeader) {
+                        resultsHeader.insertBefore(restoreMsg, resultsHeader.firstChild);
+                    }
+                }
+            }
+        }
+        
+        // Clear saved data
+        function clearSavedData() {
+            localStorage.removeItem('udiscovery_formData');
+            localStorage.removeItem('udiscovery_results');
+            localStorage.removeItem('udiscovery_timestamp');
+            location.reload();
+        }
+        
+        // Make clearSavedData available globally
+        window.clearSavedData = clearSavedData;
+        
+        // Restore on page load
+        document.addEventListener('DOMContentLoaded', restoreSavedData);
     </script>
 </body>
 </html>
