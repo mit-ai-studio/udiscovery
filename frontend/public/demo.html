@@ -536,6 +536,10 @@
             border-radius: 8px;
             overflow: hidden;
             transition: all 0.3s;
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            min-height: 100px;
         }
         
         .candidate-card:hover {
@@ -621,6 +625,9 @@
             border-top: 1px solid rgba(110, 231, 215, 0.2);
             padding: 1rem;
             background: rgba(1, 42, 66, 0.5);
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         .candidate-rationale h5 {
@@ -635,6 +642,39 @@
             font-size: 0.875rem;
             line-height: 1.6;
             margin: 0;
+        }
+        
+        /* Candidate Details View */
+        .candidate-details-view {
+            padding: 1rem;
+            max-height: calc(100vh - 20rem);
+            overflow-y: auto;
+        }
+        
+        .candidate-details-header {
+            border-bottom: 1px solid rgba(110, 231, 215, 0.2);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .candidate-detail-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(110, 231, 215, 0.1);
+        }
+        
+        .candidate-detail-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .candidate-detail-section h4 {
+            margin-top: 0;
+        }
+        
+        .candidate-detail-section ul {
+            margin-top: 0.5rem;
         }
         
         /* Campaign Sidebar */
@@ -1550,9 +1590,20 @@ Ideal candidates often have **3-10 years of professional experience** and come f
 
 We want to find individuals who demonstrate a deep commitment to **equity, social justice, and innovation**. Your task is to find datasets containing profiles we can analyze for these signals. Look for keywords indicating leadership, initiative, and a desire to solve complex educational problems, such as 'program manager,' 'department head,' 'founder,' 'principal,' or active involvement in 'community engagement,' 'policy writing,' or 'curriculum development'.`;
 
-        // Handle form submission
-        document.getElementById('university-form').addEventListener('submit', async (e) => {
+        // Handle form submission - ensure DOM is ready
+        function attachFormHandler() {
+            const form = document.getElementById('university-form');
+            if (!form) {
+                console.error('Form element not found! Retrying...');
+                setTimeout(attachFormHandler, 100);
+                return;
+            }
+            
+            console.log('Form element found, attaching submit listener');
+            form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            console.log('=== Form submitted! ===');
             
             // Build comprehensive university goal from form data
             const formData = {
@@ -1644,7 +1695,40 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 }
                 document.querySelector('.demo-form-section').style.display = 'block';
             }
-        });
+            });
+        }
+        
+        // Attach form handler when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachFormHandler);
+        } else {
+            attachFormHandler();
+        }
+        
+        // Also add direct click handler as backup
+        function attachButtonHandler() {
+            const submitBtn = document.getElementById('submit-demo-btn');
+            if (submitBtn) {
+                console.log('Submit button found, attaching click handler');
+                submitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Button clicked directly!');
+                    const form = document.getElementById('university-form');
+                    if (form) {
+                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }
+                });
+            } else {
+                console.log('Submit button not found, retrying...');
+                setTimeout(attachButtonHandler, 100);
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachButtonHandler);
+        } else {
+            attachButtonHandler();
+        }
 
         // Loading progress and status messages
         let loadingInterval = null;
@@ -1973,12 +2057,24 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         let currentView = 'list';
         
         function renderCandidateCards(candidates) {
+            console.log('=== renderCandidateCards called ===');
+            console.log('Number of candidates:', candidates ? candidates.length : 0);
+            console.log('Current expandedCandidateIndex:', expandedCandidateIndex);
+            
             const prospectsList = document.getElementById('prospects-list');
             const prospectsTitle = document.getElementById('prospects-title');
             
-            if (!prospectsList) return;
+            if (!prospectsList) {
+                console.error('prospects-list element not found!');
+                return;
+            }
             
-            if (candidates.length === 0) {
+            if (!prospectsList) {
+                console.error('prospects-list element not found!');
+                return;
+            }
+            
+            if (!candidates || candidates.length === 0) {
                 prospectsList.innerHTML = `
                     <div class="candidate-card" style="text-align: center; padding: 3rem;">
                         <p style="color: rgba(255, 255, 255, 0.7);">
@@ -1996,32 +2092,88 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 prospectsTitle.textContent = `Ranked Prospects (${candidates.length})`;
             }
             
-            prospectsList.innerHTML = candidates.map((candidate, index) => {
-                const probability = candidate.probability !== null && candidate.probability !== undefined 
-                    ? (parseFloat(candidate.probability) * 100).toFixed(1)
-                    : '0';
-                const contactInfo = extractContactInfo(candidate);
-                const isExpanded = expandedCandidateIndex === index;
+            console.log('About to render', candidates.length, 'candidates');
+            console.log('prospectsList element:', prospectsList);
+            
+            const cardsHTML = candidates.map((candidate, index) => {
+                // Use the original index from the filtered array, not the display index
+                const candidateIndex = index;
+                const isExpanded = expandedCandidateIndex === candidateIndex;
                 
-                // Extract location, experience from background
-                const background = candidate.background || '';
+                if (isExpanded) {
+                    console.log(`Rendering EXPANDED candidate ${candidateIndex}:`, {
+                        name: candidate.name,
+                        hasBackground: !!candidate.background,
+                        background: candidate.background ? candidate.background.substring(0, 100) : 'none',
+                        hasWhyMatch: !!candidate.whyMatch,
+                        hasPositiveDrivers: !!candidate.positiveDrivers,
+                        hasNegativeDrivers: !!candidate.negativeDrivers
+                    });
+                }
+                
+                // Ensure we have at least a name to display - check multiple possible fields
+                const candidateName = candidate.name || candidate.fullName || candidate.candidateName || `Candidate ${candidateIndex + 1}`;
+                
+                // Calculate probability - try multiple sources
+                let probability = '0';
+                if (candidate.probability !== null && candidate.probability !== undefined) {
+                    const prob = parseFloat(candidate.probability);
+                    probability = (prob > 1 ? prob : prob * 100).toFixed(1);
+                } else if (candidate.score) {
+                    const scoreParts = candidate.score.split('/');
+                    if (scoreParts[0]) {
+                        probability = parseFloat(scoreParts[0]).toFixed(1);
+                    }
+                }
+                
+                const contactInfo = extractContactInfo(candidate);
+                
+                // Extract location, experience from background - try multiple sources
+                const background = candidate.background || candidate.rationale || candidate.whyMatch || candidate.description || '';
                 const location = extractLocation(background) || 'Not specified';
                 const experience = extractExperience(background) || 'Not specified';
                 const interests = candidate.interests || [];
                 
+                console.log(`Candidate ${candidateIndex}:`, {
+                    name: candidateName,
+                    probability: probability,
+                    location: location,
+                    backgroundLength: background.length,
+                    hasPropensitySegment: !!candidate.propensitySegment,
+                    hasInterests: interests.length > 0,
+                    hasBackground: !!candidate.background,
+                    hasWhyMatch: !!candidate.whyMatch,
+                    hasPositiveDrivers: !!(candidate.positiveDrivers && (Array.isArray(candidate.positiveDrivers) ? candidate.positiveDrivers.length > 0 : candidate.positiveDrivers)),
+                    hasNegativeDrivers: !!(candidate.negativeDrivers && (Array.isArray(candidate.negativeDrivers) ? candidate.negativeDrivers.length > 0 : candidate.negativeDrivers)),
+                    hasStrengths: !!candidate.strengths,
+                    hasAssumptions: !!candidate.assumptions,
+                    fullCandidate: candidate
+                });
+                
+                // Use candidate.background if available, otherwise try to construct from other fields
+                let candidateBackground = candidate.background || '';
+                if (!candidateBackground && candidate.description) {
+                    candidateBackground = candidate.description;
+                }
+                // If still no background, try to get it from the parsed data
+                if (!candidateBackground) {
+                    candidateBackground = background;
+                }
+                
                 return `
-                    <div class="candidate-card">
+                    <div class="candidate-card" onclick="window.showCandidateDetails(${candidateIndex})" style="cursor: pointer;">
                         <div class="candidate-card-header">
                             <div class="candidate-card-main">
                                 <div class="candidate-info">
                                     <div class="candidate-name-row">
-                                        <h4 class="candidate-name">${escapeHtml(candidate.name || 'Unknown')}</h4>
+                                        <h4 class="candidate-name">${escapeHtml(candidateName)}</h4>
                                         <span class="propensity-badge">${probability}% propensity</span>
                                     </div>
                                     <div class="candidate-meta">
                                         <span>${escapeHtml(location)}</span>
                                         <span>${escapeHtml(experience)}</span>
                                         ${candidate.propensitySegment ? `<span>${escapeHtml(candidate.propensitySegment)}</span>` : ''}
+                                        ${candidate.rank ? `<span>Rank: #${escapeHtml(candidate.rank)}</span>` : ''}
                                     </div>
                                     ${interests.length > 0 ? `
                                         <div class="candidate-interests">
@@ -2030,39 +2182,82 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                             `).join('')}
                                         </div>
                                     ` : ''}
+                                    ${candidateBackground ? `
+                                        <div style="margin-top: 0.5rem; color: rgba(255, 255, 255, 0.6); font-size: 0.875rem;">
+                                            ${escapeHtml(candidateBackground.substring(0, 150))}${candidateBackground.length > 150 ? '...' : ''}
+                                        </div>
+                                    ` : ''}
                                 </div>
-                                <button class="candidate-expand-btn" onclick="toggleCandidateExpand(${index})">
-                                    ${isExpanded ? '▲' : '▼'}
-                                </button>
                             </div>
                         </div>
-                        ${isExpanded ? `
-                            <div class="candidate-rationale">
-                                <h5>AI Rationale</h5>
-                                <p>${escapeHtml(candidate.background || candidate.rationale || 'No rationale available.')}</p>
-                                ${candidate.positiveDrivers ? `
-                                    <h5 style="margin-top: 1rem;">Positive Drivers</h5>
-                                    <p>${escapeHtml(Array.isArray(candidate.positiveDrivers) ? candidate.positiveDrivers.join(', ') : candidate.positiveDrivers)}</p>
-                                ` : ''}
-                                ${candidate.negativeDrivers ? `
-                                    <h5 style="margin-top: 1rem;">Negative Drivers</h5>
-                                    <p>${escapeHtml(Array.isArray(candidate.negativeDrivers) ? candidate.negativeDrivers.join(', ') : candidate.negativeDrivers)}</p>
-                                ` : ''}
-                                ${contactInfo ? `
-                                    <h5 style="margin-top: 1rem;">Contact</h5>
-                                    <p style="color: #6EE7D7;">${escapeHtml(contactInfo)}</p>
-                                ` : ''}
-                            </div>
-                        ` : ''}
                     </div>
                 `;
             }).join('');
+            
+            console.log('Generated cardsHTML, length:', cardsHTML.length);
+            console.log('First 500 chars of HTML:', cardsHTML.substring(0, 500));
+            
+            if (cardsHTML && cardsHTML.length > 0) {
+                prospectsList.innerHTML = cardsHTML;
+                console.log('Cards HTML inserted into DOM');
+                console.log('prospectsList.innerHTML length after insertion:', prospectsList.innerHTML.length);
+                
+                // Verify cards are in DOM
+                const renderedCards = prospectsList.querySelectorAll('.candidate-card');
+                console.log('Number of .candidate-card elements found in DOM:', renderedCards.length);
+                
+                if (renderedCards.length === 0) {
+                    console.error('Cards were inserted but not found in DOM!');
+                    // Try a simple test
+                    prospectsList.innerHTML = '<div class="candidate-card" style="padding: 2rem; background: red; color: white;"><h3>TEST CARD - If you see this, rendering works</h3><p>But candidate data might be missing</p></div>';
+                } else {
+                    // Check if cards have content
+                    renderedCards.forEach((card, idx) => {
+                        const nameEl = card.querySelector('.candidate-name');
+                        console.log(`Card ${idx} - has name element:`, !!nameEl, nameEl ? nameEl.textContent : 'N/A');
+                    });
+                }
+            } else {
+                console.error('cardsHTML is empty!');
+                prospectsList.innerHTML = '<div class="candidate-card" style="padding: 2rem; background: red; color: white;"><p>Error: No cards HTML generated. Candidates array might be empty or malformed.</p></div>';
+            }
         }
         
         function toggleCandidateExpand(index) {
-            expandedCandidateIndex = expandedCandidateIndex === index ? null : index;
-            if (window.filteredCandidatesData) {
-                renderCandidateCards(window.filteredCandidatesData);
+            console.log('=== toggleCandidateExpand called ===');
+            console.log('index parameter:', index, 'type:', typeof index);
+            console.log('Current expandedCandidateIndex:', expandedCandidateIndex);
+            
+            // Ensure index is a number
+            const numIndex = typeof index === 'string' ? parseInt(index, 10) : index;
+            if (isNaN(numIndex)) {
+                console.error('Invalid index:', index);
+                return;
+            }
+            
+            // Toggle: if same index, collapse; otherwise expand new one
+            if (expandedCandidateIndex === numIndex) {
+                expandedCandidateIndex = null;
+                console.log('Collapsing card at index:', numIndex);
+            } else {
+                expandedCandidateIndex = numIndex;
+                console.log('Expanding card at index:', numIndex);
+            }
+            
+            console.log('New expandedCandidateIndex:', expandedCandidateIndex);
+            
+            // Use the filtered candidates if available, otherwise use all candidates
+            const candidatesToRender = window.filteredCandidatesData || window.allCandidatesData || [];
+            console.log('Candidates to render:', candidatesToRender.length);
+            
+            if (candidatesToRender.length > 0) {
+                console.log('Calling renderCandidateCards with expandedCandidateIndex:', expandedCandidateIndex);
+                renderCandidateCards(candidatesToRender);
+                console.log('renderCandidateCards completed');
+            } else {
+                console.error('No candidates data available to render!');
+                console.error('window.filteredCandidatesData:', window.filteredCandidatesData);
+                console.error('window.allCandidatesData:', window.allCandidatesData);
             }
         }
         
@@ -2141,6 +2336,148 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             updateCampaignView();
         }
         
+        function showCandidateDetails(index) {
+            console.log('=== showCandidateDetails called ===');
+            console.log('Index:', index);
+            console.log('window.filteredCandidatesData:', window.filteredCandidatesData);
+            console.log('window.allCandidatesData:', window.allCandidatesData);
+            
+            const candidates = window.filteredCandidatesData || window.allCandidatesData || [];
+            console.log('Candidates array length:', candidates.length);
+            
+            if (!candidates || candidates.length === 0) {
+                console.error('No candidates data available!');
+                return;
+            }
+            
+            if (index < 0 || index >= candidates.length) {
+                console.error('Invalid candidate index:', index, 'out of range [0,', candidates.length, ')');
+                return;
+            }
+            
+            const candidate = candidates[index];
+            console.log('Selected candidate:', candidate);
+            
+            const viewport = document.getElementById('campaign-viewport');
+            if (!viewport) {
+                console.error('campaign-viewport element not found!');
+                return;
+            }
+            
+            console.log('Viewport found, updating content...');
+            
+            // Switch to list view to show candidate details
+            currentView = 'list';
+            const listBtn = document.querySelector('.campaign-btn.active');
+            if (listBtn) listBtn.classList.remove('active');
+            const newListBtn = document.querySelector('.campaign-btn[data-view="list"]');
+            if (newListBtn) newListBtn.classList.add('active');
+            
+            // Extract candidate data
+            const candidateName = candidate.name || candidate.fullName || candidate.candidateName || `Candidate ${index + 1}`;
+            const candidateBackground = candidate.background || candidate.description || '';
+            const contactInfo = extractContactInfo(candidate);
+            
+            // Build the detailed view
+            let detailsHTML = `
+                <div class="candidate-details-view">
+                    <div class="candidate-details-header">
+                        <h3 style="color: #6EE7D7; margin: 0 0 0.5rem 0; font-size: 1.25rem;">${escapeHtml(candidateName)}</h3>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+                            <span class="propensity-badge" style="font-size: 1rem;">${candidate.probability ? (parseFloat(candidate.probability) > 1 ? parseFloat(candidate.probability).toFixed(1) : (parseFloat(candidate.probability) * 100).toFixed(1)) : '0'}% propensity</span>
+                            ${candidate.rank ? `<span style="color: rgba(255, 255, 255, 0.7);">Rank: #${escapeHtml(candidate.rank)}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    ${candidateBackground ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #6EE7D7; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">📋 Background</h4>
+                            <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin: 0;">${escapeHtml(candidateBackground)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${candidate.whyMatch ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #4CAF50; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">🎯 Why They Match</h4>
+                            <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin: 0;">${escapeHtml(candidate.whyMatch)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${candidate.positiveDrivers && (Array.isArray(candidate.positiveDrivers) ? candidate.positiveDrivers.length > 0 : candidate.positiveDrivers) ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #4CAF50; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">✅ Key Positive Drivers</h4>
+                            ${Array.isArray(candidate.positiveDrivers) ? `
+                                <ul style="margin: 0; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.9); line-height: 1.8;">
+                                    ${candidate.positiveDrivers.map(driver => `<li>${escapeHtml(driver)}</li>`).join('')}
+                                </ul>
+                            ` : `
+                                <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin: 0;">${escapeHtml(candidate.positiveDrivers)}</p>
+                            `}
+                        </div>
+                    ` : ''}
+                    
+                    ${candidate.negativeDrivers && (Array.isArray(candidate.negativeDrivers) ? candidate.negativeDrivers.length > 0 : candidate.negativeDrivers) ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #f44336; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">⚠️ Key Negative Drivers</h4>
+                            ${Array.isArray(candidate.negativeDrivers) ? `
+                                <ul style="margin: 0; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.9); line-height: 1.8;">
+                                    ${candidate.negativeDrivers.map(driver => `<li>${escapeHtml(driver)}</li>`).join('')}
+                                </ul>
+                            ` : `
+                                <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin: 0;">${escapeHtml(candidate.negativeDrivers)}</p>
+                            `}
+                        </div>
+                    ` : ''}
+                    
+                    ${candidate.strengths ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #5DADE2; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">💪 Areas of Strength</h4>
+                            <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin: 0;">${escapeHtml(candidate.strengths)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${candidate.assumptions ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #FFC300; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">⚠️ Assumptions/Warnings</h4>
+                            <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; margin: 0;">${escapeHtml(candidate.assumptions)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${contactInfo ? `
+                        <div class="candidate-detail-section">
+                            <h4 style="color: #6EE7D7; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">📧 Contact Information</h4>
+                            <p style="color: #6EE7D7; line-height: 1.6; margin: 0;">${escapeHtml(contactInfo)}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            console.log('Setting viewport innerHTML, length:', detailsHTML.length);
+            
+            // Store selected candidate index
+            window.selectedCandidateIndex = index;
+            
+            viewport.innerHTML = detailsHTML;
+            console.log('Viewport innerHTML set. Content length:', viewport.innerHTML.length);
+            console.log('First 300 chars:', viewport.innerHTML.substring(0, 300));
+            
+            // Highlight the selected card
+            const cards = document.querySelectorAll('.candidate-card');
+            console.log('Found', cards.length, 'candidate cards');
+            cards.forEach((card, idx) => {
+                if (idx === index) {
+                    card.style.borderColor = 'rgba(110, 231, 215, 0.8)';
+                    card.style.boxShadow = '0 0 0 2px rgba(110, 231, 215, 0.3)';
+                    console.log('Highlighted card at index', idx);
+                } else {
+                    card.style.borderColor = 'rgba(110, 231, 215, 0.3)';
+                    card.style.boxShadow = 'none';
+                }
+            });
+            
+            console.log('showCandidateDetails completed');
+        }
+        
         function updateCampaignView() {
             const viewport = document.getElementById('campaign-viewport');
             if (!viewport || !window.filteredCandidatesData) return;
@@ -2148,7 +2485,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             if (currentView === 'list') {
                 viewport.innerHTML = `
                     <p class="campaign-placeholder">
-                        View detailed prospect information in the main list. Click on a prospect to expand their AI rationale.
+                        Click on a prospect card to view their detailed information here.
                     </p>
                 `;
             } else if (currentView === 'email') {
@@ -2217,6 +2554,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         
         // Make functions globally available
         window.toggleCandidateExpand = toggleCandidateExpand;
+        window.showCandidateDetails = showCandidateDetails;
         window.exportCampaignData = exportCampaignData;
 
         function extractContactInfo(candidate) {
@@ -2317,13 +2655,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             `;
         }
 
-        function showCandidateDetails(index) {
-            const modal = document.getElementById(`candidate-modal-${index}`);
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-        }
+        // Old modal showCandidateDetails removed - using sidebar view instead
 
         function closeModal(index) {
             const modal = document.getElementById(`candidate-modal-${index}`);
@@ -2358,15 +2690,28 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 if (line.startsWith('```')) continue;
                 
                 // Check if this is a candidate number (e.g., "1.", "2.", etc.)
+                // Handle formats like: "1. [Full Name: first_name + last_name]" or "1. John Doe"
                 const candidateMatch = line.match(/^(\d+)\.\s*(.+)$/);
                 if (candidateMatch) {
                     if (currentCandidate) {
                         candidates.push(currentCandidate);
                     }
                     // Clean markdown formatting from name
-                    let name = candidateMatch[2].replace(/\*\*/g, '').replace(/\[|\]/g, '').trim();
-                    // Remove "Full Name:" prefix if present
-                    name = name.replace(/^full name:\s*/i, '').trim();
+                    let name = candidateMatch[2].replace(/\*\*/g, '').trim();
+                    
+                    // Handle "[Full Name: first_name + last_name]" format
+                    const fullNameMatch = name.match(/\[Full Name:\s*(.+?)\]/i);
+                    if (fullNameMatch) {
+                        name = fullNameMatch[1].trim();
+                        // Handle "first_name + last_name" format
+                        name = name.replace(/\s*\+\s*/g, ' ').trim();
+                    } else {
+                        // Remove brackets if present
+                        name = name.replace(/\[|\]/g, '').trim();
+                        // Remove "Full Name:" prefix if present
+                        name = name.replace(/^full name:\s*/i, '').trim();
+                    }
+                    
                     currentCandidate = {
                         rank: candidateMatch[1],
                         name: name,
@@ -2380,7 +2725,8 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                         negativeDrivers: [],
                         assumptions: '',
                         email: null,
-                        contactInfo: null
+                        contactInfo: null,
+                        interests: []
                     };
                     currentSection = null;
                     continue;
@@ -2438,7 +2784,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     continue;
                 }
                 
-                // Check for Contact/Email
+                // Check for Contact/Email - be more flexible with format
                 if (line.toLowerCase().includes('contact:') || line.toLowerCase().includes('email:')) {
                     const contactMatch = line.match(/(?:contact|email):\s*(.+)/i);
                     if (contactMatch) {
@@ -2453,6 +2799,15 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                         }
                     }
                     continue;
+                }
+                
+                // Also check for email pattern anywhere in the line
+                if (!currentCandidate.email) {
+                    const emailMatch = line.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+                    if (emailMatch && line.toLowerCase().includes('contact')) {
+                        currentCandidate.email = emailMatch[0];
+                        currentCandidate.contactInfo = emailMatch[0];
+                    }
                 }
                 
                 // Check for section labels
@@ -2533,10 +2888,34 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                         } else if (cleanedLine) {
                             currentCandidate[currentSection].push(cleanedLine);
                         }
+                    } else if (currentSection === 'interests') {
+                        // Handle interests as array
+                        if (!currentCandidate.interests) {
+                            currentCandidate.interests = [];
+                        }
+                        // Split by comma or semicolon, or add as single item
+                        const interestItems = cleanedLine.split(/[,;]/).map(i => i.trim()).filter(i => i);
+                        currentCandidate.interests.push(...interestItems);
                     } else {
                         // For other sections, append as before
                         if (typeof currentCandidate[currentSection] === 'string') {
                             currentCandidate[currentSection] += (currentCandidate[currentSection] ? ' ' : '') + cleanedLine;
+                        } else if (!currentCandidate[currentSection]) {
+                            currentCandidate[currentSection] = cleanedLine;
+                        }
+                    }
+                } else if (!foundSection && !currentSection) {
+                    // If no current section but line has content, it might be background or continuation
+                    // Check if it looks like background info (contains work exp, years, etc.)
+                    const cleanedLine = line.replace(/\*\*/g, '').replace(/\[|\]/g, '').trim();
+                    if (cleanedLine && (cleanedLine.toLowerCase().includes('years') || 
+                        cleanedLine.toLowerCase().includes('experience') || 
+                        cleanedLine.toLowerCase().includes('position') ||
+                        cleanedLine.toLowerCase().includes('degree'))) {
+                        if (!currentCandidate.background) {
+                            currentCandidate.background = cleanedLine;
+                        } else {
+                            currentCandidate.background += ' ' + cleanedLine;
                         }
                     }
                 }
@@ -2554,6 +2933,11 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             // Add the last candidate
             if (currentCandidate) {
                 candidates.push(currentCandidate);
+            }
+            
+            console.log('parseCandidates found', candidates.length, 'candidates');
+            if (candidates.length > 0) {
+                console.log('First candidate parsed:', JSON.stringify(candidates[0], null, 2));
             }
             
             // Post-process: extract emails from background if not already found
