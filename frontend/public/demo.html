@@ -11,7 +11,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
-            padding-top: 7rem;
+            padding-top: 1rem;
             min-height: 100vh;
             background: #012A42;
         }
@@ -1311,31 +1311,23 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
+    <nav class="navbar" style="border-bottom: 1px solid rgba(110, 231, 215, 0.2); background: rgba(1, 42, 66, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50;">
+        <div class="nav-container" style="max-width: 1440px; margin: 0 auto; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between;">
             <div class="nav-logo">
-                <a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
-                    <img src="images/udiscovery-logo.png" alt="UDiscovery Logo" style="height: 60px; width: auto;" />
-                </a>
+                <img src="images/udiscovery-logo.png" alt="UDiscovery Logo" style="height: 80px; width: auto;" />
             </div>
-            <div class="nav-menu">
-                <a href="/#problem" class="nav-link">The Problem</a>
-                <a href="/#solution" class="nav-link">Our Solution</a>
-                <a href="/#vision" class="nav-link">The Vision</a>
-            </div>
-            <div class="nav-buttons">
-                <a href="/signin" class="btn btn-secondary">Sign In</a>
-                <a href="/demo" class="btn btn-primary">Request a Demo</a>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    <a href="#" id="nav-prospecting" class="nav-link" style="color: #6EE7D7; padding: 0.5rem 0.75rem;">Prospecting</a>
+                    <a href="#" id="nav-admissions" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem;">Admissions</a>
+                    <a href="#" id="nav-logout" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem;">Logout</a>
+                </div>
+                <div id="welcome-message" style="color: rgba(203, 213, 225, 1); padding-right: 0.75rem; font-size: 0.875rem;"></div>
             </div>
         </div>
     </nav>
 
     <div class="demo-container">
-        <div class="demo-header">
-            <h1>Interactive UDiscovery Demo</h1>
-            <p>Experience how our AI agents find your ideal candidates</p>
-        </div>
-
         <div class="demo-form-section" id="university-form-section">
             <h2 style="color: #6EE7D7; margin-bottom: 1.5rem; border-left: 4px solid #6EE7D7; padding-left: 1rem;">Tell Us About Your Program</h2>
             <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem; font-size: 0.95rem;">Fill in the details about your university program to help us find the best candidates</p>
@@ -1430,27 +1422,10 @@
         </div>
 
         <div id="results-section" class="results-section">
-            <!-- Continue Journey Section - Timeline at Top -->
-            <div id="continue-journey-section" class="continue-journey-section" style="display: none;">
-                <div class="journey-timeline">
-                    <div class="journey-step completed">
-                        <div class="step-icon">✓</div>
-                        <div class="step-title">Step 1: Find Candidates</div>
-                        <div class="step-description">AI-powered candidate discovery based on your program requirements</div>
-                    </div>
-                    <div class="timeline-arrow">→</div>
-                    <div class="journey-step active">
-                        <div class="step-icon">📋</div>
-                        <div class="step-title">Step 2: Assess Applications</div>
-                        <div class="step-description">Evaluate admission applications using AI assessment</div>
-                    </div>
-                </div>
-                <button id="continue-to-admissions-btn" class="continue-btn" onclick="showAdmissionsSection()">
-                    Continue to Step 2: Assess Admission Applications
-                </button>
-                <div class="demo-note">
-                    <strong>📌 Demo Note:</strong> For this demonstration, we'll use a synthetic database based on the prospective candidates we found. This protects candidate data while showcasing our AI assessment capabilities. In production, you would upload actual admission applications.
-                </div>
+            <!-- Page Header -->
+            <div style="margin-bottom: 1.5rem; margin-top: 0.5rem; max-width: 1440px; margin-left: auto; margin-right: auto; padding: 0 2rem;">
+                <h2 style="color: #6EE7D7; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 600;">Prospecting Dashboard</h2>
+                <p style="color: rgba(148, 163, 184, 1); font-size: 0.875rem; margin: 0;">Discovery phase: Ranked candidates by application propensity</p>
             </div>
             
             <!-- Dashboard Layout: Sidebar + Main Content -->
@@ -1634,6 +1609,12 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             // Save form data to localStorage
             localStorage.setItem('udiscovery_formData', JSON.stringify(formData));
             
+            // Update welcome message
+            const welcomeMsg = document.getElementById('welcome-message');
+            if (welcomeMsg && formData.universityName) {
+                welcomeMsg.textContent = `Welcome, ${formData.universityName}!`;
+            }
+            
             // Build the university goal text
             let universityGoal = `University: ${formData.universityName}\n`;
             universityGoal += `Program: ${formData.programName} (${formData.programLevel})\n`;
@@ -1652,7 +1633,6 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             document.querySelector('.demo-form-section').style.display = 'none';
             document.getElementById('loading-section').style.display = 'block';
             document.getElementById('results-section').style.display = 'none';
-            document.getElementById('continue-journey-section').style.display = 'none';
             document.getElementById('error-container').innerHTML = '';
             
             // Start loading progress
@@ -1691,9 +1671,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     localStorage.setItem('udiscovery_results', data.result);
                     localStorage.setItem('udiscovery_timestamp', new Date().toISOString());
                     
-                    // Show continue journey section first (at top)
-                    document.getElementById('continue-journey-section').style.display = 'block';
-                    // Then display results
+                    // Display results
                     displayResults(data.result);
                 } else {
                     showError(data.error || 'Failed to generate demo results');
@@ -1842,7 +1820,6 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         // Show admissions section
         function showAdmissionsSection() {
             document.getElementById('results-section').style.display = 'none';
-            document.getElementById('continue-journey-section').style.display = 'none';
             document.getElementById('admissions-section').classList.add('active');
             // Initialize upload area when section is shown
             initializeUploadArea();
@@ -1946,6 +1923,20 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         
 
         function displayResults(result) {
+            // Update welcome message with university name
+            const savedFormData = localStorage.getItem('udiscovery_formData');
+            if (savedFormData) {
+                try {
+                    const formData = JSON.parse(savedFormData);
+                    const welcomeMsg = document.getElementById('welcome-message');
+                    if (welcomeMsg && formData.universityName) {
+                        welcomeMsg.textContent = `Welcome, ${formData.universityName}!`;
+                    }
+                } catch (e) {
+                    console.error('Error parsing form data:', e);
+                }
+            }
+            
             const resultsContent = document.getElementById('results-content');
             
             // Get the result text - CrewAI returns result.raw as a string
@@ -3286,7 +3277,6 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 // Hide form, show results
                 document.querySelector('.demo-form-section').style.display = 'none';
                 document.getElementById('results-section').style.display = 'block';
-                document.getElementById('continue-journey-section').style.display = 'block';
                 
                 // Display the saved results
                 displayResults(savedResults);
@@ -3320,7 +3310,24 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         window.clearSavedData = clearSavedData;
         
         // Restore on page load
+        // Update welcome message on page load
+        function updateWelcomeMessage() {
+            const savedFormData = localStorage.getItem('udiscovery_formData');
+            if (savedFormData) {
+                try {
+                    const formData = JSON.parse(savedFormData);
+                    const welcomeMsg = document.getElementById('welcome-message');
+                    if (welcomeMsg && formData.universityName) {
+                        welcomeMsg.textContent = `Welcome, ${formData.universityName}!`;
+                    }
+                } catch (e) {
+                    console.error('Error parsing form data:', e);
+                }
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
+            updateWelcomeMessage();
             restoreSavedData();
             
             // Force select dropdown to match input text color
