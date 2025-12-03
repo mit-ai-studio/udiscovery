@@ -2128,11 +2128,14 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 
                 const contactInfo = extractContactInfo(candidate);
                 
-                // Extract location, experience from background - try multiple sources
+                // Extract location, experience, GPA, degree from background - try multiple sources
                 const background = candidate.background || candidate.rationale || candidate.whyMatch || candidate.description || '';
-                const location = extractLocation(background) || 'Not specified';
-                const experience = extractExperience(background) || 'Not specified';
+                const location = extractLocation(background) || extractLocation(candidate.background || '') || 'Not specified';
+                const experience = extractExperience(background) || extractExperience(candidate.background || '') || 'Not specified';
+                const gpa = extractGPA(background) || extractGPA(candidate.background || '') || null;
+                const degree = extractDegree(background) || extractDegree(candidate.background || '') || null;
                 const interests = candidate.interests || [];
+                const skills = extractSkills(candidate) || [];
                 
                 console.log(`Candidate ${candidateIndex}:`, {
                     name: candidateName,
@@ -2169,16 +2172,16 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                         <h4 class="candidate-name">${escapeHtml(candidateName)}</h4>
                                         <span class="propensity-badge">${probability}% propensity</span>
                                     </div>
-                                    <div class="candidate-meta">
+                                    <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; margin-top: 0.5rem;">
                                         <span>${escapeHtml(location)}</span>
+                                        ${gpa ? `<span>GPA: ${escapeHtml(gpa)}</span>` : ''}
                                         <span>${escapeHtml(experience)}</span>
-                                        ${candidate.propensitySegment ? `<span>${escapeHtml(candidate.propensitySegment)}</span>` : ''}
-                                        ${candidate.rank ? `<span>Rank: #${escapeHtml(candidate.rank)}</span>` : ''}
+                                        ${degree ? `<span>${escapeHtml(degree)}</span>` : ''}
                                     </div>
-                                    ${interests.length > 0 ? `
-                                        <div class="candidate-interests">
-                                            ${interests.map(interest => `
-                                                <span class="interest-tag">${escapeHtml(interest)}</span>
+                                    ${skills.length > 0 ? `
+                                        <div class="candidate-skills" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">
+                                            ${skills.map(skill => `
+                                                <span class="skill-tag" style="border: 1px solid rgba(110, 231, 215, 0.5); border-radius: 4px; padding: 0.25rem 0.75rem; color: #6EE7D7; font-size: 0.75rem; background: rgba(110, 231, 215, 0.1);">${escapeHtml(skill)}</span>
                                             `).join('')}
                                         </div>
                                     ` : ''}
@@ -2531,9 +2534,120 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         }
         
         function extractExperience(text) {
-            const expPatterns = /(\d+)\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)/i;
+            if (!text) return null;
+            const expPatterns = /(\d+)\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp|work)/i;
             const match = text.match(expPatterns);
             return match ? `${match[1]} years exp` : null;
+        }
+        
+        function extractGPA(text) {
+            if (!text) return null;
+            // Look for GPA patterns like "GPA: 3.8", "GPA 3.8", "3.8 GPA", "gpa_percentile: 85"
+            const gpaPatterns = [
+                /GPA[:\s]+(\d+\.\d+)/i,
+                /(\d+\.\d+)\s+GPA/i,
+                /gpa[:\s]+(\d+\.\d+)/i
+            ];
+            for (const pattern of gpaPatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    return parseFloat(match[1]).toFixed(1);
+                }
+            }
+            return null;
+        }
+        
+        function extractDegree(text) {
+            if (!text) return null;
+            // Look for degree patterns like "Bachelor's Degree in X", "Bachelor of X", "Master's in X", etc.
+            const degreePatterns = [
+                /(?:Bachelor'?s?\s+(?:Degree\s+)?(?:in|of)\s+([A-Za-z\s]+))/i,
+                /(?:Master'?s?\s+(?:Degree\s+)?(?:in|of)\s+([A-Za-z\s]+))/i,
+                /(?:Doctoral?\s+(?:Degree\s+)?(?:in|of)\s+([A-Za-z\s]+))/i,
+                /(?:PhD\s+(?:in|of)\s+([A-Za-z\s]+))/i
+            ];
+            for (const pattern of degreePatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const degreeType = text.match(/(Bachelor'?s?|Master'?s?|Doctoral?|PhD)/i);
+                    const field = match[1].trim();
+                    if (degreeType) {
+                        return `${degreeType[0]} of ${field}`;
+                    }
+                    return field;
+                }
+            }
+            // Try simpler pattern
+            const simplePattern = /(Bachelor'?s?|Master'?s?|Doctoral?)\s+(?:Degree\s+)?(?:in|of)?\s*([A-Za-z\s]+)/i;
+            const simpleMatch = text.match(simplePattern);
+            if (simpleMatch) {
+                return `${simpleMatch[1]} of ${simpleMatch[2].trim()}`;
+            }
+            return null;
+        }
+        
+        function extractSkills(candidate) {
+            const skills = [];
+            const seen = new Set();
+            
+            // Check for interests first
+            if (candidate.interests && Array.isArray(candidate.interests) && candidate.interests.length > 0) {
+                candidate.interests.forEach(interest => {
+                    const clean = interest.trim();
+                    if (clean && clean.length > 2 && !seen.has(clean.toLowerCase())) {
+                        skills.push(clean);
+                        seen.add(clean.toLowerCase());
+                    }
+                });
+            }
+            
+            // Check background for common field patterns
+            const background = candidate.background || candidate.description || '';
+            if (background) {
+                // Common fields/domains
+                const commonFields = [
+                    'Computer Science', 'Data Science', 'Machine Learning', 'AI Research', 
+                    'Business Analytics', 'Statistics', 'Mathematics', 'Education', 
+                    'Engineering', 'Software Development', 'Data Analysis', 'Research',
+                    'Teaching', 'Administration', 'Policy', 'Curriculum Development',
+                    'Social Sciences', 'Arts', 'Health', 'STEM'
+                ];
+                
+                commonFields.forEach(field => {
+                    if (background.includes(field) && !seen.has(field.toLowerCase()) && skills.length < 3) {
+                        skills.push(field);
+                        seen.add(field.toLowerCase());
+                    }
+                });
+                
+                // Extract from degree field if available
+                if (candidate.background) {
+                    const degreeMatch = candidate.background.match(/(?:in|of)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
+                    if (degreeMatch && degreeMatch[1]) {
+                        const field = degreeMatch[1].trim();
+                        if (field.length > 3 && !seen.has(field.toLowerCase()) && skills.length < 3) {
+                            skills.push(field);
+                            seen.add(field.toLowerCase());
+                        }
+                    }
+                }
+            }
+            
+            // Check positive drivers for skill keywords
+            if (candidate.positiveDrivers && Array.isArray(candidate.positiveDrivers) && skills.length < 3) {
+                candidate.positiveDrivers.forEach(driver => {
+                    const driverStr = String(driver);
+                    const commonFields = ['Computer Science', 'Data Science', 'Machine Learning', 'AI', 'Analytics', 'Statistics', 'Research', 'Teaching', 'Education'];
+                    commonFields.forEach(field => {
+                        if (driverStr.includes(field) && !seen.has(field.toLowerCase()) && skills.length < 3) {
+                            skills.push(field);
+                            seen.add(field.toLowerCase());
+                        }
+                    });
+                });
+            }
+            
+            return skills.slice(0, 3); // Return max 3 skills
         }
         
         function exportCampaignData(type) {
