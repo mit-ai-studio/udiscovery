@@ -123,7 +123,9 @@ Candidates for Harvard Graduate School of Education:
    Predicted Application Probability: [MUST include a number between 0.0 and 1.0, e.g., 0.75, 0.82, 0.65. If theoretical, use an estimated value like 0.7 for high, 0.5 for medium, 0.3 for low]
    Propensity Segment: [high/medium/low]
    Contact: [email field from the dataset - use the exact email value provided]
+   Location: [State or region from home_state_or_region field - use the exact value from the dataset]
    Background: [Current Position] with [years_work_experience] years work exp, [years_education_experience] years education exp, [Prior Degree Level] in [Prior Degree Field]. Interest: [Interest]. GPA: [GPA]. Located in [State].
+   Skills/Tags: [Extract 2-3 relevant skills or tags based on: 1) Job title/role (e.g., "School Leader", "Teacher", "Principal"), 2) Education level focus (e.g., "Secondary Education", "Elementary Education", "K-12 Education"), 3) Subject area or field of expertise. Format as comma-separated list, e.g., "School Leader, Secondary Education" or "Data Science, Machine Learning"]
    Key Positive Drivers: [List factors that increase application likelihood]
    Key Negative Drivers: [List factors that decrease application likelihood]
    Assumptions/Warnings: [Any assumptions or warnings about the prediction]
@@ -132,7 +134,9 @@ Candidates for Harvard Graduate School of Education:
    Predicted Application Probability: [MUST include a number between 0.0 and 1.0, e.g., 0.75, 0.82, 0.65]
    Propensity Segment: [high/medium/low]
    Contact: [email field from the dataset - use the exact email value provided]
+   Location: [State or region from home_state_or_region field - use the exact value from the dataset]
    Background: [Current Position] with [years_work_experience] years work exp, [years_education_experience] years education exp, [Prior Degree Level] in [Prior Degree Field]. Interest: [Interest]. GPA: [GPA]. Located in [State].
+   Skills/Tags: [Extract 2-3 relevant skills or tags based on job title, education level, and subject area. Format as comma-separated list]
    Key Positive Drivers: [...]
    Key Negative Drivers: [...]
    Assumptions/Warnings: [...]

@@ -593,18 +593,33 @@
         }
         
         .candidate-interests {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+        }
+        
+        .skills-container {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+            margin-top: 0.75rem !important;
+            min-height: 24px !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         .interest-tag {
             padding: 0.25rem 0.5rem;
-            background: #012A42;
-            border: 1px solid rgba(110, 231, 215, 0.3);
-            border-radius: 4px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.75rem;
+            background: #012A42 !important;
+            border: 1px solid rgba(110, 231, 215, 0.3) !important;
+            border-radius: 4px !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 0.75rem !important;
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
         }
         
         .candidate-expand-btn {
@@ -2130,28 +2145,14 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 
                 // Extract location, experience, GPA, degree from background - try multiple sources
                 const background = candidate.background || candidate.rationale || candidate.whyMatch || candidate.description || '';
-                const location = extractLocation(background) || extractLocation(candidate.background || '') || 'Not specified';
+                
+                // Use location from agent output if available, otherwise extract from background
+                let location = candidate.location || extractLocation(background) || extractLocation(candidate.background || '') || 'Not specified';
+                // Convert state abbreviation to full state name
+                location = getFullStateName(location);
                 const experience = extractExperience(background) || extractExperience(candidate.background || '') || 'Not specified';
                 const gpa = extractGPA(background) || extractGPA(candidate.background || '') || null;
                 const degree = extractDegree(background) || extractDegree(candidate.background || '') || null;
-                const interests = candidate.interests || [];
-                const skills = extractSkills(candidate) || [];
-                
-                console.log(`Candidate ${candidateIndex}:`, {
-                    name: candidateName,
-                    probability: probability,
-                    location: location,
-                    backgroundLength: background.length,
-                    hasPropensitySegment: !!candidate.propensitySegment,
-                    hasInterests: interests.length > 0,
-                    hasBackground: !!candidate.background,
-                    hasWhyMatch: !!candidate.whyMatch,
-                    hasPositiveDrivers: !!(candidate.positiveDrivers && (Array.isArray(candidate.positiveDrivers) ? candidate.positiveDrivers.length > 0 : candidate.positiveDrivers)),
-                    hasNegativeDrivers: !!(candidate.negativeDrivers && (Array.isArray(candidate.negativeDrivers) ? candidate.negativeDrivers.length > 0 : candidate.negativeDrivers)),
-                    hasStrengths: !!candidate.strengths,
-                    hasAssumptions: !!candidate.assumptions,
-                    fullCandidate: candidate
-                });
                 
                 // Use candidate.background if available, otherwise try to construct from other fields
                 let candidateBackground = candidate.background || '';
@@ -2178,13 +2179,6 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                         <span>${escapeHtml(experience)}</span>
                                         ${degree ? `<span>${escapeHtml(degree)}</span>` : ''}
                                     </div>
-                                    ${skills.length > 0 ? `
-                                        <div class="candidate-skills" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">
-                                            ${skills.map(skill => `
-                                                <span class="skill-tag" style="border: 1px solid rgba(110, 231, 215, 0.5); border-radius: 4px; padding: 0.25rem 0.75rem; color: #6EE7D7; font-size: 0.75rem; background: rgba(110, 231, 215, 0.1);">${escapeHtml(skill)}</span>
-                                            `).join('')}
-                                        </div>
-                                    ` : ''}
                                     ${candidateBackground ? `
                                         <div style="margin-top: 0.5rem; color: rgba(255, 255, 255, 0.6); font-size: 0.875rem;">
                                             ${escapeHtml(candidateBackground.substring(0, 150))}${candidateBackground.length > 150 ? '...' : ''}
@@ -2313,8 +2307,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 // Search filter
                 if (searchQuery) {
                     const name = (c.name || '').toLowerCase();
-                    const interests = Array.isArray(c.interests) ? c.interests.join(' ').toLowerCase() : '';
-                    if (!name.includes(searchQuery) && !interests.includes(searchQuery)) {
+                    if (!name.includes(searchQuery)) {
                         return false;
                     }
                 }
@@ -2527,6 +2520,38 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             }
         }
         
+        // State abbreviation to full name mapping
+        const stateNames = {
+            'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+            'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+            'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+            'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+            'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+            'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+            'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+            'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+            'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+            'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+            'DC': 'District of Columbia'
+        };
+        
+        function getFullStateName(location) {
+            if (!location) return location;
+            const trimmed = location.trim().toUpperCase();
+            // Check if it's a state abbreviation
+            if (stateNames[trimmed]) {
+                return stateNames[trimmed];
+            }
+            // Check if it contains a state abbreviation
+            for (const [abbr, fullName] of Object.entries(stateNames)) {
+                if (trimmed.includes(abbr)) {
+                    return trimmed.replace(abbr, fullName);
+                }
+            }
+            // If it's already a full name or something else, return as is
+            return location;
+        }
+        
         function extractLocation(text) {
             const locationPatterns = /(?:from|located in|based in|resides in|in)\s+([A-Z][a-zA-Z\s,]+)/i;
             const match = text.match(locationPatterns);
@@ -2589,64 +2614,126 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         function extractSkills(candidate) {
             const skills = [];
             const seen = new Set();
+            const background = candidate.background || candidate.description || '';
             
-            // Check for interests first
-            if (candidate.interests && Array.isArray(candidate.interests) && candidate.interests.length > 0) {
+            if (!background) {
+                // Fallback to interests if no background
+                if (candidate.interests && Array.isArray(candidate.interests)) {
+                    return candidate.interests.slice(0, 3);
+                }
+                return skills;
+            }
+            
+            // 1. Extract job titles/roles from the beginning of background (most common pattern)
+            // Look for patterns like "School or District Leader", "Teacher", "Principal", etc.
+            const jobTitlePatterns = [
+                /^(School or District Leader|District Leader|School Leader)/i,
+                /(School or District Leader|District Leader|School Leader|Principal|Vice Principal|Assistant Principal|Superintendent|Department Head|Program Manager|Curriculum Director|Education Director)/i,
+                /(Teacher|Instructor|Professor|Lecturer|Educator|Coordinator|Specialist|Administrator|Manager|Director)/i
+            ];
+            
+            for (const pattern of jobTitlePatterns) {
+                const match = background.match(pattern);
+                if (match && match[0]) {
+                    let title = match[0].trim();
+                    // Clean up common variations
+                    if (title.toLowerCase().includes('school or district leader')) {
+                        title = 'School Leader';
+                    } else if (title.toLowerCase().includes('district leader') && !title.toLowerCase().includes('school')) {
+                        title = 'District Leader';
+                    } else if (title.toLowerCase().includes('school leader')) {
+                        title = 'School Leader';
+                    }
+                    
+                    if (!seen.has(title.toLowerCase()) && skills.length < 3) {
+                        skills.push(title);
+                        seen.add(title.toLowerCase());
+                        break; // Take first match
+                    }
+                }
+            }
+            
+            // 2. Extract education level/type (e.g., "Secondary Education", "Elementary Education")
+            const educationLevelPatterns = [
+                /(Secondary Education|Elementary Education|Primary Education|Higher Education|Early Childhood Education|Special Education|Adult Education)/i,
+                /(K-12|K–12|K12)/i,
+                /(secondary|elementary|primary|higher education)/i
+            ];
+            
+            for (const pattern of educationLevelPatterns) {
+                const match = background.match(pattern);
+                if (match && match[0]) {
+                    let level = match[0].trim();
+                    // Normalize
+                    if (level.match(/K-?12|K–?12/i)) {
+                        level = 'K-12 Education';
+                    } else if (level.toLowerCase().includes('secondary')) {
+                        level = 'Secondary Education';
+                    } else if (level.toLowerCase().includes('elementary')) {
+                        level = 'Elementary Education';
+                    } else if (level.toLowerCase().includes('primary')) {
+                        level = 'Primary Education';
+                    } else if (level.toLowerCase().includes('higher')) {
+                        level = 'Higher Education';
+                    }
+                    
+                    if (!seen.has(level.toLowerCase()) && skills.length < 3) {
+                        skills.push(level);
+                        seen.add(level.toLowerCase());
+                        break; // Take first match
+                    }
+                }
+            }
+            
+            // 3. Check interests array (from Figma pattern)
+            if (candidate.interests && Array.isArray(candidate.interests) && skills.length < 3) {
                 candidate.interests.forEach(interest => {
                     const clean = interest.trim();
-                    if (clean && clean.length > 2 && !seen.has(clean.toLowerCase())) {
+                    if (clean && clean.length > 2 && !seen.has(clean.toLowerCase()) && skills.length < 3) {
                         skills.push(clean);
                         seen.add(clean.toLowerCase());
                     }
                 });
             }
             
-            // Check background for common field patterns
-            const background = candidate.background || candidate.description || '';
-            if (background) {
-                // Common fields/domains
-                const commonFields = [
-                    'Computer Science', 'Data Science', 'Machine Learning', 'AI Research', 
-                    'Business Analytics', 'Statistics', 'Mathematics', 'Education', 
-                    'Engineering', 'Software Development', 'Data Analysis', 'Research',
-                    'Teaching', 'Administration', 'Policy', 'Curriculum Development',
-                    'Social Sciences', 'Arts', 'Health', 'STEM'
+            // 4. Extract subject areas/fields from background if still need more
+            if (skills.length < 3) {
+                const subjectPatterns = [
+                    /(Computer Science|Data Science|Machine Learning|AI Research|Business Analytics|Statistics|Mathematics|Engineering|Software Development)/i,
+                    /(Social Sciences|Arts|Health|STEM|Science|Technology|Research|Policy|Curriculum Development)/i
                 ];
                 
-                commonFields.forEach(field => {
-                    if (background.includes(field) && !seen.has(field.toLowerCase()) && skills.length < 3) {
-                        skills.push(field);
-                        seen.add(field.toLowerCase());
-                    }
-                });
-                
-                // Extract from degree field if available
-                if (candidate.background) {
-                    const degreeMatch = candidate.background.match(/(?:in|of)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
-                    if (degreeMatch && degreeMatch[1]) {
-                        const field = degreeMatch[1].trim();
-                        if (field.length > 3 && !seen.has(field.toLowerCase()) && skills.length < 3) {
-                            skills.push(field);
-                            seen.add(field.toLowerCase());
+                for (const pattern of subjectPatterns) {
+                    const match = background.match(pattern);
+                    if (match && match[0] && skills.length < 3) {
+                        const subject = match[0].trim();
+                        if (!seen.has(subject.toLowerCase())) {
+                            skills.push(subject);
+                            seen.add(subject.toLowerCase());
                         }
                     }
                 }
             }
             
-            // Check positive drivers for skill keywords
-            if (candidate.positiveDrivers && Array.isArray(candidate.positiveDrivers) && skills.length < 3) {
-                candidate.positiveDrivers.forEach(driver => {
-                    const driverStr = String(driver);
-                    const commonFields = ['Computer Science', 'Data Science', 'Machine Learning', 'AI', 'Analytics', 'Statistics', 'Research', 'Teaching', 'Education'];
-                    commonFields.forEach(field => {
-                        if (driverStr.includes(field) && !seen.has(field.toLowerCase()) && skills.length < 3) {
-                            skills.push(field);
-                            seen.add(field.toLowerCase());
-                        }
-                    });
-                });
+            // If no skills found, provide defaults based on background context
+            if (skills.length === 0 && background) {
+                // Try to infer from location/industry mentioned
+                if (background.toLowerCase().includes('education') || background.toLowerCase().includes('school') || background.toLowerCase().includes('teacher')) {
+                    skills.push('Education');
+                }
+                if (background.toLowerCase().includes('secondary') || background.toLowerCase().includes('high school')) {
+                    skills.push('Secondary Education');
+                } else if (background.toLowerCase().includes('elementary') || background.toLowerCase().includes('primary')) {
+                    skills.push('Elementary Education');
+                }
             }
             
+            // Always return at least one skill if we have background
+            if (skills.length === 0 && background) {
+                skills.push('Education');
+            }
+            
+            console.log('extractSkills returning:', skills);
             return skills.slice(0, 3); // Return max 3 skills
         }
         
@@ -2899,6 +2986,27 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 }
                 
                 // Check for Contact/Email - be more flexible with format
+                // Check for Location
+                if (line.toLowerCase().includes('location:')) {
+                    const locationMatch = line.match(/location:\s*(.+)/i);
+                    if (locationMatch) {
+                        currentCandidate.location = locationMatch[1].trim();
+                    }
+                    continue;
+                }
+                
+                // Check for Skills/Tags
+                if (line.toLowerCase().includes('skills/tags:') || line.toLowerCase().includes('skills:') || line.toLowerCase().includes('tags:')) {
+                    const skillsMatch = line.match(/(?:skills\/tags|skills|tags):\s*(.+)/i);
+                    if (skillsMatch) {
+                        const skillsStr = skillsMatch[1].trim();
+                        // Split by comma and clean up
+                        currentCandidate.skills = skillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                        currentCandidate.interests = currentCandidate.skills; // Also set interests for compatibility
+                    }
+                    continue;
+                }
+                
                 if (line.toLowerCase().includes('contact:') || line.toLowerCase().includes('email:')) {
                     const contactMatch = line.match(/(?:contact|email):\s*(.+)/i);
                     if (contactMatch) {
