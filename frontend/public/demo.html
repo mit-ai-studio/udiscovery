@@ -7,10 +7,16 @@
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Override nav-container from styles.css */
+        .nav-container {
+            max-width: none !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+        
         .demo-container {
-            max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem 0;
             padding-top: 1rem;
             min-height: 100vh;
             background: #012A42;
@@ -239,13 +245,14 @@
         .dashboard-layout {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 2.5rem;
         }
         
         @media (min-width: 1024px) {
             .dashboard-layout {
                 flex-direction: row;
                 align-items: flex-start;
+                gap: 2.5rem;
             }
         }
         
@@ -273,14 +280,14 @@
         
         .sidebar-section h3 {
             color: #6EE7D7;
-            font-size: 1rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 1rem;
         }
         
         .sidebar-text {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
+            font-size: 1.125rem;
             margin-bottom: 1rem;
         }
         
@@ -288,7 +295,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.875rem;
+            font-size: 1.125rem;
             padding: 0.5rem 0;
             border-bottom: 1px solid rgba(110, 231, 215, 0.2);
         }
@@ -378,13 +385,13 @@
         
         .kpi-label {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
+            font-size: 1.125rem;
             margin-bottom: 0.5rem;
         }
         
         .kpi-value {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 600;
         }
         
@@ -398,7 +405,7 @@
         
         .filters-section h3 {
             color: #6EE7D7;
-            font-size: 1rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 1rem;
         }
@@ -432,7 +439,7 @@
         
         .filter-row label {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 0.875rem;
+            font-size: 1.125rem;
         }
         
         .threshold-value {
@@ -515,7 +522,7 @@
         
         .prospects-main h3 {
             color: #6EE7D7;
-            font-size: 1rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 1rem;
         }
@@ -570,7 +577,7 @@
         
         .candidate-name {
             color: #6EE7D7;
-            font-size: 1rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin: 0;
         }
@@ -580,7 +587,7 @@
             border-radius: 4px;
             background: rgba(110, 231, 215, 0.2);
             color: #6EE7D7;
-            font-size: 0.875rem;
+            font-size: 1.125rem;
         }
         
         .candidate-meta {
@@ -588,7 +595,7 @@
             flex-wrap: wrap;
             gap: 1rem;
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
+            font-size: 1.125rem;
             margin-bottom: 0.75rem;
         }
         
@@ -702,7 +709,7 @@
         
         @media (min-width: 1024px) {
             .campaign-sidebar {
-                width: 288px;
+                width: 320px;
                 flex-shrink: 0;
                 max-height: calc(100vh - 14rem);
             }
@@ -718,7 +725,7 @@
         
         .campaign-buttons h3 {
             color: #6EE7D7;
-            font-size: 1rem;
+            font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 0.75rem;
         }
@@ -736,7 +743,7 @@
             color: rgba(255, 255, 255, 0.9);
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 0.875rem;
+            font-size: 1.125rem;
         }
         
         .campaign-btn:last-child {
@@ -768,7 +775,7 @@
         
         .campaign-placeholder {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
+            font-size: 1.125rem;
             line-height: 1.6;
         }
         
@@ -782,7 +789,7 @@
         
         .campaign-contact-name {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 0.875rem;
+            font-size: 1.125rem;
             margin-bottom: 0.25rem;
         }
         
@@ -1312,17 +1319,17 @@
 </head>
 <body>
     <nav class="navbar" style="border-bottom: 1px solid rgba(110, 231, 215, 0.2); background: rgba(1, 42, 66, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50;">
-        <div class="nav-container" style="max-width: 1440px; margin: 0 auto; padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between;">
+        <div class="nav-container" style="padding: 0.5rem 10rem; display: flex; align-items: center; justify-content: space-between;">
             <div class="nav-logo">
                 <img src="images/udiscovery-logo.png" alt="UDiscovery Logo" style="height: 80px; width: auto;" />
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
                 <div style="display: flex; align-items: center; gap: 1.5rem;">
-                    <a href="#" id="nav-prospecting" class="nav-link" style="color: #6EE7D7; padding: 0.5rem 0.75rem;">Prospecting</a>
-                    <a href="#" id="nav-admissions" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem;">Admissions</a>
-                    <a href="#" id="nav-logout" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem;">Logout</a>
+                    <a href="#" id="nav-prospecting" class="nav-link" style="color: #6EE7D7; padding: 0.5rem 0.75rem; font-size: 1.125rem;">Prospecting</a>
+                    <a href="#" id="nav-admissions" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem; font-size: 1.125rem;">Admissions</a>
+                    <a href="#" id="nav-logout" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem; font-size: 1.125rem;">Logout</a>
                 </div>
-                <div id="welcome-message" style="color: rgba(203, 213, 225, 1); padding-right: 0.75rem; font-size: 0.875rem;"></div>
+                <div id="welcome-message" style="color: rgba(203, 213, 225, 1); padding-right: 0.75rem; font-size: 1.125rem;"></div>
             </div>
         </div>
     </nav>
@@ -1423,13 +1430,13 @@
 
         <div id="results-section" class="results-section">
             <!-- Page Header -->
-            <div style="margin-bottom: 1.5rem; margin-top: 0.5rem; max-width: 1440px; margin-left: auto; margin-right: auto; padding: 0 2rem;">
-                <h2 style="color: #6EE7D7; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 600;">Prospecting Dashboard</h2>
-                <p style="color: rgba(148, 163, 184, 1); font-size: 0.875rem; margin: 0;">Discovery phase: Ranked candidates by application propensity</p>
+            <div style="margin-bottom: 1.5rem; margin-top: 0.5rem; margin-left: 10rem; margin-right: 10rem;">
+                <h2 style="color: #6EE7D7; margin-bottom: 0.5rem; font-size: 2rem; font-weight: 600;">Prospecting Dashboard</h2>
+                <p style="color: rgba(148, 163, 184, 1); font-size: 1.125rem; margin: 0;">Discovery phase: Ranked candidates by application propensity</p>
             </div>
             
             <!-- Dashboard Layout: Sidebar + Main Content -->
-            <div class="dashboard-layout">
+            <div class="dashboard-layout" style="margin-left: 10rem; margin-right: 10rem;">
                 <!-- Left Sidebar -->
                 <div class="dashboard-sidebar">
                     <div class="sidebar-section">
@@ -2164,7 +2171,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                         <h4 class="candidate-name">${escapeHtml(candidateName)}</h4>
                                         <span class="propensity-badge">${probability}% propensity</span>
                                     </div>
-                                    <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; margin-top: 0.5rem;">
+                                    <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 1rem; margin-top: 0.5rem;">
                                         <span>${escapeHtml(location)}</span>
                                         ${gpa ? `<span>GPA: ${escapeHtml(gpa)}</span>` : ''}
                                         <span>${escapeHtml(experience)}</span>
