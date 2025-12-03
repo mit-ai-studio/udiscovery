@@ -3942,6 +3942,13 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 
                 const applicants = result.results.filter(a => !a.error);
                 
+                // Sort by probability of success (descending - highest first)
+                applicants.sort((a, b) => {
+                    const probA = a.probability_of_success ? (a.probability_of_success > 1 ? a.probability_of_success : a.probability_of_success * 100) : 0;
+                    const probB = b.probability_of_success ? (b.probability_of_success > 1 ? b.probability_of_success : b.probability_of_success * 100) : 0;
+                    return probB - probA; // Descending order
+                });
+                
                 // Store globally
                 window.allAdmissionData = applicants;
                 window.filteredAdmissionData = applicants;
