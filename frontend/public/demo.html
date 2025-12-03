@@ -534,12 +534,12 @@
             background: #01344F;
             border: 1px solid rgba(110, 231, 215, 0.3);
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
             transition: all 0.3s;
             display: block;
             visibility: visible;
             opacity: 1;
-            min-height: 100px;
+            min-height: auto;
         }
         
         .candidate-card:hover {
@@ -547,7 +547,7 @@
         }
         
         .candidate-card-header {
-            padding: 1rem;
+            padding: 0.25rem;
         }
         
         .candidate-card-main {
@@ -2179,11 +2179,6 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                         <span>${escapeHtml(experience)}</span>
                                         ${degree ? `<span>${escapeHtml(degree)}</span>` : ''}
                                     </div>
-                                    ${candidateBackground ? `
-                                        <div style="margin-top: 0.5rem; color: rgba(255, 255, 255, 0.6); font-size: 0.875rem;">
-                                            ${escapeHtml(candidateBackground.substring(0, 150))}${candidateBackground.length > 150 ? '...' : ''}
-                                        </div>
-                                    ` : ''}
                                 </div>
                             </div>
                         </div>
