@@ -959,10 +959,12 @@
         .loading {
             text-align: center;
             padding: 3rem;
+            background: #012A42;
+            border-radius: 8px;
         }
         .loading-spinner {
-            border: 4px solid #F0F4F8;
-            border-top: 4px solid #3A86FF;
+            border: 4px solid rgba(110, 231, 215, 0.2);
+            border-top: 4px solid #6EE7D7;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -983,24 +985,24 @@
         .progress-bar-container {
             width: 100%;
             height: 24px;
-            background: rgba(240, 244, 248, 0.3);
+            background: rgba(110, 231, 215, 0.15);
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 0.5rem;
-            border: 1px solid rgba(58, 134, 255, 0.2);
+            border: 1px solid rgba(110, 231, 215, 0.3);
         }
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #3A86FF 0%, #5DADE2 100%);
+            background: linear-gradient(90deg, #6EE7D7 0%, #5DD6C6 100%);
             border-radius: 12px;
             width: 0%;
             transition: width 0.3s ease;
-            box-shadow: 0 2px 8px rgba(58, 134, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(110, 231, 215, 0.3);
         }
         .progress-percentage {
             font-size: 1.2rem;
             font-weight: 600;
-            color: #3A86FF;
+            color: #6EE7D7;
             margin-top: 0.5rem;
         }
         .loading-status {
