@@ -217,35 +217,35 @@ def create_scoring_task(rubric_scores: dict, applicant_data: dict):
            - LC = Life Context
         
         2. Calculate Probability of Success using the logistic regression formula:
-           z = -7.0 + 0.7×MV + 0.6×RE + 0.5×LE + 0.65×LO + 0.45×AC - 0.7×LC
+           z = -7.75 + 0.68×MV + 0.58×RE + 0.48×LE + 0.63×LO + 0.43×AC - 0.72×LC
            probability_of_success = 1 / (1 + e^(-z))
            
            - Convert probability to percentage (0-100): probability_percentage = probability_of_success × 100
            - Example: if MV=4, RE=4, LE=3, LO=4, AC=4, LC=3
-             then: z = -7.0 + 0.7×4 + 0.6×4 + 0.5×3 + 0.65×4 + 0.45×4 - 0.7×3
-                   z = -7.0 + 2.8 + 2.4 + 1.5 + 2.6 + 1.8 - 2.1 = 2.0
-             probability = 1 / (1 + e^(-2.0)) ≈ 0.88
-             probability_percentage = 88%
+             then: z = -7.75 + 0.68×4 + 0.58×4 + 0.48×3 + 0.63×4 + 0.43×4 - 0.72×3
+                   z = -7.75 + 2.72 + 2.32 + 1.44 + 2.52 + 1.72 - 2.16 = 0.21
+             probability = 1 / (1 + e^(-0.21)) ≈ 0.55
+             probability_percentage = 55%
            - Example with average scores (MV=3, RE=3, LE=3, LO=3, AC=3, LC=3):
-             then: z = -7.0 + 0.7×3 + 0.6×3 + 0.5×3 + 0.65×3 + 0.45×3 - 0.7×3
-                   z = -7.0 + 2.1 + 1.8 + 1.5 + 1.95 + 1.35 - 2.1 = 0.6
-             probability = 1 / (1 + e^(-0.6)) ≈ 0.65
-             probability_percentage = 65%
+             then: z = -7.75 + 0.68×3 + 0.58×3 + 0.48×3 + 0.63×3 + 0.43×3 - 0.72×3
+                   z = -7.75 + 2.04 + 1.74 + 1.44 + 1.89 + 1.29 - 2.16 = -0.51
+             probability = 1 / (1 + e^(0.51)) ≈ 0.37
+             probability_percentage = 37%
            - Example with good scores (MV=4, RE=4, LE=4, LO=4, AC=4, LC=4):
-             then: z = -7.0 + 0.7×4 + 0.6×4 + 0.5×4 + 0.65×4 + 0.45×4 - 0.7×4
-                   z = -7.0 + 2.8 + 2.4 + 2.0 + 2.6 + 1.8 - 2.8 = 1.8
-             probability = 1 / (1 + e^(-1.8)) ≈ 0.86
-             probability_percentage = 86%
+             then: z = -7.75 + 0.68×4 + 0.58×4 + 0.48×4 + 0.63×4 + 0.43×4 - 0.72×4
+                   z = -7.75 + 2.72 + 2.32 + 1.92 + 2.52 + 1.72 - 2.88 = 0.47
+             probability = 1 / (1 + e^(-0.47)) ≈ 0.62
+             probability_percentage = 62%
            - Example with very good scores (MV=5, RE=4, LE=4, LO=5, AC=5, LC=4):
-             then: z = -7.0 + 0.7×5 + 0.6×4 + 0.5×4 + 0.65×5 + 0.45×5 - 0.7×4
-                   z = -7.0 + 3.5 + 2.4 + 2.0 + 3.25 + 2.25 - 2.8 = 3.6
-             probability = 1 / (1 + e^(-3.6)) ≈ 0.97
-             probability_percentage = 97%
+             then: z = -7.75 + 0.68×5 + 0.58×4 + 0.48×4 + 0.63×5 + 0.43×5 - 0.72×4
+                   z = -7.75 + 3.4 + 2.32 + 1.92 + 3.15 + 2.15 - 2.88 = 2.31
+             probability = 1 / (1 + e^(-2.31)) ≈ 0.91
+             probability_percentage = 91%
            - Example with excellent scores (MV=5, RE=5, LE=5, LO=5, AC=5, LC=4):
-             then: z = -7.0 + 0.7×5 + 0.6×5 + 0.5×5 + 0.65×5 + 0.45×5 - 0.7×4
-                   z = -7.0 + 3.5 + 3.0 + 2.5 + 3.25 + 2.25 - 2.8 = 4.7
-             probability = 1 / (1 + e^(-4.7)) ≈ 0.991
-             probability_percentage = 99.1%
+             then: z = -7.75 + 0.68×5 + 0.58×5 + 0.48×5 + 0.63×5 + 0.43×5 - 0.72×4
+                   z = -7.75 + 3.4 + 2.9 + 2.4 + 3.15 + 2.15 - 2.88 = 3.27
+             probability = 1 / (1 + e^(-3.27)) ≈ 0.96
+             probability_percentage = 96%
         
         IMPORTANT: 
         - Do NOT use GPA, teaching experience, or any other factors in the calculation
