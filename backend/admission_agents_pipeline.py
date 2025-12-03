@@ -690,6 +690,9 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
                 "gpa": gpa_display,
                 "gre_score": gre_score,
                 "teaching_experience_years": teaching_exp,
+                "cv": applicant_data.get('cv', ''),
+                "roles_in_education": applicant_data.get('roles_in_education', ''),
+                "field_of_study": applicant_data.get('field_of_study', ''),
                 "rubric_scores": {
                     "motivation_values": rubric_scores.get('motivation_values'),
                     "resilience": rubric_scores.get('resilience'),
