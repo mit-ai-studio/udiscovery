@@ -6,6 +6,7 @@
     <title>UDiscovery - Interactive Demo</title>
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Override nav-container from styles.css */
         .nav-container {
@@ -1075,6 +1076,23 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(110, 231, 215, 0.3);
         }
+        
+        .sidebar-upload-btn i,
+        .download-csv-btn i,
+        .campaign-btn i,
+        .nav-link i {
+            flex-shrink: 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (min-width: 640px) {
+            .hidden.sm\:inline {
+                display: inline;
+            }
+        }
         .modal {
             display: none;
             position: fixed;
@@ -1352,7 +1370,10 @@
                 <div style="display: flex; align-items: center; gap: 1.5rem;">
                     <a href="#" id="nav-prospecting" class="nav-link" style="color: #6EE7D7; padding: 0.5rem 0.75rem; font-size: 1.125rem;">Prospecting</a>
                     <a href="#" id="nav-admissions" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem; font-size: 1.125rem;">Admissions</a>
-                    <a href="#" id="nav-logout" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem; font-size: 1.125rem;">Logout</a>
+                    <a href="#" id="nav-logout" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem; font-size: 1.125rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
                 </div>
                 <div id="welcome-message" style="color: rgba(203, 213, 225, 1); padding-right: 0.75rem; font-size: 1.125rem;"></div>
             </div>
@@ -1477,7 +1498,8 @@
                         <h3>Training Data</h3>
                         <p class="sidebar-text">Upload datasets to improve predictions</p>
                         <button class="sidebar-upload-btn">
-                            📤 Upload Dataset
+                            <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                            Upload Dataset
                         </button>
                         <div class="sidebar-item">
                             <span>Demo Training Data</span>
@@ -1491,9 +1513,10 @@
                     <!-- KPI Results Box -->
                     <div class="kpi-section">
                         <div class="kpi-header">
-                            <h3>🎉 Prospecting Results & KPIs</h3>
+                            <h3>Prospecting Results & KPIs</h3>
                             <button id="download-csv-btn" class="download-csv-btn" style="display: none;" onclick="downloadCSV()">
-                                📥 Export
+                                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                                <span class="hidden sm:inline">Export</span>
                             </button>
                         </div>
                         <div class="kpi-grid" id="kpi-grid">
@@ -1627,13 +1650,16 @@
                             <div class="campaign-buttons">
                                 <h3>Campaign Views</h3>
                                 <button class="campaign-btn active" data-view="list">
-                                    📋 Ranked List
+                                    <i data-lucide="list" style="width: 16px; height: 16px;"></i>
+                                    Ranked List
                                 </button>
                                 <button class="campaign-btn" data-view="email">
-                                    ✉️ Generate Email Campaign
+                                    <i data-lucide="mail" style="width: 16px; height: 16px;"></i>
+                                    Generate Email Campaign
                                 </button>
                                 <button class="campaign-btn" data-view="sms">
-                                    💬 Generate SMS Campaign
+                                    <i data-lucide="message-square" style="width: 16px; height: 16px;"></i>
+                                    Generate SMS Campaign
                                 </button>
                             </div>
                             <div class="campaign-viewport" id="campaign-viewport">
@@ -2660,8 +2686,8 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 viewport.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h4 style="color: #6EE7D7; margin: 0;">Email Addresses</h4>
-                        <button onclick="exportCampaignData('email')" style="background: transparent; border: none; color: #6EE7D7; cursor: pointer;">
-                            📥
+                        <button onclick="exportCampaignData('email')" style="background: transparent; border: none; color: #6EE7D7; cursor: pointer; padding: 0.25rem;">
+                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
                         </button>
                     </div>
                     <div>
@@ -2677,12 +2703,17 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 viewport.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h4 style="color: #6EE7D7; margin: 0;">Phone Numbers</h4>
-                        <button onclick="exportCampaignData('sms')" style="background: transparent; border: none; color: #6EE7D7; cursor: pointer;">
-                            📥
+                        <button onclick="exportCampaignData('sms')" style="background: transparent; border: none; color: #6EE7D7; cursor: pointer; padding: 0.25rem;">
+                            <i data-lucide="download" style="width: 16px; height: 16px;"></i>
                         </button>
                     </div>
                     <p class="campaign-placeholder">Phone number extraction not yet implemented</p>
                 `;
+            }
+            
+            // Re-initialize icons after updating content
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         }
         
@@ -3507,6 +3538,11 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         }
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
             updateWelcomeMessage();
             restoreSavedData();
             
