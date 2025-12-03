@@ -433,8 +433,33 @@
                 grid-column: span 12;
             }
             .filter-row:not(:first-child) {
-                grid-column: span 6;
+                grid-column: span 4;
             }
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1.5px solid rgba(110, 231, 215, 0.3);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            background: #012A42;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #6EE7D7;
+            box-shadow: 0 0 0 3px rgba(110, 231, 215, 0.2);
+        }
+        
+        .filter-select:hover {
+            border-color: rgba(110, 231, 215, 0.5);
         }
         
         .filter-row label {
@@ -1502,8 +1527,88 @@
                                 </div>
                             </div>
                             <div class="filter-row">
-                                <label>Search</label>
-                                <input type="text" id="search-query" class="filter-input" placeholder="Search by name or interests...">
+                                <label>Region</label>
+                                <select id="region-filter" class="filter-select">
+                                    <option value="all">All Regions</option>
+                                    <option value="Alabama">Alabama</option>
+                                    <option value="Alaska">Alaska</option>
+                                    <option value="Arizona">Arizona</option>
+                                    <option value="Arkansas">Arkansas</option>
+                                    <option value="California">California</option>
+                                    <option value="Colorado">Colorado</option>
+                                    <option value="Connecticut">Connecticut</option>
+                                    <option value="Delaware">Delaware</option>
+                                    <option value="Florida">Florida</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Hawaii">Hawaii</option>
+                                    <option value="Idaho">Idaho</option>
+                                    <option value="Illinois">Illinois</option>
+                                    <option value="Indiana">Indiana</option>
+                                    <option value="Iowa">Iowa</option>
+                                    <option value="Kansas">Kansas</option>
+                                    <option value="Kentucky">Kentucky</option>
+                                    <option value="Louisiana">Louisiana</option>
+                                    <option value="Maine">Maine</option>
+                                    <option value="Maryland">Maryland</option>
+                                    <option value="Massachusetts">Massachusetts</option>
+                                    <option value="Michigan">Michigan</option>
+                                    <option value="Minnesota">Minnesota</option>
+                                    <option value="Mississippi">Mississippi</option>
+                                    <option value="Missouri">Missouri</option>
+                                    <option value="Montana">Montana</option>
+                                    <option value="Nebraska">Nebraska</option>
+                                    <option value="Nevada">Nevada</option>
+                                    <option value="New Hampshire">New Hampshire</option>
+                                    <option value="New Jersey">New Jersey</option>
+                                    <option value="New Mexico">New Mexico</option>
+                                    <option value="New York">New York</option>
+                                    <option value="North Carolina">North Carolina</option>
+                                    <option value="North Dakota">North Dakota</option>
+                                    <option value="Ohio">Ohio</option>
+                                    <option value="Oklahoma">Oklahoma</option>
+                                    <option value="Oregon">Oregon</option>
+                                    <option value="Pennsylvania">Pennsylvania</option>
+                                    <option value="Rhode Island">Rhode Island</option>
+                                    <option value="South Carolina">South Carolina</option>
+                                    <option value="South Dakota">South Dakota</option>
+                                    <option value="Tennessee">Tennessee</option>
+                                    <option value="Texas">Texas</option>
+                                    <option value="Utah">Utah</option>
+                                    <option value="Vermont">Vermont</option>
+                                    <option value="Virginia">Virginia</option>
+                                    <option value="Washington">Washington</option>
+                                    <option value="West Virginia">West Virginia</option>
+                                    <option value="Wisconsin">Wisconsin</option>
+                                    <option value="Wyoming">Wyoming</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <label>Experience Range</label>
+                                <select id="experience-filter" class="filter-select">
+                                    <option value="all">All Experience Levels</option>
+                                    <option value="no-exp">No Professional Experience</option>
+                                    <option value="0-2">0-2 Years</option>
+                                    <option value="2-5">2-5 Years</option>
+                                    <option value="5-10">5-10 Years</option>
+                                    <option value="10-15">10-15 Years</option>
+                                    <option value="15+">Over 15 Years</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <label>Incoming Industry</label>
+                                <select id="industry-filter" class="filter-select">
+                                    <option value="all">All Industries</option>
+                                    <option value="k12">K-12 Education</option>
+                                    <option value="higher-ed">Higher Education</option>
+                                    <option value="for-profit">For-Profit Education</option>
+                                    <option value="non-profit">Non-Profit/NGO</option>
+                                    <option value="edtech">EdTech/Technology</option>
+                                    <option value="media">Media & Publishing</option>
+                                    <option value="corporate">Corporate Training</option>
+                                    <option value="government">Government/Public Sector</option>
+                                    <option value="healthcare">Healthcare Education</option>
+                                    <option value="consulting">Education Consulting</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -2254,7 +2359,6 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         function initializeFilters() {
             const thresholdSlider = document.getElementById('threshold-slider');
             const thresholdDisplay = document.getElementById('threshold-display');
-            const searchInput = document.getElementById('search-query');
             
             if (thresholdSlider) {
                 thresholdSlider.addEventListener('input', (e) => {
@@ -2264,8 +2368,25 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 });
             }
             
-            if (searchInput) {
-                searchInput.addEventListener('input', () => {
+            // Add event listeners for filter dropdowns
+            const regionFilter = document.getElementById('region-filter');
+            const experienceFilter = document.getElementById('experience-filter');
+            const industryFilter = document.getElementById('industry-filter');
+            
+            if (regionFilter) {
+                regionFilter.addEventListener('change', () => {
+                    applyFilters();
+                });
+            }
+            
+            if (experienceFilter) {
+                experienceFilter.addEventListener('change', () => {
+                    applyFilters();
+                });
+            }
+            
+            if (industryFilter) {
+                industryFilter.addEventListener('change', () => {
                     applyFilters();
                 });
             }
@@ -2286,23 +2407,75 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             if (!window.allCandidatesData) return;
             
             const threshold = currentThreshold;
-            const searchQuery = document.getElementById('search-query')?.value.toLowerCase() || '';
+            const selectedRegion = document.getElementById('region-filter')?.value || 'all';
+            const selectedExperience = document.getElementById('experience-filter')?.value || 'all';
+            const selectedIndustry = document.getElementById('industry-filter')?.value || 'all';
             
             let filtered = window.allCandidatesData.filter(c => {
-                // Threshold filter
-                if (c.probability !== null && c.probability !== undefined) {
-                    const prob = parseFloat(c.probability) * 100;
-                    if (prob < threshold) return false;
-                } else {
-                    return false;
+                // Filter by threshold
+                const prob = c.probability ? parseFloat(c.probability) * 100 : 0;
+                if (prob < threshold) return false;
+                
+                // Filter by region
+                if (selectedRegion !== 'all') {
+                    const background = c.background || c.rationale || c.whyMatch || '';
+                    let location = c.location || extractLocation(background) || '';
+                    location = getFullStateName(location);
+                    if (location !== selectedRegion) return false;
                 }
                 
-                // Search filter
-                if (searchQuery) {
-                    const name = (c.name || '').toLowerCase();
-                    if (!name.includes(searchQuery)) {
-                        return false;
+                // Filter by experience range
+                if (selectedExperience !== 'all') {
+                    const background = c.background || c.rationale || c.whyMatch || '';
+                    const experienceText = extractExperience(background) || '';
+                    const yearsMatch = experienceText.match(/(\d+)\s*years?/i);
+                    const years = yearsMatch ? parseInt(yearsMatch[1]) : null;
+                    
+                    if (selectedExperience === 'no-exp') {
+                        if (years !== null && years > 0) return false;
+                    } else if (selectedExperience === '0-2') {
+                        if (years === null || years < 0 || years > 2) return false;
+                    } else if (selectedExperience === '2-5') {
+                        if (years === null || years < 2 || years > 5) return false;
+                    } else if (selectedExperience === '5-10') {
+                        if (years === null || years < 5 || years > 10) return false;
+                    } else if (selectedExperience === '10-15') {
+                        if (years === null || years < 10 || years > 15) return false;
+                    } else if (selectedExperience === '15+') {
+                        if (years === null || years < 15) return false;
                     }
+                }
+                
+                // Filter by industry
+                if (selectedIndustry !== 'all') {
+                    const background = (c.background || c.rationale || c.whyMatch || '').toLowerCase();
+                    const interests = (c.interests || []).join(' ').toLowerCase();
+                    const combinedText = background + ' ' + interests;
+                    
+                    let matches = false;
+                    if (selectedIndustry === 'k12' && (combinedText.includes('k-12') || combinedText.includes('k12') || combinedText.includes('elementary') || combinedText.includes('secondary education'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'higher-ed' && (combinedText.includes('higher education') || combinedText.includes('university') || combinedText.includes('college'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'for-profit' && (combinedText.includes('for-profit') || combinedText.includes('for profit'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'non-profit' && (combinedText.includes('non-profit') || combinedText.includes('nonprofit') || combinedText.includes('ngo'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'edtech' && (combinedText.includes('edtech') || combinedText.includes('ed-tech') || combinedText.includes('technology'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'media' && (combinedText.includes('media') || combinedText.includes('publishing'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'corporate' && (combinedText.includes('corporate') || combinedText.includes('training'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'government' && (combinedText.includes('government') || combinedText.includes('public sector'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'healthcare' && (combinedText.includes('healthcare') || combinedText.includes('health care'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'consulting' && (combinedText.includes('consulting') || combinedText.includes('consultant'))) {
+                        matches = true;
+                    }
+                    
+                    if (!matches) return false;
                 }
                 
                 return true;
