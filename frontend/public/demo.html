@@ -3953,8 +3953,8 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 window.allAdmissionData = applicants;
                 window.filteredAdmissionData = applicants;
                 
-                // Update KPIs
-                updateAdmissionKPIs(applicants);
+                // Update KPIs (use all data, not filtered)
+                updateAdmissionKPIs(window.allAdmissionData);
                 
                 // Initialize filters
                 initializeAdmissionFilters();
@@ -3977,46 +3977,56 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             }
         }
         
-        // Calculate decision from probability
-        function calculateDecisionFromProbability(probability) {
+        // Calculate decision from probability using current threshold
+        function calculateDecisionFromProbability(probability, threshold = null) {
+            // Use current threshold if not provided
+            const admitThreshold = threshold !== null ? threshold / 100 : currentAdmissionThreshold / 100;
+            const waitlistThreshold = admitThreshold - 0.05; // 5% less than ADMIT threshold
+            
             // Convert to 0-1 scale if it's 0-100
             const prob = probability > 1 ? probability / 100 : probability;
             
-            // ADMIT threshold: 75%
-            // WAITLIST threshold: 70% (5% less than ADMIT)
-            // REJECTED: anything below 70%
-            if (prob >= 0.75) return 'ADMIT';
-            if (prob >= 0.70) return 'WAITLIST';
+            // ADMIT: >= threshold
+            // WAITLIST: >= (threshold - 5%) but < threshold
+            // REJECTED: anything below (threshold - 5%)
+            if (prob >= admitThreshold) return 'ADMIT';
+            if (prob >= waitlistThreshold) return 'WAITLIST';
             return 'NOT_ADMITTED';
         }
         
-        // Calculate risk band from probability
-        function calculateRiskBand(probability) {
+        // Calculate risk band from probability using current threshold
+        function calculateRiskBand(probability, threshold = null) {
+            // Use current threshold if not provided
+            const admitThreshold = threshold !== null ? threshold / 100 : currentAdmissionThreshold / 100;
+            const waitlistThreshold = admitThreshold - 0.05; // 5% less than ADMIT threshold
+            
             // Convert to 0-1 scale if it's 0-100
             const prob = probability > 1 ? probability / 100 : probability;
             
             // Align risk bands with decision thresholds
-            if (prob >= 0.75) return 'Low Risk';
-            if (prob >= 0.70) return 'Medium Risk';
+            if (prob >= admitThreshold) return 'Low Risk';
+            if (prob >= waitlistThreshold) return 'Medium Risk';
             return 'High Risk';
         }
         
-        // Update admission KPIs
+        // Update admission KPIs using current threshold
         function updateAdmissionKPIs(applicants) {
             const total = applicants.length;
-            // Calculate decisions from probability
-            // ADMIT: >= 75%, WAITLIST: >= 70% but < 75%, REJECTED: < 70%
+            const admitThreshold = currentAdmissionThreshold / 100;
+            const waitlistThreshold = admitThreshold - 0.05; // 5% less than ADMIT threshold
+            
+            // Calculate decisions from probability using current threshold
             const accepted = applicants.filter(a => {
                 const prob = a.probability_of_success > 1 ? a.probability_of_success / 100 : a.probability_of_success;
-                return prob >= 0.75;
+                return prob >= admitThreshold;
             }).length;
             const waitlisted = applicants.filter(a => {
                 const prob = a.probability_of_success > 1 ? a.probability_of_success / 100 : a.probability_of_success;
-                return prob >= 0.70 && prob < 0.75;
+                return prob >= waitlistThreshold && prob < admitThreshold;
             }).length;
             const rejected = applicants.filter(a => {
                 const prob = a.probability_of_success > 1 ? a.probability_of_success / 100 : a.probability_of_success;
-                return prob < 0.70;
+                return prob < waitlistThreshold;
             }).length;
             
             document.getElementById('admission-kpi-total').textContent = total;
@@ -4061,15 +4071,17 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         function applyAdmissionFilters() {
             if (!window.allAdmissionData) return;
             
-            const threshold = currentAdmissionThreshold;
             const selectedLocation = document.getElementById('admission-location-filter')?.value || 'all';
             const selectedDecision = document.getElementById('admission-decision-filter')?.value || 'all';
             const selectedRisk = document.getElementById('admission-risk-filter')?.value || 'all';
             
+            // Filter by location, decision, and risk (but NOT by threshold - show all candidates)
             let filtered = window.allAdmissionData.filter(a => {
-                // Filter by threshold (probability of success)
-                const prob = a.probability_of_success ? (a.probability_of_success > 1 ? a.probability_of_success : a.probability_of_success * 100) : 0;
-                if (prob < threshold) return false;
+                // Filter by location
+                if (selectedLocation !== 'all') {
+                    const location = a.location || '';
+                    if (location !== selectedLocation) return false;
+                }
                 
                 // Calculate decision from probability for filtering
                 const decision = calculateDecisionFromProbability(a.probability_of_success);
@@ -4090,6 +4102,10 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             });
             
             window.filteredAdmissionData = filtered;
+            
+            // Update KPIs based on all data and current threshold (threshold affects KPIs, not the list)
+            updateAdmissionKPIs(window.allAdmissionData);
+            
             renderAdmissionCards(filtered);
         }
         
