@@ -25,7 +25,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(log_filename),
-        logging.StreamHandler(sys.stdout)
+        logging.StreamHandler(sys.stderr)  # Send logs to stderr to keep stdout clean for JSON
     ]
 )
 
@@ -61,6 +61,16 @@ THRESHOLDS = {
 def load_admission_data(dataset_path: str = "dataset/synt_admission.csv", num_rows: int = None):
     """Load admission dataset"""
     try:
+        # Get absolute path
+        if not os.path.isabs(dataset_path):
+            # Assume it's relative to the backend directory
+            backend_dir = os.path.dirname(os.path.abspath(__file__))
+            dataset_path = os.path.join(backend_dir, "..", dataset_path)
+            dataset_path = os.path.normpath(dataset_path)
+        
+        if not os.path.exists(dataset_path):
+            raise FileNotFoundError(f"Dataset file not found: {dataset_path}")
+        
         df = pd.read_csv(dataset_path, nrows=num_rows)
         logger.info(f"Loaded {len(df)} admission applications from {dataset_path}")
         return df
@@ -79,9 +89,9 @@ def create_data_standardization_agent():
         each of the six rubric dimensions: Motivation & Values, Resilience, Leadership, 
         Learning Orientation/Fit, Academic Readiness, and Life Context. You are objective, 
         consistent, and never use protected attributes like gender, age, or race in your scoring.""",
-        verbose=True,
+        verbose=False,  # Disable verbose output to keep stdout clean
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash-exp"
+        llm="gemini/gemini-2.0-flash"  # Use stable model instead of experimental
     )
 
 def create_scoring_agent():
@@ -93,9 +103,9 @@ def create_scoring_agent():
         and uses logistic regression to predict program success. You combine rubric scores with 
         probability estimates to produce a final admissions score. You ensure all calculations are 
         accurate and follow the specified formulas.""",
-        verbose=True,
+        verbose=False,  # Disable verbose output to keep stdout clean
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash-exp"
+        llm="gemini/gemini-2.0-flash"  # Use stable model instead of experimental
     )
 
 def create_decision_agent():
@@ -107,9 +117,9 @@ def create_decision_agent():
         clear thresholds. You classify applicants using fixed criteria and never make exceptions 
         or use protected attributes. You identify strengths (all rubric dimensions ≥4), growth 
         areas (all ≤2), and risk bands based on probability of success.""",
-        verbose=True,
+        verbose=False,  # Disable verbose output to keep stdout clean
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash-exp"
+        llm="gemini/gemini-2.0-flash"  # Use stable model instead of experimental
     )
 
 def create_explanation_agent():
@@ -121,9 +131,9 @@ def create_explanation_agent():
         admission decisions. You use templates for each decision outcome and incorporate 
         computed strengths, growth areas, and risk bands. Your explanations are honest, 
         constructive, and help applicants understand the decision.""",
-        verbose=True,
+        verbose=False,  # Disable verbose output to keep stdout clean
         allow_delegation=False,
-        llm="gemini/gemini-2.0-flash-exp"
+        llm="gemini/gemini-2.0-flash"  # Use stable model instead of experimental
     )
 
 def create_standardization_task(applicant_data: dict):
@@ -393,7 +403,7 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
                 agents=[create_data_standardization_agent()],
                 tasks=[standardization_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=False  # Disable verbose output to keep stdout clean
             )
             standardization_result = standardization_crew.kickoff()
             rubric_scores = parse_json_output(str(standardization_result))
@@ -414,7 +424,7 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
                 agents=[create_scoring_agent()],
                 tasks=[scoring_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=False  # Disable verbose output to keep stdout clean
             )
             scoring_result = scoring_crew.kickoff()
             scoring_results = parse_json_output(str(scoring_result))
@@ -432,7 +442,7 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
                 agents=[create_decision_agent()],
                 tasks=[decision_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=False  # Disable verbose output to keep stdout clean
             )
             decision_result = decision_crew.kickoff()
             decision_results = parse_json_output(str(decision_result))
@@ -451,7 +461,7 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
                 agents=[create_explanation_agent()],
                 tasks=[explanation_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=False  # Disable verbose output to keep stdout clean
             )
             explanation_result = explanation_crew.kickoff()
             explanation = str(explanation_result).strip()

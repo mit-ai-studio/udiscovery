@@ -78,6 +78,198 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Run admission assessment endpoint
+app.post('/api/run-admission', async (req, res) => {
+    // Set a longer timeout for batch processing (30 minutes)
+    req.setTimeout(30 * 60 * 1000);
+    res.setTimeout(30 * 60 * 1000);
+    
+    const { num_applications } = req.body;
+    
+    // Flag to prevent multiple responses
+    let responseSent = false;
+    const sendResponse = (data) => {
+        if (!responseSent) {
+            responseSent = true;
+            res.json(data);
+        }
+    };
+    
+    try {
+        // Execute Python admission runner
+        const { spawn } = require('child_process');
+        const path = require('path');
+        const fs = require('fs');
+        
+        const backendPath = path.join(__dirname, '..', 'backend');
+        const scriptPath = path.join(backendPath, 'admission_runner.py');
+        
+        // Check if script exists
+        if (!fs.existsSync(scriptPath)) {
+            return sendResponse({
+                success: false,
+                error: `Python script not found at: ${scriptPath}`
+            });
+        }
+        
+        // Try multiple Python paths (prioritize venv)
+        const pythonPaths = [
+            path.join(backendPath, 'venv', 'bin', 'python3'),
+            path.join(backendPath, 'venv', 'bin', 'python'),
+            'python3',
+            'python'
+        ];
+        
+        let pythonPath = null;
+        for (const p of pythonPaths) {
+            if (p.startsWith('/') || p.includes('venv')) {
+                // Absolute path or venv path - check if exists
+                if (fs.existsSync(p)) {
+                    pythonPath = p;
+                    break;
+                }
+            } else {
+                // System command - try to find it
+                try {
+                    const { execSync } = require('child_process');
+                    execSync(`which ${p}`, { stdio: 'ignore' });
+                    pythonPath = p;
+                    break;
+                } catch (e) {
+                    continue;
+                }
+            }
+        }
+        
+        if (!pythonPath) {
+            return sendResponse({
+                success: false,
+                error: 'Python executable not found. Please ensure Python is installed.'
+            });
+        }
+        
+        console.log(`Using Python: ${pythonPath}`);
+        console.log(`Running admission assessment with ${num_applications || 'all'} applications...`);
+        
+        // Prepare arguments
+        const args = [scriptPath];
+        if (num_applications) {
+            args.push(num_applications.toString());
+        }
+        
+        // Spawn Python process
+        const pythonProcess = spawn(pythonPath, args, {
+            cwd: backendPath,
+            env: { 
+                ...process.env, 
+                PYTHONUNBUFFERED: '1',
+                NO_COLOR: '1',
+                TERM: 'dumb'  // Disable color output
+            }
+        });
+        
+        let resultData = '';
+        let errorData = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+            const text = data.toString();
+            // Filter out CrewAI progress bars and other non-JSON output
+            // Look for lines that start with special characters (progress bars)
+            const lines = text.split('\n');
+            const filteredLines = lines.filter(line => {
+                const trimmed = line.trim();
+                // Skip lines that look like progress bars or decorations
+                if (trimmed.startsWith('╭') || trimmed.startsWith('╰') || trimmed.startsWith('│') || 
+                    trimmed.startsWith('├') || trimmed.startsWith('└') || trimmed.startsWith('─') ||
+                    trimmed.startsWith('█') || trimmed.match(/^[═║╔╗╚╝]/)) {
+                    return false;
+                }
+                // Skip empty lines
+                if (!trimmed) return false;
+                // Keep everything else (including JSON)
+                return true;
+            });
+            resultData += filteredLines.join('\n');
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+            errorData += data.toString();
+            console.error('Python stderr:', data.toString());
+        });
+        
+        pythonProcess.on('close', (code) => {
+            if (code === 0) {
+                try {
+                    // Remove all progress bar characters first
+                    let cleaned = resultData.replace(/[╭╰│├└─═║╔╗╚╝█]/g, '');
+                    
+                    // Try to extract JSON from the output
+                    // Look for the last valid JSON object (CrewAI may output other text)
+                    const lines = cleaned.split('\n');
+                    let jsonFound = false;
+                    let jsonLine = '';
+                    
+                    // Try to find JSON in reverse order
+                    for (let i = lines.length - 1; i >= 0; i--) {
+                        const line = lines[i].trim();
+                        if (line.startsWith('{') || line.startsWith('[')) {
+                            try {
+                                JSON.parse(line);
+                                jsonLine = line;
+                                jsonFound = true;
+                                break;
+                            } catch (e) {
+                                continue;
+                            }
+                        }
+                    }
+                    
+                    if (jsonFound) {
+                        const result = JSON.parse(jsonLine);
+                        sendResponse(result);
+                    } else {
+                        // If no single-line JSON, try to find JSON boundaries in multiline
+                        const jsonStart = cleaned.indexOf('{');
+                        const jsonEnd = cleaned.lastIndexOf('}');
+                        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+                            const jsonStr = cleaned.substring(jsonStart, jsonEnd + 1);
+                            const result = JSON.parse(jsonStr);
+                            sendResponse(result);
+                        } else {
+                            // Last resort: try parsing the whole cleaned string
+                            const result = JSON.parse(cleaned.trim());
+                            sendResponse(result);
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    console.error('Result data preview:', resultData.substring(0, 1000));
+                    console.error('Error data:', errorData.substring(0, 500));
+                    sendResponse({
+                        success: false,
+                        error: `Failed to parse result: ${parseError.message}. Output: ${resultData.substring(0, 500)}`
+                    });
+                }
+            } else {
+                const errorPreview = errorData.substring(0, 500);
+                const resultPreview = resultData.substring(0, 500);
+                console.error('Python script failed:', { code, errorPreview, resultPreview });
+                sendResponse({
+                    success: false,
+                    error: `Python script failed with code ${code}. Error: ${errorPreview}`
+                });
+            }
+        });
+        
+    } catch (error) {
+        console.error('Top-level error in /api/run-admission:', error);
+        sendResponse({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
 // Run demo endpoint
 app.post('/api/run-demo', async (req, res) => {
     // Set a longer timeout for batch processing (30 minutes)

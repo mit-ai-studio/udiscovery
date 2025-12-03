@@ -491,6 +491,35 @@
             background: #01425F;
             outline: none;
             -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .threshold-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6EE7D7;
+            cursor: pointer;
+        }
+        
+        .threshold-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6EE7D7;
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Admission-specific slider color */
+        #admission-threshold-slider::-webkit-slider-thumb {
+            background: #4B9BFF !important;
+        }
+        
+        #admission-threshold-slider::-moz-range-thumb {
+            background: #4B9BFF !important;
         }
         
         .threshold-slider::-webkit-slider-thumb {
@@ -1472,6 +1501,274 @@
             </form>
 
             <div id="error-container"></div>
+        </div>
+
+        <!-- Admission Results Section -->
+        <div id="admission-results-section" class="results-section" style="display: none;">
+            <!-- Page Header -->
+            <div style="margin-bottom: 1.5rem; margin-top: 0.5rem; margin-left: 10rem; margin-right: 10rem;">
+                <h2 style="color: #4B9BFF; margin-bottom: 0.5rem; font-size: 2rem; font-weight: 600;">Admissions Decision Dashboard</h2>
+                <p style="color: rgba(148, 163, 184, 1); font-size: 1.125rem; margin: 0;">Decision phase: AI-generated rationale and success predictions</p>
+            </div>
+            
+            <!-- Dashboard Layout: Sidebar + Main Content -->
+            <div class="dashboard-layout" style="margin-left: 10rem; margin-right: 10rem;">
+                <!-- Left Sidebar -->
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-section">
+                        <h3>Candidates Dataset</h3>
+                        <p class="sidebar-text">Admission database is active and updated</p>
+                        <div class="sidebar-item">
+                            <span>Updated Database Nov. 2025</span>
+                            <span class="status-badge active">Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>Admission Criteria</h3>
+                        <div class="sidebar-item">
+                            <span>Academic Excellence</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <span>Professional Experience</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <span>Leadership</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <span>Mission Alignment</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="dashboard-main">
+                    <!-- KPI Results Box -->
+                    <div class="kpi-section" style="border-color: rgba(75, 155, 255, 0.25);">
+                        <div class="kpi-header">
+                            <h3 style="color: #4B9BFF;">Admission Results & KPIs</h3>
+                            <button id="download-admission-csv-btn" class="download-csv-btn" style="display: none; background: rgba(75, 155, 255, 0.85);" onclick="downloadAdmissionCSV()">
+                                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                                <span class="hidden sm:inline">Export</span>
+                            </button>
+                        </div>
+                        <div class="kpi-grid" id="admission-kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-label">Total Reviewed</div>
+                                <div class="kpi-value" id="admission-kpi-total" style="color: #4B9BFF;">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Accepted</div>
+                                <div class="kpi-value" id="admission-kpi-accepted" style="color: #298E34;">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Waitlisted</div>
+                                <div class="kpi-value" id="admission-kpi-waitlisted" style="color: rgba(255, 195, 0, 0.9);">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Rejected</div>
+                                <div class="kpi-value" id="admission-kpi-rejected" style="color: #FF5F5F;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters & Controls -->
+                    <div class="filters-section" style="border-color: rgba(75, 155, 255, 0.25);">
+                        <h3 style="color: #4B9BFF;">Filters & Controls</h3>
+                        <div class="filters-grid">
+                            <div class="filter-row">
+                                <label>
+                                    Acceptance Threshold: <span class="threshold-value" id="admission-threshold-display">75</span>%
+                                </label>
+                                <div class="slider-container">
+                                    <span class="slider-label">0%</span>
+                                    <input type="range" id="admission-threshold-slider" min="0" max="100" value="75" class="threshold-slider">
+                                    <span class="slider-label">100%</span>
+                                </div>
+                            </div>
+                            <div class="filter-row">
+                                <label>Location</label>
+                                <select id="admission-location-filter" class="filter-select">
+                                    <option value="all">All Locations</option>
+                                    <option value="domestic">Domestic Only</option>
+                                    <option value="international">International Only</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <label>Decision Status</label>
+                                <select id="admission-decision-filter" class="filter-select">
+                                    <option value="all">All Decisions</option>
+                                    <option value="ADMIT">Accepted</option>
+                                    <option value="WAITLIST">Waitlisted</option>
+                                    <option value="NOT_ADMITTED">Rejected</option>
+                                    <option value="NOT_ADMITTED_INELIGIBLE">Not Eligible</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <label>Risk Band</label>
+                                <select id="admission-risk-filter" class="filter-select">
+                                    <option value="all">All Risk Levels</option>
+                                    <option value="Low Risk">Low Risk</option>
+                                    <option value="Medium Risk">Medium Risk</option>
+                                    <option value="High Risk">High Risk</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applicants List + Right Panel -->
+                    <div class="flex flex-col lg:flex-row gap-4" style="display: flex; flex-direction: row; gap: 1.5rem;">
+                        <!-- Applicants List -->
+                        <div class="flex-1" style="flex: 1; min-width: 0;">
+                            <h3 id="admission-prospects-title" style="color: #4B9BFF; margin-bottom: 1rem; font-size: 1.25rem;">Ranked Candidates (0)</h3>
+                            <div class="prospects-list" id="admission-prospects-list" style="max-height: calc(100vh - 20rem); overflow-y: auto;">
+                                <!-- Applicants will be rendered here as cards -->
+                            </div>
+                        </div>
+
+                        <!-- Right Panel - AI Rationale & Decision Actions -->
+                        <div class="campaign-sidebar" style="width: 320px; flex-shrink: 0;">
+                            <div id="admission-detail-viewport" class="campaign-viewport" style="min-height: 400px;">
+                                <p class="campaign-placeholder">Select an applicant to view & decide</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admission Results Section -->
+        <div id="admission-results-section" class="results-section" style="display: none;">
+            <!-- Page Header -->
+            <div style="margin-bottom: 1.5rem; margin-top: 0.5rem; margin-left: 10rem; margin-right: 10rem;">
+                <h2 style="color: #4B9BFF; margin-bottom: 0.5rem; font-size: 2rem; font-weight: 600;">Admissions Decision Dashboard</h2>
+                <p style="color: rgba(148, 163, 184, 1); font-size: 1.125rem; margin: 0;">Decision phase: AI-generated rationale and success predictions</p>
+            </div>
+            
+            <!-- Dashboard Layout: Sidebar + Main Content -->
+            <div class="dashboard-layout" style="margin-left: 10rem; margin-right: 10rem;">
+                <!-- Left Sidebar -->
+                <div class="dashboard-sidebar">
+                    <div class="sidebar-section">
+                        <h3>Candidates Dataset</h3>
+                        <p class="sidebar-text">Admission database is active and updated</p>
+                        <div class="sidebar-item">
+                            <span>Updated Database Nov. 2025</span>
+                            <span class="status-badge active">Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>Admission Criteria</h3>
+                        <div class="sidebar-item">
+                            <span>Academic Excellence</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <span>Professional Experience</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <span>Leadership</span>
+                        </div>
+                        <div class="sidebar-item">
+                            <span>Mission Alignment</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="dashboard-main">
+                    <!-- KPI Results Box -->
+                    <div class="kpi-section" style="border-color: rgba(75, 155, 255, 0.25);">
+                        <div class="kpi-header">
+                            <h3 style="color: #4B9BFF;">Admission Results & KPIs</h3>
+                            <button id="download-admission-csv-btn" class="download-csv-btn" style="display: none; background: rgba(75, 155, 255, 0.85);" onclick="downloadAdmissionCSV()">
+                                <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+                                <span class="hidden sm:inline">Export</span>
+                            </button>
+                        </div>
+                        <div class="kpi-grid" id="admission-kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-label">Total Reviewed</div>
+                                <div class="kpi-value" id="admission-kpi-total" style="color: #4B9BFF;">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Accepted</div>
+                                <div class="kpi-value" id="admission-kpi-accepted" style="color: #298E34;">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Waitlisted</div>
+                                <div class="kpi-value" id="admission-kpi-waitlisted" style="color: rgba(255, 195, 0, 0.9);">0</div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-label">Rejected</div>
+                                <div class="kpi-value" id="admission-kpi-rejected" style="color: #FF5F5F;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters & Controls -->
+                    <div class="filters-section" style="border-color: rgba(75, 155, 255, 0.25);">
+                        <h3 style="color: #4B9BFF;">Filters & Controls</h3>
+                        <div class="filters-grid">
+                            <div class="filter-row">
+                                <label>
+                                    Acceptance Threshold: <span class="threshold-value" id="admission-threshold-display" style="color: #4B9BFF;">75</span>%
+                                </label>
+                                <div class="slider-container">
+                                    <span class="slider-label">0%</span>
+                                    <input type="range" id="admission-threshold-slider" min="0" max="100" value="75" class="threshold-slider">
+                                    <span class="slider-label">100%</span>
+                                </div>
+                            </div>
+                            <div class="filter-row">
+                                <label>Location</label>
+                                <select id="admission-location-filter" class="filter-select">
+                                    <option value="all">All Locations</option>
+                                    <option value="domestic">Domestic Only</option>
+                                    <option value="international">International Only</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <label>Decision Status</label>
+                                <select id="admission-decision-filter" class="filter-select">
+                                    <option value="all">All Decisions</option>
+                                    <option value="ADMIT">Accepted</option>
+                                    <option value="WAITLIST">Waitlisted</option>
+                                    <option value="NOT_ADMITTED">Rejected</option>
+                                    <option value="NOT_ADMITTED_INELIGIBLE">Not Eligible</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <label>Risk Band</label>
+                                <select id="admission-risk-filter" class="filter-select">
+                                    <option value="all">All Risk Levels</option>
+                                    <option value="Low Risk">Low Risk</option>
+                                    <option value="Medium Risk">Medium Risk</option>
+                                    <option value="High Risk">High Risk</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applicants List + Right Panel -->
+                    <div style="display: flex; flex-direction: row; gap: 1.5rem;">
+                        <!-- Applicants List -->
+                        <div style="flex: 1; min-width: 0;">
+                            <h3 id="admission-prospects-title" style="color: #4B9BFF; margin-bottom: 1rem; font-size: 1.25rem;">Ranked Candidates (0)</h3>
+                            <div class="prospects-list" id="admission-prospects-list" style="max-height: calc(100vh - 20rem); overflow-y: auto;">
+                                <!-- Applicants will be rendered here as cards -->
+                            </div>
+                        </div>
+
+                        <!-- Right Panel - AI Rationale & Decision Actions -->
+                        <div class="campaign-sidebar" style="width: 320px; flex-shrink: 0;">
+                            <div id="admission-detail-viewport" class="campaign-viewport" style="min-height: 400px;">
+                                <p class="campaign-placeholder">Select an applicant to view & decide</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="results-section" class="results-section">
@@ -3537,11 +3834,473 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             }
         }
         
+        // Navigation handlers
+        function setupNavigation() {
+            const navProspecting = document.getElementById('nav-prospecting');
+            const navAdmissions = document.getElementById('nav-admissions');
+            
+            if (navProspecting) {
+                navProspecting.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Show prospecting results if available, otherwise show form
+                    const resultsSection = document.getElementById('results-section');
+                    const formSection = document.querySelector('.demo-form-section');
+                    const admissionsSection = document.getElementById('admissions-section');
+                    
+                    if (resultsSection && resultsSection.style.display !== 'none') {
+                        // Already showing prospecting results
+                        return;
+                    }
+                    
+                    // Hide admissions, show prospecting
+                    if (admissionsSection) admissionsSection.classList.remove('active');
+                    if (formSection) formSection.style.display = 'block';
+                    if (resultsSection) resultsSection.style.display = 'none';
+                    
+                    // Update nav colors
+                    navProspecting.style.color = '#6EE7D7';
+                    navAdmissions.style.color = 'rgba(148, 163, 184, 1)';
+                });
+            }
+            
+            if (navAdmissions) {
+                navAdmissions.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Trigger admission assessment
+                    runAdmissionAssessment();
+                    
+                    // Update nav colors
+                    navProspecting.style.color = 'rgba(148, 163, 184, 1)';
+                    navAdmissions.style.color = '#4B9BFF';
+                });
+            }
+        }
+        
+        // Store admission data globally
+        window.allAdmissionData = [];
+        window.filteredAdmissionData = [];
+        let currentAdmissionThreshold = 75;
+        let selectedAdmissionApplicant = null;
+        
+        // Display admission results
+        function displayAdmissionResults(resultJson) {
+            try {
+                const result = typeof resultJson === 'string' ? JSON.parse(resultJson) : resultJson;
+                console.log('Admission result type:', typeof result);
+                console.log('Admission result:', result);
+                
+                if (!result || !result.results || !Array.isArray(result.results)) {
+                    throw new Error('Invalid admission result format');
+                }
+                
+                const applicants = result.results.filter(a => !a.error);
+                
+                // Store globally
+                window.allAdmissionData = applicants;
+                window.filteredAdmissionData = applicants;
+                
+                // Update KPIs
+                updateAdmissionKPIs(applicants);
+                
+                // Initialize filters
+                initializeAdmissionFilters();
+                
+                // Render applicant cards
+                renderAdmissionCards(applicants);
+                
+                // Show results section
+                document.getElementById('admission-results-section').style.display = 'block';
+                document.getElementById('results-section').style.display = 'none';
+                
+                // Re-initialize icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+                
+            } catch (error) {
+                console.error('Error displaying admission results:', error);
+                showError(`Failed to display admission results: ${error.message}`);
+            }
+        }
+        
+        // Update admission KPIs
+        function updateAdmissionKPIs(applicants) {
+            const total = applicants.length;
+            const accepted = applicants.filter(a => a.decision === 'ADMIT').length;
+            const waitlisted = applicants.filter(a => a.decision === 'WAITLIST').length;
+            const rejected = applicants.filter(a => a.decision === 'NOT_ADMITTED' || a.decision === 'NOT_ADMITTED_INELIGIBLE').length;
+            
+            document.getElementById('admission-kpi-total').textContent = total;
+            document.getElementById('admission-kpi-accepted').textContent = accepted;
+            document.getElementById('admission-kpi-waitlisted').textContent = waitlisted;
+            document.getElementById('admission-kpi-rejected').textContent = rejected;
+            
+            // Show export button
+            document.getElementById('download-admission-csv-btn').style.display = 'flex';
+        }
+        
+        // Initialize admission filters
+        function initializeAdmissionFilters() {
+            const thresholdSlider = document.getElementById('admission-threshold-slider');
+            const thresholdDisplay = document.getElementById('admission-threshold-display');
+            const locationFilter = document.getElementById('admission-location-filter');
+            const decisionFilter = document.getElementById('admission-decision-filter');
+            const riskFilter = document.getElementById('admission-risk-filter');
+            
+            if (thresholdSlider) {
+                thresholdSlider.addEventListener('input', (e) => {
+                    currentAdmissionThreshold = parseInt(e.target.value);
+                    if (thresholdDisplay) thresholdDisplay.textContent = currentAdmissionThreshold;
+                    applyAdmissionFilters();
+                });
+            }
+            
+            if (locationFilter) {
+                locationFilter.addEventListener('change', () => applyAdmissionFilters());
+            }
+            
+            if (decisionFilter) {
+                decisionFilter.addEventListener('change', () => applyAdmissionFilters());
+            }
+            
+            if (riskFilter) {
+                riskFilter.addEventListener('change', () => applyAdmissionFilters());
+            }
+        }
+        
+        // Apply admission filters
+        function applyAdmissionFilters() {
+            if (!window.allAdmissionData) return;
+            
+            const threshold = currentAdmissionThreshold;
+            const selectedLocation = document.getElementById('admission-location-filter')?.value || 'all';
+            const selectedDecision = document.getElementById('admission-decision-filter')?.value || 'all';
+            const selectedRisk = document.getElementById('admission-risk-filter')?.value || 'all';
+            
+            let filtered = window.allAdmissionData.filter(a => {
+                // Filter by threshold (probability of success)
+                const prob = a.probability_of_success ? parseFloat(a.probability_of_success) * 100 : 0;
+                if (prob < threshold) return false;
+                
+                // Filter by decision
+                if (selectedDecision !== 'all' && a.decision !== selectedDecision) return false;
+                
+                // Filter by risk band
+                if (selectedRisk !== 'all' && a.risk_band !== selectedRisk) return false;
+                
+                return true;
+            });
+            
+            // Sort by final score (descending)
+            filtered.sort((a, b) => {
+                const scoreA = a.final_score ? parseFloat(a.final_score) : 0;
+                const scoreB = b.final_score ? parseFloat(b.final_score) : 0;
+                return scoreB - scoreA;
+            });
+            
+            window.filteredAdmissionData = filtered;
+            renderAdmissionCards(filtered);
+        }
+        
+        // Render admission applicant cards
+        function renderAdmissionCards(applicants) {
+            const listContainer = document.getElementById('admission-prospects-list');
+            if (!listContainer) return;
+            
+            const titleElement = document.getElementById('admission-prospects-title');
+            if (titleElement) {
+                titleElement.textContent = `Ranked Candidates (${applicants.length})`;
+            }
+            
+            if (applicants.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="padding: 3rem; text-align: center; color: rgba(148, 163, 184, 1);">
+                        No applicants match your current filters. Adjust the threshold or filter criteria.
+                    </div>
+                `;
+                return;
+            }
+            
+            const cardsHTML = applicants.map((applicant, index) => {
+                const name = applicant.name || 'Unknown';
+                const probability = applicant.probability_of_success ? (parseFloat(applicant.probability_of_success) * 100).toFixed(1) : '0.0';
+                const decision = applicant.decision || 'NOT_ADMITTED';
+                const finalScore = applicant.final_score ? parseFloat(applicant.final_score).toFixed(2) : '0.00';
+                
+                // Decision badge color
+                let decisionColor = '#FF5F5F';
+                let decisionText = 'Declined';
+                if (decision === 'ADMIT') {
+                    decisionColor = '#298E34';
+                    decisionText = 'Accepted';
+                } else if (decision === 'WAITLIST') {
+                    decisionColor = 'rgba(255, 195, 0, 0.9)';
+                    decisionText = 'Waitlisted';
+                } else if (decision === 'NOT_ADMITTED_INELIGIBLE') {
+                    decisionColor = '#FF5F5F';
+                    decisionText = 'Not Eligible';
+                }
+                
+                return `
+                    <div class="candidate-card" onclick="window.showAdmissionDetails(${index})" style="cursor: pointer; border-color: ${selectedAdmissionApplicant === index ? 'rgba(75, 155, 255, 0.6)' : 'rgba(75, 155, 255, 0.25)'}; background: #0A3550;">
+                        <div class="candidate-card-header">
+                            <div class="candidate-card-main">
+                                <div class="candidate-info">
+                                    <div class="candidate-name-row">
+                                        <h4 class="candidate-name" style="color: #4B9BFF;">${escapeHtml(name)}</h4>
+                                        <span class="propensity-badge" style="background: rgba(110, 231, 215, 0.15); color: #4B9BFF;">${probability}% success</span>
+                                        <span class="propensity-badge" style="background: ${decisionColor}; color: #FFFFFF;">${decisionText}</span>
+                                    </div>
+                                    <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 1rem; margin-top: 0.5rem;">
+                                        <span>Final Score: ${finalScore}</span>
+                                        <span>Risk: ${applicant.risk_band || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            listContainer.innerHTML = cardsHTML;
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        
+        // Show admission applicant details
+        function showAdmissionDetails(index) {
+            const applicants = window.filteredAdmissionData || [];
+            if (index < 0 || index >= applicants.length) return;
+            
+            selectedAdmissionApplicant = index;
+            const applicant = applicants[index];
+            
+            const viewport = document.getElementById('admission-detail-viewport');
+            if (!viewport) return;
+            
+            const rubricScores = applicant.rubric_scores || {};
+            const probability = applicant.probability_of_success ? (parseFloat(applicant.probability_of_success) * 100).toFixed(1) : '0.0';
+            const finalScore = applicant.final_score ? parseFloat(applicant.final_score).toFixed(2) : '0.00';
+            
+            viewport.innerHTML = `
+                <div class="candidate-details-view">
+                    <div class="candidate-details-header">
+                        <h3 style="color: #4B9BFF; margin-bottom: 0.5rem;">${escapeHtml(applicant.name || 'Unknown')}</h3>
+                        <p style="color: rgba(148, 163, 184, 1); font-size: 0.9rem; margin-bottom: 1rem;">${applicant.application_id || 'N/A'}</p>
+                    </div>
+                    
+                    <div class="candidate-detail-section">
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">AI Rationale</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; margin-bottom: 1rem;">${escapeHtml(applicant.explanation || 'No explanation available')}</p>
+                    </div>
+                    
+                    <div class="candidate-detail-section">
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Scoring Breakdown</h4>
+                        <div style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Motivation & Values</span>
+                                <span style="color: ${rubricScores.motivation_values >= 4 ? '#298E34' : rubricScores.motivation_values >= 3 ? 'rgba(255, 195, 0, 0.9)' : '#94A3B8'}; font-weight: 600;">${rubricScores.motivation_values || 0}/5</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Resilience</span>
+                                <span style="color: ${rubricScores.resilience >= 4 ? '#298E34' : rubricScores.resilience >= 3 ? 'rgba(255, 195, 0, 0.9)' : '#94A3B8'}; font-weight: 600;">${rubricScores.resilience || 0}/5</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Leadership</span>
+                                <span style="color: ${rubricScores.leadership >= 4 ? '#298E34' : rubricScores.leadership >= 3 ? 'rgba(255, 195, 0, 0.9)' : '#94A3B8'}; font-weight: 600;">${rubricScores.leadership || 0}/5</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Learning Orientation/Fit</span>
+                                <span style="color: ${rubricScores.learning_orientation_fit >= 4 ? '#298E34' : rubricScores.learning_orientation_fit >= 3 ? 'rgba(255, 195, 0, 0.9)' : '#94A3B8'}; font-weight: 600;">${rubricScores.learning_orientation_fit || 0}/5</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Academic Readiness</span>
+                                <span style="color: ${rubricScores.academic_readiness >= 4 ? '#298E34' : rubricScores.academic_readiness >= 3 ? 'rgba(255, 195, 0, 0.9)' : '#94A3B8'}; font-weight: 600;">${rubricScores.academic_readiness || 0}/5</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Life Context</span>
+                                <span style="color: ${rubricScores.life_context >= 4 ? '#298E34' : rubricScores.life_context >= 3 ? 'rgba(255, 195, 0, 0.9)' : '#94A3B8'}; font-weight: 600;">${rubricScores.life_context || 0}/5</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="candidate-detail-section">
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Final Scores</h4>
+                        <div style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Weighted Rubric Score</span>
+                                <span style="color: #4B9BFF; font-weight: 600;">${applicant.weighted_rubric_score ? parseFloat(applicant.weighted_rubric_score).toFixed(2) : '0.00'}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Probability of Success</span>
+                                <span style="color: #4B9BFF; font-weight: 600;">${probability}%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Final Score</span>
+                                <span style="color: #4B9BFF; font-weight: 600;">${finalScore}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${applicant.strengths && applicant.strengths.length > 0 ? `
+                    <div class="candidate-detail-section">
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Strengths</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8);">${escapeHtml(applicant.strengths.join(', '))}</p>
+                    </div>
+                    ` : ''}
+                    
+                    ${applicant.growth_areas && applicant.growth_areas.length > 0 ? `
+                    <div class="candidate-detail-section">
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Growth Areas</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8);">${escapeHtml(applicant.growth_areas.join(', '))}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="candidate-detail-section">
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Decision Actions</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button class="campaign-btn" style="background: rgba(75, 155, 255, 0.85); color: #FFFFFF; width: 100%; padding: 0.75rem;">
+                                Proceed with Recommendation
+                            </button>
+                            <button class="campaign-btn" style="background: transparent; border: 1px solid #4B9BFF; color: #4B9BFF; width: 100%; padding: 0.75rem;">
+                                Send to Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Re-render cards to update selection highlight
+            renderAdmissionCards(applicants);
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        
+        // Download admission CSV
+        function downloadAdmissionCSV() {
+            if (!window.filteredAdmissionData || window.filteredAdmissionData.length === 0) {
+                alert('No admission data available to download.');
+                return;
+            }
+            
+            const headers = ['Application ID', 'Name', 'Decision', 'Final Score', 'Probability of Success', 'Risk Band', 'Weighted Rubric Score', 'Strengths', 'Growth Areas', 'Explanation'];
+            const rows = window.filteredAdmissionData.map(a => [
+                a.application_id || '',
+                a.name || '',
+                a.decision || '',
+                a.final_score || '',
+                a.probability_of_success ? (parseFloat(a.probability_of_success) * 100).toFixed(2) + '%' : '',
+                a.risk_band || '',
+                a.weighted_rubric_score || '',
+                (a.strengths || []).join('; '),
+                (a.growth_areas || []).join('; '),
+                (a.explanation || '').replace(/\n/g, ' ')
+            ]);
+            
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `admission_results_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+        
+        // Make functions globally available
+        window.showAdmissionDetails = showAdmissionDetails;
+        window.downloadAdmissionCSV = downloadAdmissionCSV;
+        
+        // Run admission assessment
+        async function runAdmissionAssessment() {
+            // Hide form and results, show loading
+            document.querySelector('.demo-form-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('admissions-section').classList.remove('active');
+            document.getElementById('loading-section').style.display = 'block';
+            document.getElementById('error-container').innerHTML = '';
+            
+            // Start loading progress
+            startLoadingProgress();
+            
+            try {
+                // Create an AbortController for timeout handling
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30 * 60 * 1000); // 30 minute timeout
+                
+                const response = await fetch('/api/run-admission', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ num_applications: 10 }), // Start with 10 for testing
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Stop loading progress
+                stopLoadingProgress();
+                
+                // Hide loading
+                document.getElementById('loading-section').style.display = 'none';
+                
+                if (data.success) {
+                    // Save results to localStorage
+                    localStorage.setItem('udiscovery_admission_results', data.result);
+                    localStorage.setItem('udiscovery_admission_timestamp', new Date().toISOString());
+                    
+                    // Hide loading, show admission results
+                    document.getElementById('loading-section').style.display = 'none';
+                    document.getElementById('admission-results-section').style.display = 'block';
+                    
+                    // Display admission results
+                    displayAdmissionResults(data.result);
+                } else {
+                    stopLoadingProgress();
+                    // Hide loading, show error but don't show form
+                    document.getElementById('loading-section').style.display = 'none';
+                    showError(data.error || 'Failed to generate admission assessment results');
+                }
+            } catch (error) {
+                stopLoadingProgress();
+                
+                // Hide loading, show error
+                document.getElementById('loading-section').style.display = 'none';
+                
+                if (error.name === 'AbortError') {
+                    showError('Request timed out. The assessment is taking longer than expected. Please try again or contact support.');
+                } else {
+                    const errorMsg = error.message.includes('404') 
+                        ? 'Server endpoint not found. Please restart the server (npm start) to register the new admission endpoint.'
+                        : `Failed to run admission assessment: ${error.message}`;
+                    showError(errorMsg);
+                }
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Lucide icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
+            
+            // Setup navigation
+            setupNavigation();
             
             updateWelcomeMessage();
             restoreSavedData();
