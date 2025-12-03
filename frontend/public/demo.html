@@ -4115,6 +4115,60 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 const decision = calculateDecisionFromProbability(applicant.probability_of_success);
                 const riskBand = calculateRiskBand(applicant.probability_of_success);
                 
+                // Extract location, GPA, GRE, and experience
+                let location = applicant.location || 'Not specified';
+                // Location should already be a state name from backend
+                // Just ensure it's clean - if it contains a state name, extract just that
+                if (location && location !== 'Not specified' && location.length > 0) {
+                    const stateNames = ['New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 
+                                      'North Dakota', 'Rhode Island', 'South Carolina', 'South Dakota', 'West Virginia',
+                                      'District of Columbia', 'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 
+                                      'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 
+                                      'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 
+                                      'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 
+                                      'Nebraska', 'Nevada', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Tennessee', 
+                                      'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'Wisconsin', 'Wyoming'];
+                    
+                    // Sort by length (longest first) to match multi-word states correctly
+                    stateNames.sort((a, b) => b.length - a.length);
+                    
+                    // Find the first state name in the location string
+                    let foundState = null;
+                    for (const state of stateNames) {
+                        if (location.includes(state)) {
+                            foundState = state;
+                            break;
+                        }
+                    }
+                    
+                    if (foundState) {
+                        location = foundState;
+                    } else if (location.length === 2) {
+                        // If it's a 2-letter abbreviation, convert it
+                        location = getFullStateName(location);
+                    }
+                    // If location is already a valid state name or we couldn't find one, use as is
+                }
+                
+                const gpa = applicant.gpa || null;
+                const greScore = applicant.gre_score || null;
+                const teachingExp = applicant.teaching_experience_years || null;
+                
+                // Format experience
+                const expDisplay = teachingExp ? `${teachingExp} years exp` : 'Not specified';
+                
+                // Format GRE score (might be in format like "TOEFL 100 / IELTS 7.7")
+                let greDisplay = null;
+                if (greScore) {
+                    // Try to extract numeric GRE score if it's a simple number, otherwise show as is
+                    const greMatch = greScore.toString().match(/(\d+)/);
+                    if (greMatch) {
+                        greDisplay = `GRE: ${greMatch[1]}`;
+                    } else {
+                        greDisplay = `GRE: ${greScore}`;
+                    }
+                }
+                
                 // Decision badge color
                 let decisionColor = '#FF5F5F';
                 let decisionText = 'Declined';
@@ -4129,6 +4183,22 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     decisionText = 'Not Eligible';
                 }
                 
+                // Build meta info row
+                const metaItems = [];
+                if (location && location !== 'Not specified') {
+                    metaItems.push(location);
+                }
+                if (gpa) {
+                    metaItems.push(`GPA: ${gpa}`);
+                }
+                if (greDisplay) {
+                    metaItems.push(greDisplay);
+                }
+                if (expDisplay && expDisplay !== 'Not specified') {
+                    metaItems.push(expDisplay);
+                }
+                const metaRow = metaItems.length > 0 ? metaItems.join(' • ') : 'Information not available';
+                
                 return `
                     <div class="candidate-card" onclick="window.showAdmissionDetails(${index})" style="cursor: pointer; border-color: ${selectedAdmissionApplicant === index ? 'rgba(75, 155, 255, 0.6)' : 'rgba(75, 155, 255, 0.25)'}; background: #0A3550;">
                         <div class="candidate-card-header">
@@ -4140,6 +4210,9 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                         <span class="propensity-badge" style="background: ${decisionColor}; color: #FFFFFF;">${decisionText}</span>
                                     </div>
                                     <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 1rem; margin-top: 0.5rem;">
+                                        ${metaRow}
+                                    </div>
+                                    <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; margin-top: 0.25rem;">
                                         <span>Risk: ${riskBand}</span>
                                     </div>
                                 </div>
@@ -4183,7 +4256,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     
                     <div class="candidate-detail-section">
                         <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">AI Rationale</h4>
-                        <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; margin-bottom: 1rem;">${escapeHtml(applicant.explanation || 'No explanation available')}</p>
+                        <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; margin-bottom: 1rem;">${escapeHtml(applicant.ai_rationale || applicant.explanation || 'No rationale available')}</p>
                     </div>
                     
                     <div class="candidate-detail-section">

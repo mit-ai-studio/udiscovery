@@ -180,16 +180,17 @@ def create_standardization_task(applicant_data: dict):
           learning_orientation_fit, academic_readiness, life_context
         - Each score must be an integer between 1 and 5
         
-        Return ONLY a valid JSON object, no additional text.""",
+        Return ONLY a valid JSON object with scores and a brief AI rationale explaining the scoring, no additional text.""",
         agent=create_data_standardization_agent(),
-        expected_output="""A JSON object with six integer scores (1-5) for each rubric dimension:
+        expected_output="""A JSON object with six integer scores (1-5) for each rubric dimension and an AI rationale:
         {{
             "motivation_values": <integer 1-5>,
             "resilience": <integer 1-5>,
             "leadership": <integer 1-5>,
             "learning_orientation_fit": <integer 1-5>,
             "academic_readiness": <integer 1-5>,
-            "life_context": <integer 1-5>
+            "life_context": <integer 1-5>,
+            "ai_rationale": "<brief 2-3 sentence summary explaining the overall assessment and key strengths/concerns>"
         }}"""
     )
 
@@ -448,12 +449,256 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
             if probability < 0 or probability > 100:
                 raise ValueError(f"Invalid probability_of_success: {probability} (must be 0-100)")
             
-            # Return only probability of success as required
-            # But also include application_id and name for frontend display
+            # Extract additional information for frontend display
+            # Location: extract state from city field - use city-to-state mapping
+            city = applicant_data.get('city', '').strip() if applicant_data.get('city') else ''
+            location = ''
+            if city:
+                import re
+                # State abbreviation to full name mapping
+                state_map = {
+                    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+                    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+                    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+                    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+                    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+                    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+                    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+                    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+                    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+                    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+                    'DC': 'District of Columbia'
+                }
+                
+                # City to state mapping (major US cities)
+                city_to_state = {
+                    'Denver': 'Colorado', 'New York': 'New York', 'Los Angeles': 'California', 'Chicago': 'Illinois',
+                    'Houston': 'Texas', 'Phoenix': 'Arizona', 'Philadelphia': 'Pennsylvania', 'San Antonio': 'Texas',
+                    'San Diego': 'California', 'Dallas': 'Texas', 'San Jose': 'California', 'Austin': 'Texas',
+                    'Jacksonville': 'Florida', 'Fort Worth': 'Texas', 'Columbus': 'Ohio', 'Charlotte': 'North Carolina',
+                    'San Francisco': 'California', 'Indianapolis': 'Indiana', 'Seattle': 'Washington', 'Boston': 'Massachusetts',
+                    'Washington': 'District of Columbia', 'El Paso': 'Texas', 'Nashville': 'Tennessee', 'Detroit': 'Michigan',
+                    'Oklahoma City': 'Oklahoma', 'Portland': 'Oregon', 'Las Vegas': 'Nevada', 'Memphis': 'Tennessee',
+                    'Louisville': 'Kentucky', 'Baltimore': 'Maryland', 'Milwaukee': 'Wisconsin', 'Albuquerque': 'New Mexico',
+                    'Tucson': 'Arizona', 'Fresno': 'California', 'Sacramento': 'California', 'Kansas City': 'Missouri',
+                    'Mesa': 'Arizona', 'Atlanta': 'Georgia', 'Omaha': 'Nebraska', 'Colorado Springs': 'Colorado',
+                    'Raleigh': 'North Carolina', 'Virginia Beach': 'Virginia', 'Miami': 'Florida', 'Oakland': 'California',
+                    'Minneapolis': 'Minnesota', 'Tulsa': 'Oklahoma', 'Cleveland': 'Ohio', 'Wichita': 'Kansas',
+                    'Arlington': 'Texas', 'New Orleans': 'Louisiana', 'Tampa': 'Florida', 'Honolulu': 'Hawaii',
+                    'Anaheim': 'California', 'Santa Ana': 'California', 'St. Louis': 'Missouri', 'Riverside': 'California',
+                    'Corpus Christi': 'Texas', 'Lexington': 'Kentucky', 'Pittsburgh': 'Pennsylvania', 'Anchorage': 'Alaska',
+                    'Stockton': 'California', 'Cincinnati': 'Ohio', 'St. Paul': 'Minnesota', 'Toledo': 'Ohio',
+                    'Greensboro': 'North Carolina', 'Newark': 'New Jersey', 'Plano': 'Texas', 'Henderson': 'Nevada',
+                    'Lincoln': 'Nebraska', 'Buffalo': 'New York', 'Jersey City': 'New Jersey', 'Chula Vista': 'California',
+                    'Fort Wayne': 'Indiana', 'Orlando': 'Florida', 'St. Petersburg': 'Florida', 'Chandler': 'Arizona',
+                    'Laredo': 'Texas', 'Norfolk': 'Virginia', 'Durham': 'North Carolina', 'Madison': 'Wisconsin',
+                    'Lubbock': 'Texas', 'Irvine': 'California', 'Winston-Salem': 'North Carolina', 'Glendale': 'Arizona',
+                    'Garland': 'Texas', 'Hialeah': 'Florida', 'Reno': 'Nevada', 'Chesapeake': 'Virginia',
+                    'Gilbert': 'Arizona', 'Baton Rouge': 'Louisiana', 'Irving': 'Texas', 'Scottsdale': 'Arizona',
+                    'North Las Vegas': 'Nevada', 'Fremont': 'California', 'Boise': 'Idaho', 'Richmond': 'Virginia',
+                    'San Bernardino': 'California', 'Birmingham': 'Alabama', 'Spokane': 'Washington', 'Rochester': 'New York',
+                    'Des Moines': 'Iowa', 'Modesto': 'California', 'Fayetteville': 'North Carolina', 'Tacoma': 'Washington',
+                    'Oxnard': 'California', 'Fontana': 'California', 'Columbus': 'Georgia', 'Montgomery': 'Alabama',
+                    'Moreno Valley': 'California', 'Shreveport': 'Louisiana', 'Aurora': 'Illinois', 'Yonkers': 'New York',
+                    'Akron': 'Ohio', 'Huntington Beach': 'California', 'Little Rock': 'Arkansas', 'Augusta': 'Georgia',
+                    'Amarillo': 'Texas', 'Glendale': 'California', 'Mobile': 'Alabama', 'Grand Rapids': 'Michigan',
+                    'Salt Lake City': 'Utah', 'Tallahassee': 'Florida', 'Huntsville': 'Alabama', 'Grand Prairie': 'Texas',
+                    'Knoxville': 'Tennessee', 'Worcester': 'Massachusetts', 'Newport News': 'Virginia', 'Brownsville': 'Texas',
+                    'Overland Park': 'Kansas', 'Santa Clarita': 'California', 'Providence': 'Rhode Island', 'Garden Grove': 'California',
+                    'Chattanooga': 'Tennessee', 'Oceanside': 'California', 'Jackson': 'Mississippi', 'Fort Lauderdale': 'Florida',
+                    'Santa Rosa': 'California', 'Rancho Cucamonga': 'California', 'Port St. Lucie': 'Florida', 'Tempe': 'Arizona',
+                    'Ontario': 'California', 'Vancouver': 'Washington', 'Sioux Falls': 'South Dakota', 'Peoria': 'Arizona',
+                    'Salem': 'Oregon', 'Elk Grove': 'California', 'Corona': 'California', 'Eugene': 'Oregon',
+                    'Pembroke Pines': 'Florida', 'Valley Stream': 'New York', 'Lancaster': 'California', 'Salinas': 'California',
+                    'Palmdale': 'California', 'Hayward': 'California', 'Frisco': 'Texas', 'Pasadena': 'Texas',
+                    'Macon': 'Georgia', 'Alexandria': 'Virginia', 'Pomona': 'California', 'Lakewood': 'Colorado',
+                    'Sunnyvale': 'California', 'Escondido': 'California', 'Kansas City': 'Kansas', 'Hollywood': 'Florida',
+                    'Clarksville': 'Tennessee', 'Torrance': 'California', 'Rockford': 'Illinois', 'Joliet': 'Illinois',
+                    'Paterson': 'New Jersey', 'Bridgeport': 'Connecticut', 'Naperville': 'Illinois', 'Savannah': 'Georgia',
+                    'Mesquite': 'Texas', 'Syracuse': 'New York', 'Pasadena': 'California', 'Orange': 'California',
+                    'Fullerton': 'California', 'Killeen': 'Texas', 'Dayton': 'Ohio', 'McAllen': 'Texas',
+                    'Bellevue': 'Washington', 'Miramar': 'Florida', 'Hampton': 'Virginia', 'West Valley City': 'Utah',
+                    'Warren': 'Michigan', 'Olathe': 'Kansas', 'Waco': 'Texas', 'Gainesville': 'Florida',
+                    'Cedar Rapids': 'Iowa', 'Visalia': 'California', 'Coral Springs': 'Florida', 'Thousand Oaks': 'California',
+                    'Elizabeth': 'New Jersey', 'Stamford': 'Connecticut', 'Concord': 'California', 'Kent': 'Washington',
+                    'Lafayette': 'Louisiana', 'New Haven': 'Connecticut', 'Topeka': 'Kansas', 'Simi Valley': 'California',
+                    'Santa Clara': 'California', 'Athens': 'Georgia', 'Hartford': 'Connecticut', 'Victorville': 'California',
+                    'Abilene': 'Texas', 'Norman': 'Oklahoma', 'Vallejo': 'California', 'Berkeley': 'California',
+                    'Round Rock': 'Texas', 'Ann Arbor': 'Michigan', 'Richmond': 'California', 'Everett': 'Washington',
+                    'Evansville': 'Indiana', 'Odessa': 'Texas', 'Allentown': 'Pennsylvania', 'Fargo': 'North Dakota',
+                    'Beaumont': 'Texas', 'Independence': 'Missouri', 'Surprise': 'Arizona', 'Santa Maria': 'California',
+                    'El Monte': 'California', 'Cambridge': 'Massachusetts', 'Clearwater': 'Florida', 'Westminster': 'Colorado',
+                    'Rochester': 'Minnesota', 'Waterbury': 'Connecticut', 'Provo': 'Utah', 'West Jordan': 'Utah',
+                    'Murfreesboro': 'Tennessee', 'Gresham': 'Oregon', 'Fairfield': 'California', 'Lowell': 'Massachusetts',
+                    'San Buenaventura': 'California', 'Pueblo': 'Colorado', 'High Point': 'North Carolina', 'West Covina': 'California',
+                    'Richmond': 'Virginia', 'Murrieta': 'California', 'Carrollton': 'Texas', 'Midland': 'Texas',
+                    'Charleston': 'South Carolina', 'Waco': 'Texas', 'Sterling Heights': 'Michigan', 'Denton': 'Texas',
+                    'Palm Bay': 'Florida', 'Cedar Park': 'Texas', 'Kenosha': 'Wisconsin', 'Lakeland': 'Florida',
+                    'Miami Gardens': 'Florida', 'Tyler': 'Texas', 'Lewisville': 'Texas', 'Burbank': 'California',
+                    'Renton': 'Washington', 'Davenport': 'Iowa', 'South Bend': 'Indiana', 'Vista': 'California',
+                    'Edinburg': 'Texas', 'Tuscaloosa': 'Alabama', 'Carmel': 'Indiana', 'Spokane Valley': 'Washington',
+                    'San Mateo': 'California', 'Rialto': 'California', 'Compton': 'California', 'Mission Viejo': 'California',
+                    'Boulder': 'Colorado', 'Daly City': 'California', 'Brockton': 'Massachusetts', 'Bellingham': 'Washington',
+                    'Green Bay': 'Wisconsin', 'Boca Raton': 'Florida', 'Largo': 'Florida', 'Temecula': 'California',
+                    'Meridian': 'Idaho', 'Erie': 'Pennsylvania', 'South Gate': 'California', 'Hillsboro': 'Oregon',
+                    'Yuma': 'Arizona', 'Sandy Springs': 'Georgia', 'Federal Way': 'Washington', 'Sparks': 'Nevada',
+                    'Santa Monica': 'California', 'Roswell': 'Georgia', 'Lynn': 'Massachusetts', 'Bend': 'Oregon',
+                    'Downey': 'California', 'Sandy': 'Utah', 'Tracy': 'California', 'Bryan': 'Texas',
+                    'Bremerton': 'Washington', 'Inglewood': 'California', 'Hemet': 'California', 'Nampa': 'Idaho',
+                    'Fishers': 'Indiana', 'San Angelo': 'Texas', 'Lakewood': 'Washington', 'Menifee': 'California',
+                    'Jurupa Valley': 'California', 'Racine': 'Wisconsin', 'Rio Rancho': 'New Mexico', 'Redding': 'California',
+                    'Chico': 'California', 'Tuscaloosa': 'Alabama', 'Billings': 'Montana', 'West Palm Beach': 'Florida',
+                    'Broken Arrow': 'Oklahoma', 'Avondale': 'Arizona', 'Layton': 'Utah', 'Miami Beach': 'Florida',
+                    'Bellingham': 'Washington', 'Bend': 'Oregon', 'Boulder': 'Colorado', 'Bremerton': 'Washington',
+                    'Brockton': 'Massachusetts', 'Bryan': 'Texas', 'Burbank': 'California', 'Cambridge': 'Massachusetts',
+                    'Carmel': 'Indiana', 'Carrollton': 'Texas', 'Cedar Park': 'Texas', 'Cedar Rapids': 'Iowa',
+                    'Chandler': 'Arizona', 'Charleston': 'South Carolina', 'Chattanooga': 'Tennessee', 'Chico': 'California',
+                    'Chula Vista': 'California', 'Cincinnati': 'Ohio', 'Clearwater': 'Florida', 'Clarksville': 'Tennessee',
+                    'Cleveland': 'Ohio', 'Colorado Springs': 'Colorado', 'Columbia': 'South Carolina', 'Columbus': 'Georgia',
+                    'Compton': 'California', 'Concord': 'California', 'Coral Springs': 'Florida', 'Corona': 'California',
+                    'Corpus Christi': 'Texas', 'Dallas': 'Texas', 'Daly City': 'California', 'Davenport': 'Iowa',
+                    'Dayton': 'Ohio', 'Denton': 'Texas', 'Des Moines': 'Iowa', 'Detroit': 'Michigan',
+                    'Downey': 'California', 'Durham': 'North Carolina', 'Edinburg': 'Texas', 'El Monte': 'California',
+                    'El Paso': 'Texas', 'Elk Grove': 'California', 'Elizabeth': 'New Jersey', 'Erie': 'Pennsylvania',
+                    'Escondido': 'California', 'Eugene': 'Oregon', 'Evansville': 'Indiana', 'Everett': 'Washington',
+                    'Fairfield': 'California', 'Fargo': 'North Dakota', 'Fayetteville': 'North Carolina', 'Federal Way': 'Washington',
+                    'Fishers': 'Indiana', 'Fontana': 'California', 'Fort Lauderdale': 'Florida', 'Fort Wayne': 'Indiana',
+                    'Fort Worth': 'Texas', 'Fremont': 'California', 'Fresno': 'California', 'Frisco': 'Texas',
+                    'Fullerton': 'California', 'Gainesville': 'Florida', 'Garden Grove': 'California', 'Garland': 'Texas',
+                    'Gilbert': 'Arizona', 'Glendale': 'Arizona', 'Glendale': 'California', 'Grand Prairie': 'Texas',
+                    'Grand Rapids': 'Michigan', 'Greensboro': 'North Carolina', 'Gresham': 'Oregon', 'Hampton': 'Virginia',
+                    'Hartford': 'Connecticut', 'Hayward': 'California', 'Hemet': 'California', 'Henderson': 'Nevada',
+                    'Hialeah': 'Florida', 'High Point': 'North Carolina', 'Hillsboro': 'Oregon', 'Hollywood': 'Florida',
+                    'Honolulu': 'Hawaii', 'Houston': 'Texas', 'Huntington Beach': 'California', 'Huntsville': 'Alabama',
+                    'Independence': 'Missouri', 'Indianapolis': 'Indiana', 'Inglewood': 'California', 'Irvine': 'California',
+                    'Irving': 'Texas', 'Jackson': 'Mississippi', 'Jacksonville': 'Florida', 'Jersey City': 'New Jersey',
+                    'Joliet': 'Illinois', 'Jurupa Valley': 'California', 'Kansas City': 'Kansas', 'Kansas City': 'Missouri',
+                    'Kent': 'Washington', 'Killeen': 'Texas', 'Knoxville': 'Tennessee', 'Lafayette': 'Louisiana',
+                    'Lakewood': 'Colorado', 'Lakewood': 'Washington', 'Lakeland': 'Florida', 'Lancaster': 'California',
+                    'Laredo': 'Texas', 'Las Vegas': 'Nevada', 'Layton': 'Utah', 'Lewisville': 'Texas',
+                    'Lexington': 'Kentucky', 'Lincoln': 'Nebraska', 'Little Rock': 'Arkansas', 'Long Beach': 'California',
+                    'Los Angeles': 'California', 'Louisville': 'Kentucky', 'Lowell': 'Massachusetts', 'Lubbock': 'Texas',
+                    'Lynn': 'Massachusetts', 'Macon': 'Georgia', 'Madison': 'Wisconsin', 'McAllen': 'Texas',
+                    'Memphis': 'Tennessee', 'Menifee': 'California', 'Meridian': 'Idaho', 'Mesa': 'Arizona',
+                    'Mesquite': 'Texas', 'Miami': 'Florida', 'Miami Beach': 'Florida', 'Miami Gardens': 'Florida',
+                    'Midland': 'Texas', 'Milwaukee': 'Wisconsin', 'Minneapolis': 'Minnesota', 'Miramar': 'Florida',
+                    'Mission Viejo': 'California', 'Mobile': 'Alabama', 'Modesto': 'California', 'Montgomery': 'Alabama',
+                    'Moreno Valley': 'California', 'Murfreesboro': 'Tennessee', 'Murrieta': 'California', 'Nampa': 'Idaho',
+                    'Naperville': 'Illinois', 'Nashville': 'Tennessee', 'New Haven': 'Connecticut', 'New Orleans': 'Louisiana',
+                    'New York': 'New York', 'Newark': 'New Jersey', 'Newport News': 'Virginia', 'Norfolk': 'Virginia',
+                    'Norman': 'Oklahoma', 'North Las Vegas': 'Nevada', 'Oakland': 'California', 'Oceanside': 'California',
+                    'Odessa': 'Texas', 'Olathe': 'Kansas', 'Omaha': 'Nebraska', 'Ontario': 'California',
+                    'Orange': 'California', 'Orlando': 'Florida', 'Overland Park': 'Kansas', 'Oxnard': 'California',
+                    'Palm Bay': 'Florida', 'Palmdale': 'California', 'Pasadena': 'California', 'Pasadena': 'Texas',
+                    'Paterson': 'New Jersey', 'Pembroke Pines': 'Florida', 'Peoria': 'Arizona', 'Philadelphia': 'Pennsylvania',
+                    'Phoenix': 'Arizona', 'Pittsburgh': 'Pennsylvania', 'Plano': 'Texas', 'Pomona': 'California',
+                    'Port St. Lucie': 'Florida', 'Portland': 'Oregon', 'Provo': 'Utah', 'Pueblo': 'Colorado',
+                    'Racine': 'Wisconsin', 'Raleigh': 'North Carolina', 'Rancho Cucamonga': 'California', 'Reno': 'Nevada',
+                    'Renton': 'Washington', 'Rialto': 'California', 'Richmond': 'California', 'Richmond': 'Virginia',
+                    'Riverside': 'California', 'Rochester': 'Minnesota', 'Rochester': 'New York', 'Rockford': 'Illinois',
+                    'Roswell': 'Georgia', 'Round Rock': 'Texas', 'Sacramento': 'California', 'Salem': 'Oregon',
+                    'Salinas': 'California', 'Salt Lake City': 'Utah', 'San Angelo': 'Texas', 'San Antonio': 'Texas',
+                    'San Bernardino': 'California', 'San Buenaventura': 'California', 'San Diego': 'California',
+                    'San Francisco': 'California', 'San Jose': 'California', 'San Mateo': 'California', 'Santa Ana': 'California',
+                    'Santa Clara': 'California', 'Santa Clarita': 'California', 'Santa Maria': 'California',
+                    'Santa Monica': 'California', 'Santa Rosa': 'California', 'Savannah': 'Georgia', 'Scottsdale': 'Arizona',
+                    'Seattle': 'Washington', 'Shreveport': 'Louisiana', 'Sioux Falls': 'South Dakota', 'South Bend': 'Indiana',
+                    'South Gate': 'California', 'Spokane': 'Washington', 'Spokane Valley': 'Washington', 'Springfield': 'Missouri',
+                    'St. Louis': 'Missouri', 'St. Paul': 'Minnesota', 'St. Petersburg': 'Florida', 'Stamford': 'Connecticut',
+                    'Sterling Heights': 'Michigan', 'Stockton': 'California', 'Sunnyvale': 'California', 'Surprise': 'Arizona',
+                    'Syracuse': 'New York', 'Tacoma': 'Washington', 'Tallahassee': 'Florida', 'Tampa': 'Florida',
+                    'Temecula': 'California', 'Tempe': 'Arizona', 'Thousand Oaks': 'California', 'Topeka': 'Kansas',
+                    'Torrance': 'California', 'Tracy': 'California', 'Tucson': 'Arizona', 'Tulsa': 'Oklahoma',
+                    'Tuscaloosa': 'Alabama', 'Tyler': 'Texas', 'Vallejo': 'California', 'Valley Stream': 'New York',
+                    'Vancouver': 'Washington', 'Victorville': 'California', 'Virginia Beach': 'Virginia', 'Visalia': 'California',
+                    'Vista': 'California', 'Waco': 'Texas', 'Warren': 'Michigan', 'Washington': 'District of Columbia',
+                    'Waterbury': 'Connecticut', 'West Covina': 'California', 'West Jordan': 'Utah', 'West Palm Beach': 'Florida',
+                    'West Valley City': 'Utah', 'Westminster': 'Colorado', 'Wichita': 'Kansas', 'Winston-Salem': 'North Carolina',
+                    'Worcester': 'Massachusetts', 'Yonkers': 'New York', 'Yuma': 'Arizona'
+                }
+                
+                # Normalize city name (remove extra spaces, convert to title case for matching)
+                city_normalized = ' '.join(city.split()).title()
+                
+                # First, try to find state abbreviation in city string
+                state_abbr_patterns = [
+                    r',\s*([A-Z]{2})\b',  # "City, ST"
+                    r'\b([A-Z]{2})\s*$',  # "ST" at end
+                    r'^\s*([A-Z]{2})\s*$'  # Just "ST"
+                ]
+                
+                state_abbr = None
+                for pattern in state_abbr_patterns:
+                    match = re.search(pattern, city.upper())
+                    if match:
+                        potential_abbr = match.group(1)
+                        if potential_abbr in state_map:
+                            state_abbr = potential_abbr
+                            break
+                
+                if state_abbr:
+                    location = state_map[state_abbr]
+                elif city_normalized in city_to_state:
+                    # Use city-to-state mapping
+                    location = city_to_state[city_normalized]
+                else:
+                    # Check if city contains a full state name (check longest names first)
+                    state_names = ['New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 
+                                  'North Dakota', 'Rhode Island', 'South Carolina', 'South Dakota', 'West Virginia',
+                                  'District of Columbia', 'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 
+                                  'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 
+                                  'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 
+                                  'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 
+                                  'Nebraska', 'Nevada', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Tennessee', 
+                                  'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'Wisconsin', 'Wyoming']
+                    
+                    # Sort by length (longest first) to match multi-word states correctly
+                    state_names.sort(key=len, reverse=True)
+                    for state in state_names:
+                        if state in city:
+                            location = state
+                            break
+            
+            # GPA formatting
+            gpa = applicant_data.get('gpa', None)
+            grading_scale = applicant_data.get('grading_scale', None)
+            gpa_display = None
+            if gpa is not None:
+                try:
+                    gpa_float = float(gpa)
+                    if grading_scale and float(grading_scale) == 10.0:
+                        # Convert 10-point scale to 4-point scale for display
+                        gpa_display = f"{gpa_float / 2.5:.2f}"
+                    else:
+                        gpa_display = f"{gpa_float:.2f}"
+                except (ValueError, TypeError):
+                    gpa_display = None
+            
+            # Extract GRE/test score if available
+            gre_score = applicant_data.get('language_test_score', None)
+            teaching_exp = applicant_data.get('teaching_experience_years', None)
+            
+            # Extract AI rationale and rubric scores from standardization result
+            ai_rationale = rubric_scores.get('ai_rationale', '')
+            
+            # Return probability of success with additional display info
             result = {
                 "application_id": application_id,
                 "name": applicant_data.get('name', 'N/A'),
-                "probability_of_success": probability
+                "probability_of_success": probability,
+                "location": location,
+                "gpa": gpa_display,
+                "gre_score": gre_score,
+                "teaching_experience_years": teaching_exp,
+                "rubric_scores": {
+                    "motivation_values": rubric_scores.get('motivation_values'),
+                    "resilience": rubric_scores.get('resilience'),
+                    "leadership": rubric_scores.get('leadership'),
+                    "learning_orientation_fit": rubric_scores.get('learning_orientation_fit'),
+                    "academic_readiness": rubric_scores.get('academic_readiness'),
+                    "life_context": rubric_scores.get('life_context')
+                },
+                "ai_rationale": ai_rationale
             }
             
             return result
