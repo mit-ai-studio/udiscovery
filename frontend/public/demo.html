@@ -388,13 +388,13 @@
         
         .kpi-label {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 1.125rem;
+            font-size: 1.25rem;
             margin-bottom: 0.5rem;
         }
         
         .kpi-value {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 2rem;
+            color: #FFFFFF;
+            font-size: 2.25rem;
             font-weight: 600;
         }
         
@@ -472,7 +472,8 @@
         
         .threshold-value {
             color: #6EE7D7;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.5rem;
         }
         
         .slider-container {
@@ -1406,8 +1407,8 @@
                     <a href="#" id="nav-logout" class="nav-link" style="color: rgba(148, 163, 184, 1); padding: 0.5rem 0.75rem; font-size: 1.125rem; display: flex; align-items: center; gap: 0.5rem;">
                         <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
                         <span class="hidden sm:inline">Logout</span>
-                    </a>
-                </div>
+                </a>
+            </div>
                 <div id="welcome-message" style="color: rgba(203, 213, 225, 1); padding-right: 0.75rem; font-size: 1.125rem;"></div>
             </div>
         </div>
@@ -1440,7 +1441,7 @@
                             placeholder="e.g., Master of Education"
                             required>
                     </div>
-                </div>
+        </div>
 
                 <div class="form-group">
                     <label for="program-level">Program Level *</label>
@@ -1486,22 +1487,22 @@
                             name="program-location"
                             class="form-input"
                             placeholder="e.g., Cambridge, MA">
-                    </div>
                 </div>
+            </div>
 
                 <div class="form-group">
                     <label for="additional-requirements">Additional Requirements or Preferences</label>
-                    <textarea 
+                <textarea 
                         id="additional-requirements" 
                         name="additional-requirements"
                         class="form-textarea"
                         rows="3"
                         placeholder="Any specific requirements, preferences, or considerations (e.g., work experience minimum, GPA requirements, diversity goals, etc.)"></textarea>
-                </div>
+            </div>
 
                 <button type="submit" id="submit-demo-btn" class="submit-demo-btn">
                     🚀 Find Candidates
-                </button>
+            </button>
             </form>
 
             <div id="error-container"></div>
@@ -1773,7 +1774,7 @@
                         <div class="filters-grid">
                             <div class="filter-row">
                                 <label>
-                                    Acceptance Threshold: <span class="threshold-value" id="admission-threshold-display" style="color: #4B9BFF;">75</span>%
+                                    Acceptance Threshold: <span class="threshold-value" id="admission-threshold-display" style="color: #4B9BFF; font-weight: 700; font-size: 1.5rem;">75</span>%
                                 </label>
                                 <div class="slider-container">
                                     <span class="slider-label">0%</span>
@@ -1937,11 +1938,11 @@
                         <div class="kpi-grid" id="prospecting-kpi-grid">
                             <div class="kpi-card">
                                 <div class="kpi-label">Possible Candidates Prospected</div>
-                                <div class="kpi-value" id="prospecting-kpi-total" style="color: #6EE7D7;">0</div>
+                                <div class="kpi-value" id="prospecting-kpi-total">0</div>
                             </div>
                             <div class="kpi-card">
                                 <div class="kpi-label">General Fit Candidates</div>
-                                <div class="kpi-value" id="prospecting-kpi-fit" style="color: #6EE7D7;">0</div>
+                                <div class="kpi-value" id="prospecting-kpi-fit">0</div>
                             </div>
                             <div class="kpi-card">
                                 <div class="kpi-label">High Probability (&gt;<span id="prospecting-threshold-display">40</span>%)</div>
@@ -2181,7 +2182,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             if (formData.additionalRequirements) {
                 universityGoal += `\n\nAdditional Requirements:\n${formData.additionalRequirements}`;
             }
-            
+
             // Show loading, hide form
             document.querySelector('.demo-form-section').style.display = 'none';
             document.getElementById('loading-section').style.display = 'block';
@@ -2210,7 +2211,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 
                 // Stop loading progress
@@ -2218,7 +2219,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 
                 // Hide loading, show results
                 document.getElementById('loading-section').style.display = 'none';
-                
+
                 if (data.success) {
                     // Save results to localStorage
                     localStorage.setItem('udiscovery_results', data.result);
@@ -2503,7 +2504,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 } else if (result.content !== undefined) {
                     text = String(result.content);
                 } else {
-                    text = JSON.stringify(result, null, 2);
+                text = JSON.stringify(result, null, 2);
                 }
             } else {
                 text = String(result || 'No results generated');
@@ -3210,12 +3211,12 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                             <i data-lucide="download" style="width: 16px; height: 16px;"></i>
                         </button>
                     </div>
-                    <div>
+                        <div>
                         ${emails.length > 0 ? emails.map(c => `
                             <div class="campaign-contact-item">
                                 <div class="campaign-contact-name">${escapeHtml(c.name)}</div>
                                 <div class="campaign-contact-value">${escapeHtml(c.email)}</div>
-                            </div>
+                        </div>
                         `).join('') : '<p class="campaign-placeholder">No email addresses available</p>'}
                     </div>
                 `;
@@ -3527,7 +3528,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                     </div>
                                 ` : ''}
                             </div>
-                            ${candidate.background ? `
+                        ${candidate.background ? `
                                 <div class="section" style="margin-bottom: 1.5rem;">
                                     <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #5DADE2;">📝 <strong>Background</strong></div>
                                     <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.background)}</div>
@@ -3547,9 +3548,9 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                     <ul class="drivers-list negative" style="margin: 0; padding-left: 1.5rem;">
                                         ${candidate.negativeDrivers.map(driver => `<li style="margin-bottom: 0.5rem; color: #f44336; font-size: 0.95rem;">${escapeHtml(driver)}</li>`).join('')}
                                     </ul>
-                                </div>
-                            ` : ''}
-                            ${candidate.whyMatch ? `
+                            </div>
+                        ` : ''}
+                        ${candidate.whyMatch ? `
                                 <div class="section" style="margin-bottom: 1.5rem;">
                                     <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #FFC300;">🎯 <strong>Why They Match</strong></div>
                                     <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.whyMatch)}</div>
@@ -3559,15 +3560,15 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                 <div class="assumptions" style="margin-bottom: 1.5rem;">
                                     <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #FFC300;">⚠️ <strong>Assumptions/Warnings</strong></div>
                                     <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.assumptions)}</div>
-                                </div>
-                            ` : ''}
-                            ${candidate.strengths ? `
+                            </div>
+                        ` : ''}
+                        ${candidate.strengths ? `
                                 <div class="section" style="margin-bottom: 1.5rem;">
                                     <div class="section-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: #5DADE2;">💪 <strong>Areas of Strength</strong></div>
                                     <div class="section-content" style="line-height: 1.6; font-size: 0.95rem;">${escapeHtml(candidate.strengths)}</div>
-                                </div>
-                            ` : ''}
-                        </div>
+                            </div>
+                        ` : ''}
+                    </div>
                     </div>
                 </div>
             `;
