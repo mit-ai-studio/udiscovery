@@ -84,7 +84,7 @@ app.post('/api/run-admission', async (req, res) => {
     req.setTimeout(30 * 60 * 1000);
     res.setTimeout(30 * 60 * 1000);
     
-    const { num_applications } = req.body;
+    const { num_applications, batch_size } = req.body;
     
     // Flag to prevent multiple responses
     let responseSent = false;
@@ -149,13 +149,16 @@ app.post('/api/run-admission', async (req, res) => {
         }
         
         console.log(`Using Python: ${pythonPath}`);
-        console.log(`Running admission assessment with ${num_applications || 'all'} applications...`);
+        console.log(`Running admission assessment with ${num_applications || 'all'} applications, batch size: ${batch_size || 50}...`);
         
         // Prepare arguments
         const args = [scriptPath];
-        if (num_applications) {
+        // Only add num_applications if it's a valid number
+        if (num_applications !== null && num_applications !== undefined) {
             args.push(num_applications.toString());
         }
+        // Always add batch_size as the last argument
+        args.push((batch_size || 50).toString());
         
         // Spawn Python process
         const pythonProcess = spawn(pythonPath, args, {

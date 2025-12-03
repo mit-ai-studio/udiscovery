@@ -3763,6 +3763,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
         function restoreSavedData() {
             const savedFormData = localStorage.getItem('udiscovery_formData');
             const savedResults = localStorage.getItem('udiscovery_results');
+            const savedAdmissionResults = localStorage.getItem('udiscovery_admission_results');
             
             if (savedFormData) {
                 try {
@@ -3780,14 +3781,52 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 }
             }
             
-            // If we have saved results, show them
-            if (savedResults) {
+            // Check for admission results first (if user was on admissions page)
+            if (savedAdmissionResults) {
+                // Hide form, show admission results
+                document.querySelector('.demo-form-section').style.display = 'none';
+                document.getElementById('results-section').style.display = 'none';
+                document.getElementById('admission-results-section').style.display = 'block';
+                
+                // Display the saved admission results
+                displayAdmissionResults(savedAdmissionResults);
+                
+                // Update navigation to highlight Admissions
+                const navProspecting = document.getElementById('nav-prospecting');
+                const navAdmissions = document.getElementById('nav-admissions');
+                if (navProspecting) navProspecting.style.color = 'rgba(148, 163, 184, 1)';
+                if (navAdmissions) navAdmissions.style.color = '#4B9BFF';
+                
+                // Show a message that results were restored
+                const timestamp = localStorage.getItem('udiscovery_admission_timestamp');
+                if (timestamp) {
+                    const date = new Date(timestamp);
+                    const timeStr = date.toLocaleString();
+                    const restoreMsg = document.createElement('div');
+                    restoreMsg.className = 'restore-message';
+                    restoreMsg.style.cssText = 'background: rgba(255, 195, 0, 0.2); border-left: 4px solid #FFC300; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; color: #E8EDF3; margin-left: 10rem; margin-right: 10rem;';
+                    restoreMsg.innerHTML = `📋 <strong>Restored previous admission session</strong> - Results from ${timeStr}. <button onclick="clearAdmissionData()" style="background: #FFC300; color: #212F45; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; font-weight: 600; margin-left: 0.5rem;">Clear & Start New</button>`;
+                    const admissionHeader = document.querySelector('#admission-results-section > div:first-child');
+                    if (admissionHeader) {
+                        admissionHeader.insertBefore(restoreMsg, admissionHeader.firstChild);
+                    }
+                }
+            }
+            // If we have saved prospection results, show them
+            else if (savedResults) {
                 // Hide form, show results
                 document.querySelector('.demo-form-section').style.display = 'none';
                 document.getElementById('results-section').style.display = 'block';
+                document.getElementById('admission-results-section').style.display = 'none';
                 
                 // Display the saved results
                 displayResults(savedResults);
+                
+                // Update navigation to highlight Prospecting
+                const navProspecting = document.getElementById('nav-prospecting');
+                const navAdmissions = document.getElementById('nav-admissions');
+                if (navProspecting) navProspecting.style.color = '#6EE7D7';
+                if (navAdmissions) navAdmissions.style.color = 'rgba(148, 163, 184, 1)';
                 
                 // Show a message that results were restored
                 const timestamp = localStorage.getItem('udiscovery_timestamp');
@@ -3814,8 +3853,16 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             location.reload();
         }
         
-        // Make clearSavedData available globally
+        // Clear admission data
+        function clearAdmissionData() {
+            localStorage.removeItem('udiscovery_admission_results');
+            localStorage.removeItem('udiscovery_admission_timestamp');
+            location.reload();
+        }
+        
+        // Make clear functions available globally
         window.clearSavedData = clearSavedData;
+        window.clearAdmissionData = clearAdmissionData;
         
         // Restore on page load
         // Update welcome message on page load
@@ -3923,12 +3970,47 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             }
         }
         
+        // Calculate decision from probability
+        function calculateDecisionFromProbability(probability) {
+            // Convert to 0-1 scale if it's 0-100
+            const prob = probability > 1 ? probability / 100 : probability;
+            
+            // ADMIT threshold: 75%
+            // WAITLIST threshold: 70% (5% less than ADMIT)
+            // REJECTED: anything below 70%
+            if (prob >= 0.75) return 'ADMIT';
+            if (prob >= 0.70) return 'WAITLIST';
+            return 'NOT_ADMITTED';
+        }
+        
+        // Calculate risk band from probability
+        function calculateRiskBand(probability) {
+            // Convert to 0-1 scale if it's 0-100
+            const prob = probability > 1 ? probability / 100 : probability;
+            
+            // Align risk bands with decision thresholds
+            if (prob >= 0.75) return 'Low Risk';
+            if (prob >= 0.70) return 'Medium Risk';
+            return 'High Risk';
+        }
+        
         // Update admission KPIs
         function updateAdmissionKPIs(applicants) {
             const total = applicants.length;
-            const accepted = applicants.filter(a => a.decision === 'ADMIT').length;
-            const waitlisted = applicants.filter(a => a.decision === 'WAITLIST').length;
-            const rejected = applicants.filter(a => a.decision === 'NOT_ADMITTED' || a.decision === 'NOT_ADMITTED_INELIGIBLE').length;
+            // Calculate decisions from probability
+            // ADMIT: >= 75%, WAITLIST: >= 70% but < 75%, REJECTED: < 70%
+            const accepted = applicants.filter(a => {
+                const prob = a.probability_of_success > 1 ? a.probability_of_success / 100 : a.probability_of_success;
+                return prob >= 0.75;
+            }).length;
+            const waitlisted = applicants.filter(a => {
+                const prob = a.probability_of_success > 1 ? a.probability_of_success / 100 : a.probability_of_success;
+                return prob >= 0.70 && prob < 0.75;
+            }).length;
+            const rejected = applicants.filter(a => {
+                const prob = a.probability_of_success > 1 ? a.probability_of_success / 100 : a.probability_of_success;
+                return prob < 0.70;
+            }).length;
             
             document.getElementById('admission-kpi-total').textContent = total;
             document.getElementById('admission-kpi-accepted').textContent = accepted;
@@ -3979,23 +4061,25 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             
             let filtered = window.allAdmissionData.filter(a => {
                 // Filter by threshold (probability of success)
-                const prob = a.probability_of_success ? parseFloat(a.probability_of_success) * 100 : 0;
+                const prob = a.probability_of_success ? (a.probability_of_success > 1 ? a.probability_of_success : a.probability_of_success * 100) : 0;
                 if (prob < threshold) return false;
                 
-                // Filter by decision
-                if (selectedDecision !== 'all' && a.decision !== selectedDecision) return false;
+                // Calculate decision from probability for filtering
+                const decision = calculateDecisionFromProbability(a.probability_of_success);
+                if (selectedDecision !== 'all' && decision !== selectedDecision) return false;
                 
-                // Filter by risk band
-                if (selectedRisk !== 'all' && a.risk_band !== selectedRisk) return false;
+                // Calculate risk band from probability for filtering
+                const riskBand = calculateRiskBand(a.probability_of_success);
+                if (selectedRisk !== 'all' && riskBand !== selectedRisk) return false;
                 
                 return true;
             });
             
-            // Sort by final score (descending)
+            // Sort by probability (descending)
             filtered.sort((a, b) => {
-                const scoreA = a.final_score ? parseFloat(a.final_score) : 0;
-                const scoreB = b.final_score ? parseFloat(b.final_score) : 0;
-                return scoreB - scoreA;
+                const probA = a.probability_of_success ? (a.probability_of_success > 1 ? a.probability_of_success : a.probability_of_success * 100) : 0;
+                const probB = b.probability_of_success ? (b.probability_of_success > 1 ? b.probability_of_success : b.probability_of_success * 100) : 0;
+                return probB - probA;
             });
             
             window.filteredAdmissionData = filtered;
@@ -4023,9 +4107,13 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             
             const cardsHTML = applicants.map((applicant, index) => {
                 const name = applicant.name || 'Unknown';
-                const probability = applicant.probability_of_success ? (parseFloat(applicant.probability_of_success) * 100).toFixed(1) : '0.0';
-                const decision = applicant.decision || 'NOT_ADMITTED';
-                const finalScore = applicant.final_score ? parseFloat(applicant.final_score).toFixed(2) : '0.00';
+                // Handle probability as percentage (0-100) or decimal (0-1)
+                const probValue = applicant.probability_of_success ? parseFloat(applicant.probability_of_success) : 0;
+                const probability = probValue > 1 ? probValue.toFixed(1) : (probValue * 100).toFixed(1);
+                
+                // Calculate decision and risk from probability
+                const decision = calculateDecisionFromProbability(applicant.probability_of_success);
+                const riskBand = calculateRiskBand(applicant.probability_of_success);
                 
                 // Decision badge color
                 let decisionColor = '#FF5F5F';
@@ -4052,8 +4140,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                                         <span class="propensity-badge" style="background: ${decisionColor}; color: #FFFFFF;">${decisionText}</span>
                                     </div>
                                     <div class="candidate-meta" style="display: flex; flex-wrap: wrap; gap: 0.5rem; color: rgba(255, 255, 255, 0.7); font-size: 1rem; margin-top: 0.5rem;">
-                                        <span>Final Score: ${finalScore}</span>
-                                        <span>Risk: ${applicant.risk_band || 'N/A'}</span>
+                                        <span>Risk: ${riskBand}</span>
                                     </div>
                                 </div>
                             </div>
@@ -4082,8 +4169,10 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             if (!viewport) return;
             
             const rubricScores = applicant.rubric_scores || {};
-            const probability = applicant.probability_of_success ? (parseFloat(applicant.probability_of_success) * 100).toFixed(1) : '0.0';
-            const finalScore = applicant.final_score ? parseFloat(applicant.final_score).toFixed(2) : '0.00';
+            const probValue = applicant.probability_of_success ? parseFloat(applicant.probability_of_success) : 0;
+            const probability = probValue > 1 ? probValue.toFixed(1) : (probValue * 100).toFixed(1);
+            const decision = calculateDecisionFromProbability(applicant.probability_of_success);
+            const riskBand = calculateRiskBand(applicant.probability_of_success);
             
             viewport.innerHTML = `
                 <div class="candidate-details-view">
@@ -4128,36 +4217,22 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     </div>
                     
                     <div class="candidate-detail-section">
-                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Final Scores</h4>
+                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Assessment Results</h4>
                         <div style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="color: rgba(255, 255, 255, 0.8);">Weighted Rubric Score</span>
-                                <span style="color: #4B9BFF; font-weight: 600;">${applicant.weighted_rubric_score ? parseFloat(applicant.weighted_rubric_score).toFixed(2) : '0.00'}</span>
-                            </div>
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="color: rgba(255, 255, 255, 0.8);">Probability of Success</span>
                                 <span style="color: #4B9BFF; font-weight: 600;">${probability}%</span>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: rgba(255, 255, 255, 0.8);">Final Score</span>
-                                <span style="color: #4B9BFF; font-weight: 600;">${finalScore}</span>
+                                <span style="color: rgba(255, 255, 255, 0.8);">Decision</span>
+                                <span style="color: ${decision === 'ADMIT' ? '#298E34' : decision === 'WAITLIST' ? 'rgba(255, 195, 0, 0.9)' : '#FF5F5F'}; font-weight: 600;">${decision}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: rgba(255, 255, 255, 0.8);">Risk Band</span>
+                                <span style="color: #4B9BFF; font-weight: 600;">${riskBand}</span>
                             </div>
                         </div>
                     </div>
-                    
-                    ${applicant.strengths && applicant.strengths.length > 0 ? `
-                    <div class="candidate-detail-section">
-                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Strengths</h4>
-                        <p style="color: rgba(255, 255, 255, 0.8);">${escapeHtml(applicant.strengths.join(', '))}</p>
-                    </div>
-                    ` : ''}
-                    
-                    ${applicant.growth_areas && applicant.growth_areas.length > 0 ? `
-                    <div class="candidate-detail-section">
-                        <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Growth Areas</h4>
-                        <p style="color: rgba(255, 255, 255, 0.8);">${escapeHtml(applicant.growth_areas.join(', '))}</p>
-                    </div>
-                    ` : ''}
                     
                     <div class="candidate-detail-section">
                         <h4 style="color: #4B9BFF; margin-bottom: 0.5rem;">Decision Actions</h4>
@@ -4189,19 +4264,21 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                 return;
             }
             
-            const headers = ['Application ID', 'Name', 'Decision', 'Final Score', 'Probability of Success', 'Risk Band', 'Weighted Rubric Score', 'Strengths', 'Growth Areas', 'Explanation'];
-            const rows = window.filteredAdmissionData.map(a => [
-                a.application_id || '',
-                a.name || '',
-                a.decision || '',
-                a.final_score || '',
-                a.probability_of_success ? (parseFloat(a.probability_of_success) * 100).toFixed(2) + '%' : '',
-                a.risk_band || '',
-                a.weighted_rubric_score || '',
-                (a.strengths || []).join('; '),
-                (a.growth_areas || []).join('; '),
-                (a.explanation || '').replace(/\n/g, ' ')
-            ]);
+            const headers = ['Application ID', 'Name', 'Decision', 'Probability of Success', 'Risk Band'];
+            const rows = window.filteredAdmissionData.map(a => {
+                const probValue = a.probability_of_success ? parseFloat(a.probability_of_success) : 0;
+                const probPercent = probValue > 1 ? probValue.toFixed(2) : (probValue * 100).toFixed(2);
+                const decision = calculateDecisionFromProbability(a.probability_of_success);
+                const riskBand = calculateRiskBand(a.probability_of_success);
+                
+                return [
+                    a.application_id || '',
+                    a.name || '',
+                    decision,
+                    probPercent + '%',
+                    riskBand
+                ];
+            });
             
             const csvContent = [
                 headers.join(','),
@@ -4241,7 +4318,7 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ num_applications: 10 }), // Start with 10 for testing
+                    body: JSON.stringify({ num_applications: null, batch_size: 50 }), // Process all applications in batches of 50
                     signal: controller.signal
                 });
                 

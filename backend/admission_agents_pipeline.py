@@ -50,12 +50,12 @@ RUBRIC_WEIGHTS = {
     "Life Context": 0.15
 }
 
-# Decision thresholds
+# Decision thresholds - based on probability of success only
 THRESHOLDS = {
-    "ADMIT": {"min_final_score": 3.5, "min_probability": 0.70},
-    "WAITLIST": {"min_final_score": 3.0, "min_probability": 0.60},
-    "NOT_ADMITTED": {"min_final_score": 2.5, "min_probability": 0.50},
-    "NOT_ADMITTED_INELIGIBLE": {"min_final_score": 0.0, "min_probability": 0.0}  # Special case
+    "ADMIT": {"min_probability": 0.75},  # 75% or higher
+    "WAITLIST": {"min_probability": 0.60},  # 60-74%
+    "NOT_ADMITTED": {"min_probability": 0.40},  # 40-59%
+    "NOT_ADMITTED_INELIGIBLE": {"min_probability": 0.0}  # Below 40%
 }
 
 def load_admission_data(dataset_path: str = "dataset/synt_admission.csv", num_rows: int = None):
@@ -122,19 +122,6 @@ def create_decision_agent():
         llm="gemini/gemini-2.0-flash"  # Use stable model instead of experimental
     )
 
-def create_explanation_agent():
-    """Create the explanation generation agent"""
-    return Agent(
-        role="Admissions Explanation Writer",
-        goal="Generate concise, human-readable justifications for admission decisions",
-        backstory="""You are a clear and empathetic communicator who writes explanations for 
-        admission decisions. You use templates for each decision outcome and incorporate 
-        computed strengths, growth areas, and risk bands. Your explanations are honest, 
-        constructive, and help applicants understand the decision.""",
-        verbose=False,  # Disable verbose output to keep stdout clean
-        allow_delegation=False,
-        llm="gemini/gemini-2.0-flash"  # Use stable model instead of experimental
-    )
 
 def create_standardization_task(applicant_data: dict):
     """Create task for data standardization agent"""
@@ -219,41 +206,61 @@ def create_scoring_task(rubric_scores: dict, applicant_data: dict):
         - Academic Readiness: {rubric_scores.get('academic_readiness', 'N/A')}
         - Life Context: {rubric_scores.get('life_context', 'N/A')}
         
-        Weights:
-        - Motivation & Values: 0.20
-        - Resilience: 0.15
-        - Leadership: 0.15
-        - Learning Orientation/Fit: 0.20
-        - Academic Readiness: 0.15
-        - Life Context: 0.15
-        
-        Additional Context:
-        - GPA: {applicant_data.get('gpa', 'N/A')} (Scale: {applicant_data.get('grading_scale', 'N/A')})
-        - Teaching Experience: {applicant_data.get('teaching_experience_years', 'N/A')} years
-        - Study Hours Available: {applicant_data.get('study_hours_available_per_week', 'N/A')} hours/week
-        
         Calculations Required:
-        1. Weighted Rubric Score = Σ(score × weight) for all six dimensions
-        2. Probability of Success = 1 / (1 + e^(-(-2.5 + 0.8 × weighted_rubric_score + 0.3 × normalized_gpa + 0.2 × min(teaching_experience_years, 10))))
-           - Normalize GPA to 0-1 scale: if grading_scale is 10, divide gpa by 10; if grading_scale is 4, divide gpa by 4
-           - Cap teaching_experience_years at 10 for the calculation
-           - Example: if weighted_rubric_score = 3.5, normalized_gpa = 0.85, teaching_experience = 5 years
-             then: z = -2.5 + 0.8×3.5 + 0.3×0.85 + 0.2×5 = -2.5 + 2.8 + 0.255 + 1.0 = 1.555
-             probability = 1 / (1 + e^(-1.555)) = 1 / (1 + 0.211) ≈ 0.826
-        3. Final Score = 0.6 × weighted_rubric_score + 0.4 × probability_of_success
+        1. Extract the six rubric scores (1-5 scale):
+           - MV = Motivation & Values
+           - RE = Resilience
+           - LE = Leadership
+           - LO = Learning Orientation/Fit
+           - AC = Academic Readiness
+           - LC = Life Context
+        
+        2. Calculate Probability of Success using the logistic regression formula:
+           z = -7.0 + 0.7×MV + 0.6×RE + 0.5×LE + 0.65×LO + 0.45×AC - 0.7×LC
+           probability_of_success = 1 / (1 + e^(-z))
+           
+           - Convert probability to percentage (0-100): probability_percentage = probability_of_success × 100
+           - Example: if MV=4, RE=4, LE=3, LO=4, AC=4, LC=3
+             then: z = -7.0 + 0.7×4 + 0.6×4 + 0.5×3 + 0.65×4 + 0.45×4 - 0.7×3
+                   z = -7.0 + 2.8 + 2.4 + 1.5 + 2.6 + 1.8 - 2.1 = 2.0
+             probability = 1 / (1 + e^(-2.0)) ≈ 0.88
+             probability_percentage = 88%
+           - Example with average scores (MV=3, RE=3, LE=3, LO=3, AC=3, LC=3):
+             then: z = -7.0 + 0.7×3 + 0.6×3 + 0.5×3 + 0.65×3 + 0.45×3 - 0.7×3
+                   z = -7.0 + 2.1 + 1.8 + 1.5 + 1.95 + 1.35 - 2.1 = 0.6
+             probability = 1 / (1 + e^(-0.6)) ≈ 0.65
+             probability_percentage = 65%
+           - Example with good scores (MV=4, RE=4, LE=4, LO=4, AC=4, LC=4):
+             then: z = -7.0 + 0.7×4 + 0.6×4 + 0.5×4 + 0.65×4 + 0.45×4 - 0.7×4
+                   z = -7.0 + 2.8 + 2.4 + 2.0 + 2.6 + 1.8 - 2.8 = 1.8
+             probability = 1 / (1 + e^(-1.8)) ≈ 0.86
+             probability_percentage = 86%
+           - Example with very good scores (MV=5, RE=4, LE=4, LO=5, AC=5, LC=4):
+             then: z = -7.0 + 0.7×5 + 0.6×4 + 0.5×4 + 0.65×5 + 0.45×5 - 0.7×4
+                   z = -7.0 + 3.5 + 2.4 + 2.0 + 3.25 + 2.25 - 2.8 = 3.6
+             probability = 1 / (1 + e^(-3.6)) ≈ 0.97
+             probability_percentage = 97%
+           - Example with excellent scores (MV=5, RE=5, LE=5, LO=5, AC=5, LC=4):
+             then: z = -7.0 + 0.7×5 + 0.6×5 + 0.5×5 + 0.65×5 + 0.45×5 - 0.7×4
+                   z = -7.0 + 3.5 + 3.0 + 2.5 + 3.25 + 2.25 - 2.8 = 4.7
+             probability = 1 / (1 + e^(-4.7)) ≈ 0.991
+             probability_percentage = 99.1%
+        
+        IMPORTANT: 
+        - Do NOT use GPA, teaching experience, or any other factors in the calculation
+        - Only use the six rubric scores (MV, RE, LE, LO, AC, LC) in the formula above
+        - Protected attributes (gender, age, country, etc.) must NEVER influence scoring
         
         Return ONLY a valid JSON object with:
         {{
-            "weighted_rubric_score": <float>,
-            "probability_of_success": <float between 0 and 1>,
-            "final_score": <float>
-        }}""",
+            "probability_of_success": <float between 0 and 100>
+        }}
+        
+        Note: probability_of_success should be a percentage (0-100), not a decimal (0-1).""",
         agent=create_scoring_agent(),
-        expected_output="""A JSON object with three float values:
+        expected_output="""A JSON object with probability of success as a percentage:
         {{
-            "weighted_rubric_score": <float>,
-            "probability_of_success": <float 0-1>,
-            "final_score": <float>
+            "probability_of_success": <float 0-100>
         }}"""
     )
 
@@ -274,11 +281,13 @@ def create_decision_task(rubric_scores: dict, scoring_results: dict):
         - Final Score: {scoring_results.get('final_score', 'N/A')}
         - Probability of Success: {scoring_results.get('probability_of_success', 'N/A')}
         
-        Decision Thresholds:
-        - ADMIT: final_score ≥ 3.5 AND probability ≥ 0.70
-        - WAITLIST: final_score ≥ 3.0 AND probability ≥ 0.60 (but doesn't meet ADMIT criteria)
-        - NOT_ADMITTED: final_score ≥ 2.5 AND probability ≥ 0.50 (but doesn't meet WAITLIST criteria)
-        - NOT_ADMITTED_INELIGIBLE: final_score < 2.5 OR probability < 0.50
+        Decision Thresholds (based on probability of success only):
+        - ADMIT: probability ≥ 0.75 (75% or higher)
+        - WAITLIST: 0.60 ≤ probability < 0.75 (60-74%)
+        - NOT_ADMITTED: 0.40 ≤ probability < 0.60 (40-59%)
+        - NOT_ADMITTED_INELIGIBLE: probability < 0.40 (below 40%)
+        
+        Note: The probability of success incorporates weighted_rubric_score, normalized_gpa, teaching_experience, AND final_score, ensuring a comprehensive assessment.
         
         Additional Classifications:
         - Strengths: All rubric dimensions where score ≥ 4
@@ -431,59 +440,20 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
             logger.info(f"Scoring results: {scoring_results}")
             
             # Validate scoring results
-            required_scoring_keys = ['weighted_rubric_score', 'probability_of_success', 'final_score']
-            for key in required_scoring_keys:
-                if key not in scoring_results:
-                    raise ValueError(f"Missing scoring result: {key}")
+            if 'probability_of_success' not in scoring_results:
+                raise ValueError("Missing probability_of_success in scoring results")
             
-            # Step 3: Decision
-            decision_task = create_decision_task(rubric_scores, scoring_results)
-            decision_crew = Crew(
-                agents=[create_decision_agent()],
-                tasks=[decision_task],
-                process=Process.sequential,
-                verbose=False  # Disable verbose output to keep stdout clean
-            )
-            decision_result = decision_crew.kickoff()
-            decision_results = parse_json_output(str(decision_result))
-            logger.info(f"Decision results: {decision_results}")
+            # Ensure probability is between 0 and 100
+            probability = float(scoring_results.get('probability_of_success', 0))
+            if probability < 0 or probability > 100:
+                raise ValueError(f"Invalid probability_of_success: {probability} (must be 0-100)")
             
-            # Validate decision results
-            if 'decision' not in decision_results:
-                raise ValueError("Missing decision in decision results")
-            valid_decisions = ['ADMIT', 'WAITLIST', 'NOT_ADMITTED', 'NOT_ADMITTED_INELIGIBLE']
-            if decision_results['decision'] not in valid_decisions:
-                raise ValueError(f"Invalid decision: {decision_results['decision']}")
-            
-            # Step 4: Explanation
-            explanation_task = create_explanation_task(applicant_data, rubric_scores, scoring_results, decision_results)
-            explanation_crew = Crew(
-                agents=[create_explanation_agent()],
-                tasks=[explanation_task],
-                process=Process.sequential,
-                verbose=False  # Disable verbose output to keep stdout clean
-            )
-            explanation_result = explanation_crew.kickoff()
-            explanation = str(explanation_result).strip()
-            # Remove markdown code blocks if present
-            if explanation.startswith("```"):
-                explanation = explanation.split("```")[1] if len(explanation.split("```")) > 1 else explanation
-                explanation = explanation.strip()
-            logger.info(f"Explanation: {explanation}")
-            
-            # Combine all results
+            # Return only probability of success as required
+            # But also include application_id and name for frontend display
             result = {
                 "application_id": application_id,
                 "name": applicant_data.get('name', 'N/A'),
-                "rubric_scores": rubric_scores,
-                "weighted_rubric_score": scoring_results.get('weighted_rubric_score'),
-                "probability_of_success": scoring_results.get('probability_of_success'),
-                "final_score": scoring_results.get('final_score'),
-                "decision": decision_results.get('decision'),
-                "strengths": decision_results.get('strengths', []),
-                "growth_areas": decision_results.get('growth_areas', []),
-                "risk_band": decision_results.get('risk_band'),
-                "explanation": explanation
+                "probability_of_success": probability
             }
             
             return result
@@ -501,31 +471,103 @@ def assess_application(applicant_data: dict, max_retries: int = 3):
             # Wait before retry with exponential backoff
             time.sleep(2 ** attempt)
 
-def execute_admission_pipeline(dataset_path: str = "dataset/synt_admission.csv", num_applications: int = None):
-    """Execute the admission assessment pipeline"""
-    logger.info("Starting admission assessment pipeline")
+def execute_admission_pipeline(dataset_path: str = "dataset/synt_admission.csv", num_applications: int = None, batch_size: int = 50):
+    """Execute the admission assessment pipeline with batch processing
+    
+    Args:
+        dataset_path: Path to the admission dataset CSV
+        num_applications: Maximum number of applications to process (None for all)
+        batch_size: Number of applications to process per batch (default 50)
+    """
+    logger.info("=" * 80)
+    logger.info("🚀 Admission Assessment Pipeline - Batch Processing")
+    logger.info("=" * 80)
     
     # Load data
     df = load_admission_data(dataset_path, num_applications)
+    total_applications = len(df)
     
-    # Process each application
-    results = []
-    for idx, row in df.iterrows():
-        applicant_data = row.to_dict()
-        result = assess_application(applicant_data)
-        results.append(result)
+    logger.info(f"✅ Loaded {total_applications} applications from dataset")
+    logger.info(f"📦 Processing in batches of {batch_size} applications...")
+    
+    # Split into batches
+    batches = []
+    for i in range(0, total_applications, batch_size):
+        batch_end = min(i + batch_size, total_applications)
+        batches.append((i, batch_end))
+    
+    total_batches = len(batches)
+    logger.info(f"✅ Created {total_batches} batches for processing")
+    logger.info("=" * 80)
+    logger.info(f"🔄 Processing {total_batches} batches...")
+    logger.info("=" * 80)
+    
+    # Process each batch
+    all_results = []
+    
+    for batch_num, (batch_start, batch_end) in enumerate(batches, 1):
+        logger.info("")
+        logger.info(f"📊 Processing Batch {batch_num}/{total_batches} (applications {batch_start + 1}-{batch_end})...")
         
-        # Add delay to avoid rate limits
-        if (idx + 1) % 10 == 0:
-            logger.info(f"Processed {idx + 1}/{len(df)} applications")
-            time.sleep(2)
+        # Add delay between batches to avoid rate limits (except for first batch)
+        if batch_num > 1:
+            delay_seconds = 30  # 30 second delay between batches
+            logger.info(f"⏳ Waiting {delay_seconds} seconds before processing next batch to avoid rate limits...")
+            time.sleep(delay_seconds)
+        
+        # Process each application in this batch
+        batch_results = []
+        for idx in range(batch_start, batch_end):
+            row = df.iloc[idx]
+            applicant_data = row.to_dict()
+            
+            # Retry logic for individual applications
+            max_retries = 3
+            retry_delay = 10
+            application_success = False
+            
+            for attempt in range(max_retries):
+                try:
+                    result = assess_application(applicant_data)
+                    batch_results.append(result)
+                    application_success = True
+                    break
+                except Exception as e:
+                    error_str = str(e)
+                    is_rate_limit = '429' in error_str or 'RESOURCE_EXHAUSTED' in error_str or 'rate limit' in error_str.lower()
+                    
+                    if is_rate_limit and attempt < max_retries - 1:
+                        wait_time = retry_delay * (attempt + 1)
+                        logger.warning(f"⚠️ Rate limit hit on application {idx + 1}, attempt {attempt + 1}/{max_retries}. Waiting {wait_time} seconds...")
+                        time.sleep(wait_time)
+                    else:
+                        logger.error(f"❌ Error processing application {idx + 1}: {e}")
+                        if not is_rate_limit:
+                            # For non-rate-limit errors, add error result and continue
+                            batch_results.append({
+                                "application_id": applicant_data.get('application_id', f'unknown_{idx}'),
+                                "name": applicant_data.get('name', 'N/A'),
+                                "error": str(e)
+                            })
+                            break
+            
+            # Small delay between applications within a batch
+            if (idx - batch_start + 1) % 5 == 0:
+                time.sleep(1)
+        
+        all_results.extend(batch_results)
+        logger.info(f"✅ Batch {batch_num}/{total_batches} completed ({len(batch_results)} applications processed)")
     
-    logger.info(f"Completed assessment of {len(results)} applications")
+    logger.info("")
+    logger.info("=" * 80)
+    logger.info("🎉 All batches processed successfully!")
+    logger.info(f"✅ Processed {total_applications} applications across {total_batches} batches")
+    logger.info("=" * 80)
     
     # Return combined results
     return {
-        "total_applications": len(results),
-        "results": results
+        "total_applications": len(all_results),
+        "results": all_results
     }
 
 if __name__ == "__main__":
