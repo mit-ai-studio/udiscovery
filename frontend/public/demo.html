@@ -1930,18 +1930,18 @@
                                 <span class="hidden sm:inline">Export</span>
                             </button>
                         </div>
-                        <div class="kpi-grid" id="kpi-grid">
+                        <div class="kpi-grid" id="prospecting-kpi-grid">
                             <div class="kpi-card">
                                 <div class="kpi-label">Possible Candidates Prospected</div>
-                                <div class="kpi-value" id="kpi-total">0</div>
+                                <div class="kpi-value" id="prospecting-kpi-total" style="color: #6EE7D7;">0</div>
                             </div>
                             <div class="kpi-card">
                                 <div class="kpi-label">General Fit Candidates</div>
-                                <div class="kpi-value" id="kpi-fit">0</div>
+                                <div class="kpi-value" id="prospecting-kpi-fit" style="color: #6EE7D7;">0</div>
                             </div>
                             <div class="kpi-card">
-                                <div class="kpi-label">High Probability (&gt;50%)</div>
-                                <div class="kpi-value" id="kpi-high">0</div>
+                                <div class="kpi-label">High Probability (&gt;<span id="prospecting-threshold-display">40</span>%)</div>
+                                <div class="kpi-value" id="prospecting-kpi-high" style="color: #298E34;">0</div>
                             </div>
                         </div>
                     </div>
@@ -2508,6 +2508,17 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             // Remove markdown code blocks (```...```) but keep the content inside
             text = text.replace(/```[a-z]*\n?/g, '').replace(/```/g, '').trim();
             
+            // Extract total processed count from header (e.g., "Processed 1000 candidates across 2 batches")
+            let totalProcessed = 0;
+            const processedMatch = text.match(/Processed\s+(\d+)\s+candidates/i);
+            if (processedMatch) {
+                totalProcessed = parseInt(processedMatch[1], 10);
+                console.log('Total candidates processed from dataset:', totalProcessed);
+            }
+            
+            // Store total processed count globally
+            window.totalCandidatesProcessed = totalProcessed || 0;
+            
             // Debug: log what we received
             console.log('Result type:', typeof result);
             console.log('Text length:', text.length);
@@ -2544,23 +2555,8 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             window.allCandidatesData = candidates;
             window.filteredCandidatesData = filteredCandidates;
             
-            // Update KPIs
-            const total = candidates.length;
-            const fit = candidates.filter(c => {
-                const prob = c.probability ? parseFloat(c.probability) * 100 : 0;
-                return prob >= 40;
-            }).length;
-            const high = candidates.filter(c => {
-                const prob = c.probability ? parseFloat(c.probability) * 100 : 0;
-                return prob >= 50;
-            }).length;
-            
-            const totalEl = document.getElementById('kpi-total');
-            const fitEl = document.getElementById('kpi-fit');
-            const highEl = document.getElementById('kpi-high');
-            if (totalEl) totalEl.textContent = total.toLocaleString();
-            if (fitEl) fitEl.textContent = fit.toLocaleString();
-            if (highEl) highEl.textContent = high.toLocaleString();
+            // Update KPIs (use filtered candidates - they're already filtered by threshold >= 40%)
+            updateProspectingKPIs(filteredCandidates);
             
             // Initialize filters
             initializeFilters();
@@ -2931,8 +2927,117 @@ We want to find individuals who demonstrate a deep commitment to **equity, socia
             });
             
             window.filteredCandidatesData = filtered;
+            
+            // Update KPIs based on filtered data and current threshold
+            updateProspectingKPIs(filtered);
+            
             renderCandidateCards(filtered);
             updateCampaignView();
+        }
+        
+        // Update prospecting KPIs using current threshold
+        function updateProspectingKPIs(filteredCandidates) {
+            if (!window.allCandidatesData) return;
+            
+            const threshold = currentThreshold;
+            
+            // Total candidates reviewed from dataset (never changes)
+            // Use the total processed count from backend if available, otherwise fall back to parsed candidates
+            const totalReviewed = window.totalCandidatesProcessed || window.allCandidatesData.length;
+            
+            // General fit candidates: filtered by region/experience/industry only (not threshold)
+            // This is the count of candidates that match the filters, regardless of threshold
+            const selectedRegion = document.getElementById('region-filter')?.value || 'all';
+            const selectedExperience = document.getElementById('experience-filter')?.value || 'all';
+            const selectedIndustry = document.getElementById('industry-filter')?.value || 'all';
+            
+            const generalFit = window.allCandidatesData.filter(c => {
+                // Filter by region
+                if (selectedRegion !== 'all') {
+                    const background = c.background || c.rationale || c.whyMatch || '';
+                    let location = c.location || extractLocation(background) || '';
+                    location = getFullStateName(location);
+                    if (location !== selectedRegion) return false;
+                }
+                
+                // Filter by experience range
+                if (selectedExperience !== 'all') {
+                    const background = c.background || c.rationale || c.whyMatch || '';
+                    const experienceText = extractExperience(background) || '';
+                    const yearsMatch = experienceText.match(/(\d+)\s*years?/i);
+                    const years = yearsMatch ? parseInt(yearsMatch[1]) : null;
+                    
+                    if (selectedExperience === 'no-exp') {
+                        if (years !== null && years > 0) return false;
+                    } else if (selectedExperience === '0-2') {
+                        if (years === null || years < 0 || years > 2) return false;
+                    } else if (selectedExperience === '2-5') {
+                        if (years === null || years < 2 || years > 5) return false;
+                    } else if (selectedExperience === '5-10') {
+                        if (years === null || years < 5 || years > 10) return false;
+                    } else if (selectedExperience === '10-15') {
+                        if (years === null || years < 10 || years > 15) return false;
+                    } else if (selectedExperience === '15+') {
+                        if (years === null || years < 15) return false;
+                    }
+                }
+                
+                // Filter by industry
+                if (selectedIndustry !== 'all') {
+                    const background = (c.background || c.rationale || c.whyMatch || '').toLowerCase();
+                    const interests = (c.interests || []).join(' ').toLowerCase();
+                    const combinedText = background + ' ' + interests;
+                    
+                    let matches = false;
+                    if (selectedIndustry === 'k12' && (combinedText.includes('k-12') || combinedText.includes('k12') || combinedText.includes('elementary') || combinedText.includes('secondary education'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'higher-ed' && (combinedText.includes('higher education') || combinedText.includes('university') || combinedText.includes('college'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'for-profit' && (combinedText.includes('for-profit') || combinedText.includes('for profit'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'non-profit' && (combinedText.includes('non-profit') || combinedText.includes('nonprofit') || combinedText.includes('ngo'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'edtech' && (combinedText.includes('edtech') || combinedText.includes('ed-tech') || combinedText.includes('technology'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'media' && (combinedText.includes('media') || combinedText.includes('publishing'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'corporate' && (combinedText.includes('corporate') || combinedText.includes('training'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'government' && (combinedText.includes('government') || combinedText.includes('public sector'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'healthcare' && (combinedText.includes('healthcare') || combinedText.includes('health care'))) {
+                        matches = true;
+                    } else if (selectedIndustry === 'consulting' && (combinedText.includes('consulting') || combinedText.includes('consultant'))) {
+                        matches = true;
+                    }
+                    
+                    if (!matches) return false;
+                }
+                
+                return true;
+            }).length;
+            
+            // High probability candidates: from filtered list (by filters AND threshold) that meet threshold
+            const highProbability = filteredCandidates ? filteredCandidates.filter(c => {
+                const prob = c.probability ? parseFloat(c.probability) * 100 : 0;
+                return prob >= threshold;
+            }).length : 0;
+            
+            // Update threshold display in KPI label
+            const thresholdDisplay = document.getElementById('prospecting-threshold-display');
+            if (thresholdDisplay) thresholdDisplay.textContent = threshold;
+            
+            const totalEl = document.getElementById('prospecting-kpi-total');
+            const fitEl = document.getElementById('prospecting-kpi-fit');
+            const highEl = document.getElementById('prospecting-kpi-high');
+            
+            if (totalEl) totalEl.textContent = totalReviewed.toLocaleString();
+            if (fitEl) fitEl.textContent = generalFit.toLocaleString();
+            if (highEl) highEl.textContent = highProbability.toLocaleString();
+            
+            // Show export button
+            const downloadBtn = document.getElementById('download-csv-btn');
+            if (downloadBtn) downloadBtn.style.display = 'flex';
         }
         
         function showCandidateDetails(index) {
